@@ -3,17 +3,19 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Dict, List, Optional
+from typing import Annotated
 
-from hera.shared._pydantic import BaseModel, Field
+from pydantic import Base64Str, Field
+
+from hera.shared._pydantic import APIBaseModel
 
 from ........io.k8s.api.core import v1 as v1_1
 from ........io.k8s.apimachinery.pkg.apis.meta import v1
 
 
-class AMQPConsumeConfig(BaseModel):
+class AMQPConsumeConfig(APIBaseModel):
     auto_ack: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="autoAck",
             title=(
@@ -23,14 +25,14 @@ class AMQPConsumeConfig(BaseModel):
         ),
     ] = None
     consumer_tag: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="consumerTag",
             title=("ConsumerTag is the identity of the consumer included in every delivery\n+optional"),
         ),
     ] = None
     exclusive: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             title=(
                 "Exclusive when true, the server will ensure that this is the sole consumer from this queue\n+optional"
@@ -38,14 +40,14 @@ class AMQPConsumeConfig(BaseModel):
         ),
     ] = None
     no_local: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="noLocal",
             title="NoLocal flag is not supported by RabbitMQ\n+optional",
         ),
     ] = None
     no_wait: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="noWait",
             title=(
@@ -56,24 +58,24 @@ class AMQPConsumeConfig(BaseModel):
     ] = None
 
 
-class AMQPExchangeDeclareConfig(BaseModel):
+class AMQPExchangeDeclareConfig(APIBaseModel):
     auto_delete: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="autoDelete",
             title=("AutoDelete removes the exchange when no bindings are active\n+optional"),
         ),
     ] = None
     durable: Annotated[
-        Optional[bool],
+        bool | None,
         Field(title="Durable keeps the exchange also after the server restarts\n+optional"),
     ] = None
     internal: Annotated[
-        Optional[bool],
+        bool | None,
         Field(title="Internal when true does not accept publishings\n+optional"),
     ] = None
     no_wait: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="noWait",
             title=("NowWait when true does not wait for a confirmation from the server\n+optional"),
@@ -81,13 +83,13 @@ class AMQPExchangeDeclareConfig(BaseModel):
     ] = None
 
 
-class EventSourceFilter(BaseModel):
-    expression: Optional[str] = None
+class EventSourceFilter(APIBaseModel):
+    expression: str | None = None
 
 
-class AMQPQueueBindConfig(BaseModel):
+class AMQPQueueBindConfig(APIBaseModel):
     no_wait: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="noWait",
             title=(
@@ -97,9 +99,9 @@ class AMQPQueueBindConfig(BaseModel):
     ] = None
 
 
-class AMQPQueueDeclareConfig(BaseModel):
+class AMQPQueueDeclareConfig(APIBaseModel):
     arguments: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 'Arguments of a queue (also known as "x-arguments") used for optional features and plugins\n+optional'
@@ -107,18 +109,18 @@ class AMQPQueueDeclareConfig(BaseModel):
         ),
     ] = None
     auto_delete: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="autoDelete",
             title=("AutoDelete removes the queue when no consumers are active\n+optional"),
         ),
     ] = None
     durable: Annotated[
-        Optional[bool],
+        bool | None,
         Field(title="Durable keeps the queue also after the server restarts\n+optional"),
     ] = None
     exclusive: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             title=(
                 "Exclusive sets the queues to be accessible only by the connection that"
@@ -128,11 +130,11 @@ class AMQPQueueDeclareConfig(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Name of the queue. If empty the server auto-generates a unique name for this queue\n+optional")),
     ] = None
     no_wait: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="noWait",
             title=("NowWait when true, the queue assumes to be declared on the server\n+optional"),
@@ -140,22 +142,22 @@ class AMQPQueueDeclareConfig(BaseModel):
     ] = None
 
 
-class Amount(BaseModel):
-    value: Optional[str] = None
+class Amount(APIBaseModel):
+    value: Base64Str | None = None
 
 
-class FileArtifact(BaseModel):
-    path: Optional[str] = None
+class FileArtifact(APIBaseModel):
+    path: str | None = None
 
 
-class K8SResource(BaseModel):
-    value: Optional[str] = None
+class K8SResource(APIBaseModel):
+    value: Base64Str | None = None
 
 
-class URLArtifact(BaseModel):
-    path: Annotated[Optional[str], Field(title="Path is the complete URL")] = None
+class URLArtifact(APIBaseModel):
+    path: Annotated[str | None, Field(title="Path is the complete URL")] = None
     verify_cert: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="verifyCert",
             title="VerifyCert decides whether the connection is secure or not",
@@ -163,16 +165,16 @@ class URLArtifact(BaseModel):
     ] = None
 
 
-class Int64OrString(BaseModel):
-    int64_val: Annotated[Optional[str], Field(alias="int64Val")] = None
-    str_val: Annotated[Optional[str], Field(alias="strVal")] = None
-    type: Optional[str] = None
+class Int64OrString(APIBaseModel):
+    int64_val: Annotated[str | None, Field(alias="int64Val")] = None
+    str_val: Annotated[str | None, Field(alias="strVal")] = None
+    type: str | None = None
 
 
-class BitbucketRepository(BaseModel):
-    owner: Annotated[Optional[str], Field(title="Owner is the owner of the repository")] = None
+class BitbucketRepository(APIBaseModel):
+    owner: Annotated[str | None, Field(title="Owner is the owner of the repository")] = None
     repository_slug: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="repositorySlug",
             title=(
@@ -183,16 +185,16 @@ class BitbucketRepository(BaseModel):
     ] = None
 
 
-class BitbucketServerRepository(BaseModel):
+class BitbucketServerRepository(APIBaseModel):
     project_key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="projectKey",
             description=("ProjectKey is the key of project for which integration needs to set up."),
         ),
     ] = None
     repository_slug: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="repositorySlug",
             description=("RepositorySlug is the slug of the repository for which integration needs to set up."),
@@ -200,39 +202,39 @@ class BitbucketServerRepository(BaseModel):
     ] = None
 
 
-class CatchupConfiguration(BaseModel):
+class CatchupConfiguration(APIBaseModel):
     enabled: Annotated[
-        Optional[bool],
+        bool | None,
         Field(title=("Enabled enables to triggered the missed schedule when eventsource restarts")),
     ] = None
     max_duration: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="maxDuration", title="MaxDuration holds max catchup duration"),
     ] = None
 
 
-class ConditionsResetByTime(BaseModel):
+class ConditionsResetByTime(APIBaseModel):
     cron: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron")),
     ] = None
-    timezone: Annotated[Optional[str], Field(title="+optional")] = None
+    timezone: Annotated[str | None, Field(title="+optional")] = None
 
 
-class ConfigMapPersistence(BaseModel):
+class ConfigMapPersistence(APIBaseModel):
     create_if_not_exist: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="createIfNotExist",
             title="CreateIfNotExist will create configmap if it doesn't exists",
         ),
     ] = None
-    name: Annotated[Optional[str], Field(title="Name of the configmap")] = None
+    name: Annotated[str | None, Field(title="Name of the configmap")] = None
 
 
-class DataFilter(BaseModel):
+class DataFilter(APIBaseModel):
     comparator: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Comparator compares the event data with a user given value.\nCan be"
@@ -242,7 +244,7 @@ class DataFilter(BaseModel):
         ),
     ] = None
     path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Path is the JSONPath of the event's (JSON decoded) data key\nPath is a"
@@ -255,7 +257,7 @@ class DataFilter(BaseModel):
         ),
     ] = None
     template: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Template is a go-template for extracting a string from the event's"
@@ -267,9 +269,9 @@ class DataFilter(BaseModel):
             )
         ),
     ] = None
-    type: Annotated[Optional[str], Field(title="Type contains the JSON type of the data")] = None
+    type: Annotated[str | None, Field(title="Type contains the JSON type of the data")] = None
     value: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             title=(
                 "Value is the allowed string values for this key\nBooleans are passed"
@@ -281,20 +283,20 @@ class DataFilter(BaseModel):
     ] = None
 
 
-class EventDependencyTransformer(BaseModel):
+class EventDependencyTransformer(APIBaseModel):
     jq: Annotated[
-        Optional[str],
+        str | None,
         Field(title="JQ holds the jq command applied for transformation\n+optional"),
     ] = None
     script: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Script refers to a Lua script used to transform the event\n+optional"),
     ] = None
 
 
-class TimeFilter(BaseModel):
+class TimeFilter(APIBaseModel):
     start: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Start is the beginning of a time window in UTC.\nBefore this time,"
@@ -303,7 +305,7 @@ class TimeFilter(BaseModel):
         ),
     ] = None
     stop: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Stop is the end of a time window in UTC.\nAfter or equal to this time,"
@@ -315,14 +317,14 @@ class TimeFilter(BaseModel):
     ] = None
 
 
-class WatchPathConfig(BaseModel):
-    directory: Annotated[Optional[str], Field(title="Directory to watch for events")] = None
+class WatchPathConfig(APIBaseModel):
+    directory: Annotated[str | None, Field(title="Directory to watch for events")] = None
     path: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Path is relative path of object to watch with respect to the directory")),
     ] = None
     path_regexp: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="pathRegexp",
             title=("PathRegexp is regexp of relative path of object to watch with respect to the directory"),
@@ -330,10 +332,10 @@ class WatchPathConfig(BaseModel):
     ] = None
 
 
-class GitRemoteConfig(BaseModel):
-    name: Annotated[Optional[str], Field(description="Name of the remote to fetch from.")] = None
+class GitRemoteConfig(APIBaseModel):
+    name: Annotated[str | None, Field(description="Name of the remote to fetch from.")] = None
     urls: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "URLs the URLs of a remote repository. It must be non-empty. Fetch"
@@ -343,13 +345,13 @@ class GitRemoteConfig(BaseModel):
     ] = None
 
 
-class KafkaConsumerGroup(BaseModel):
+class KafkaConsumerGroup(APIBaseModel):
     group_name: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="groupName", title="The name for the consumer group to use"),
     ] = None
     oldest: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             title=(
                 "When starting up a new group do we want to start from the oldest event"
@@ -358,7 +360,7 @@ class KafkaConsumerGroup(BaseModel):
         ),
     ] = None
     rebalance_strategy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="rebalanceStrategy",
             title=("Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.\n+optional"),
@@ -366,9 +368,9 @@ class KafkaConsumerGroup(BaseModel):
     ] = None
 
 
-class LogTrigger(BaseModel):
+class LogTrigger(APIBaseModel):
     interval_seconds: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="intervalSeconds",
             title=(
@@ -379,23 +381,23 @@ class LogTrigger(BaseModel):
     ] = None
 
 
-class Metadata(BaseModel):
-    annotations: Optional[Dict[str, str]] = None
-    labels: Optional[Dict[str, str]] = None
+class Metadata(APIBaseModel):
+    annotations: dict[str, str] | None = None
+    labels: dict[str, str] | None = None
 
 
-class OwnedRepositories(BaseModel):
-    names: Annotated[Optional[List[str]], Field(title="Repository names")] = None
-    owner: Annotated[Optional[str], Field(title="Organization or user name")] = None
+class OwnedRepositories(APIBaseModel):
+    names: Annotated[list[str] | None, Field(title="Repository names")] = None
+    owner: Annotated[str | None, Field(title="Organization or user name")] = None
 
 
-class PayloadField(BaseModel):
+class PayloadField(APIBaseModel):
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Name acts as key that holds the value at the path."),
     ] = None
     path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Path is the JSONPath of the event's (JSON decoded) data key\nPath is a"
@@ -409,25 +411,25 @@ class PayloadField(BaseModel):
     ] = None
 
 
-class RateLimit(BaseModel):
-    requests_per_unit: Annotated[Optional[int], Field(alias="requestsPerUnit")] = None
-    unit: Annotated[Optional[str], Field(title="Defaults to Second")] = None
+class RateLimit(APIBaseModel):
+    requests_per_unit: Annotated[int | None, Field(alias="requestsPerUnit")] = None
+    unit: Annotated[str | None, Field(title="Defaults to Second")] = None
 
 
-class S3Bucket(BaseModel):
-    key: Optional[str] = None
-    name: Optional[str] = None
+class S3Bucket(APIBaseModel):
+    key: str | None = None
+    name: str | None = None
 
 
-class S3Filter(BaseModel):
-    prefix: Optional[str] = None
-    suffix: Optional[str] = None
+class S3Filter(APIBaseModel):
+    prefix: str | None = None
+    suffix: str | None = None
 
 
-class Selector(BaseModel):
-    key: Annotated[Optional[str], Field(title="Key name")] = None
+class Selector(APIBaseModel):
+    key: Annotated[str | None, Field(title="Key name")] = None
     operation: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Supported operations like ==, != etc.\nDefaults to ==.\nRefer"
@@ -436,12 +438,12 @@ class Selector(BaseModel):
             )
         ),
     ] = None
-    value: Annotated[Optional[str], Field(title="Value")] = None
+    value: Annotated[str | None, Field(title="Value")] = None
 
 
-class SlackSender(BaseModel):
+class SlackSender(APIBaseModel):
     icon: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Icon is the Slack application's icon, e.g. :robot_face: or https://example.com/image.png\n+optional"
@@ -449,14 +451,14 @@ class SlackSender(BaseModel):
         ),
     ] = None
     username: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Username is the Slack application's username\n+optional"),
     ] = None
 
 
-class SlackThread(BaseModel):
+class SlackThread(APIBaseModel):
     broadcast_message_to_channel: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="broadcastMessageToChannel",
             title=(
@@ -466,7 +468,7 @@ class SlackThread(BaseModel):
         ),
     ] = None
     message_aggregation_key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="messageAggregationKey",
             title=("MessageAggregationKey allows to aggregate the messages to a thread by some key.\n+optional"),
@@ -474,18 +476,18 @@ class SlackThread(BaseModel):
     ] = None
 
 
-class StatusPolicy(BaseModel):
-    allow: Optional[List[int]] = None
+class StatusPolicy(APIBaseModel):
+    allow: list[int] | None = None
 
 
-class StorageGridFilter(BaseModel):
-    prefix: Optional[str] = None
-    suffix: Optional[str] = None
+class StorageGridFilter(APIBaseModel):
+    prefix: str | None = None
+    suffix: str | None = None
 
 
-class TriggerParameterSource(BaseModel):
+class TriggerParameterSource(APIBaseModel):
     context_key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="contextKey",
             description=(
@@ -500,7 +502,7 @@ class TriggerParameterSource(BaseModel):
         ),
     ] = None
     context_template: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="contextTemplate",
             title=(
@@ -515,7 +517,7 @@ class TriggerParameterSource(BaseModel):
         ),
     ] = None
     data_key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="dataKey",
             description=(
@@ -530,7 +532,7 @@ class TriggerParameterSource(BaseModel):
         ),
     ] = None
     data_template: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="dataTemplate",
             title=(
@@ -544,7 +546,7 @@ class TriggerParameterSource(BaseModel):
         ),
     ] = None
     dependency_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="dependencyName",
             description=(
@@ -556,7 +558,7 @@ class TriggerParameterSource(BaseModel):
         ),
     ] = None
     use_raw_data: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="useRawData",
             title=(
@@ -571,7 +573,7 @@ class TriggerParameterSource(BaseModel):
         ),
     ] = None
     value: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Value is the default literal value to use for this parameter"
@@ -583,20 +585,20 @@ class TriggerParameterSource(BaseModel):
     ] = None
 
 
-class Condition(BaseModel):
+class Condition(APIBaseModel):
     last_transition_time: Annotated[
-        Optional[v1.Time],
+        v1.Time | None,
         Field(
             alias="lastTransitionTime",
             title=("Last time the condition transitioned from one status to another.\n+optional"),
         ),
     ] = None
     message: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Human-readable message indicating details about last transition.\n+optional")),
     ] = None
     reason: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Unique, this should be a short, machine understandable string that"
@@ -605,28 +607,22 @@ class Condition(BaseModel):
             )
         ),
     ] = None
-    status: Annotated[
-        Optional[str],
-        Field(title="Condition status, True, False or Unknown.\n+required"),
-    ] = None
-    type: Annotated[Optional[str], Field(title="Condition type.\n+required")] = None
+    status: Annotated[str | None, Field(title="Condition status, True, False or Unknown.\n+required")] = None
+    type: Annotated[str | None, Field(title="Condition type.\n+required")] = None
 
 
-class EventContext(BaseModel):
+class EventContext(APIBaseModel):
     datacontenttype: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("DataContentType - A MIME (RFC2046) string describing the media type of `data`.")),
     ] = None
     id: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("ID of the event; must be non-empty and unique within the scope of the producer.")),
     ] = None
-    source: Annotated[
-        Optional[str],
-        Field(description="Source - A URI describing the event producer."),
-    ] = None
+    source: Annotated[str | None, Field(description="Source - A URI describing the event producer.")] = None
     specversion: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "SpecVersion - The version of the CloudEvents specification used by the io.argoproj.workflow.v1alpha1."
@@ -634,36 +630,33 @@ class EventContext(BaseModel):
         ),
     ] = None
     subject: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Subject - The subject of the event in the context of the event producer")),
     ] = None
-    time: Annotated[
-        Optional[v1.Time],
-        Field(description="Time - A Timestamp when the event happened."),
-    ] = None
+    time: Annotated[v1.Time | None, Field(description="Time - A Timestamp when the event happened.")] = None
     type: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Type - The type of the occurrence which has happened."),
     ] = None
 
 
-class ResourceFilter(BaseModel):
+class ResourceFilter(APIBaseModel):
     after_start: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="afterStart",
             title=("If the resource is created after the start time then the event is treated as valid.\n+optional"),
         ),
     ] = None
     created_by: Annotated[
-        Optional[v1.Time],
+        v1.Time | None,
         Field(
             alias="createdBy",
             title=("If resource is created before the specified time then the event is treated as valid.\n+optional"),
         ),
     ] = None
     fields: Annotated[
-        Optional[List[Selector]],
+        list[Selector] | None,
         Field(
             title=(
                 "Fields provide field filters similar to K8s field selector\n(see"
@@ -676,7 +669,7 @@ class ResourceFilter(BaseModel):
         ),
     ] = None
     labels: Annotated[
-        Optional[List[Selector]],
+        list[Selector] | None,
         Field(
             title=(
                 "Labels provide listing options to K8s API to watch resource/s.\nRefer"
@@ -690,15 +683,15 @@ class ResourceFilter(BaseModel):
         ),
     ] = None
     prefix: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Prefix filter is applied on the resource name.\n+optional"),
     ] = None
 
 
-class AzureEventsHubEventSource(BaseModel):
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+class AzureEventsHubEventSource(APIBaseModel):
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     fqdn: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "FQDN of the EventHubs namespace you created\nMore info at"
@@ -706,15 +699,15 @@ class AzureEventsHubEventSource(BaseModel):
             )
         ),
     ] = None
-    hub_name: Annotated[Optional[str], Field(alias="hubName", title="Event Hub path/name")] = None
+    hub_name: Annotated[str | None, Field(alias="hubName", title="Event Hub path/name")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     shared_access_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="sharedAccessKey",
             title=(
@@ -725,7 +718,7 @@ class AzureEventsHubEventSource(BaseModel):
         ),
     ] = None
     shared_access_key_name: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="sharedAccessKeyName",
             title=(
@@ -738,9 +731,9 @@ class AzureEventsHubEventSource(BaseModel):
     ] = None
 
 
-class AzureQueueStorageEventSource(BaseModel):
+class AzureQueueStorageEventSource(APIBaseModel):
     connection_string: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="connectionString",
             title=(
@@ -751,7 +744,7 @@ class AzureQueueStorageEventSource(BaseModel):
         ),
     ] = None
     decode_message: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="decodeMessage",
             title=(
@@ -762,7 +755,7 @@ class AzureQueueStorageEventSource(BaseModel):
         ),
     ] = None
     dlq: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             title=(
                 "DLQ specifies if a dead-letter queue is configured for messages that"
@@ -773,26 +766,23 @@ class AzureQueueStorageEventSource(BaseModel):
             )
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
-    queue_name: Annotated[
-        Optional[str],
-        Field(alias="queueName", title="QueueName is the name of the queue"),
-    ] = None
+    queue_name: Annotated[str | None, Field(alias="queueName", title="QueueName is the name of the queue")] = None
     storage_account_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="storageAccountName",
             title=(
@@ -803,7 +793,7 @@ class AzureQueueStorageEventSource(BaseModel):
         ),
     ] = None
     wait_time_in_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="waitTimeInSeconds",
             title=(
@@ -815,84 +805,84 @@ class AzureQueueStorageEventSource(BaseModel):
     ] = None
 
 
-class BasicAuth(BaseModel):
+class BasicAuth(APIBaseModel):
     password: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             description=("Password refers to the Kubernetes secret that holds the password required for basic auth.")
         ),
     ] = None
     username: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             description=("Username refers to the Kubernetes secret that holds the username required for basic auth.")
         ),
     ] = None
 
 
-class BitbucketBasicAuth(BaseModel):
+class BitbucketBasicAuth(APIBaseModel):
     password: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(description="Password refers to the K8s secret that holds the password."),
     ] = None
     username: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(description="Username refers to the K8s secret that holds the username."),
     ] = None
 
 
-class GenericEventSource(BaseModel):
+class GenericEventSource(APIBaseModel):
     auth_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="authSecret",
             title=("AuthSecret holds a secret selector that contains a bearer token for authentication\n+optional"),
         ),
     ] = None
-    config: Annotated[Optional[str], Field(title="Config is the event source configuration")] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
-    insecure: Annotated[Optional[bool], Field(description="Insecure determines the type of connection.")] = None
+    config: Annotated[str | None, Field(title="Config is the event source configuration")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
+    insecure: Annotated[bool | None, Field(description="Insecure determines the type of connection.")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     url: Annotated[
-        Optional[str],
+        str | None,
         Field(description="URL of the gRPC server that implements the event source."),
     ] = None
 
 
-class GitCreds(BaseModel):
-    password: Optional[v1_1.SecretKeySelector] = None
-    username: Optional[v1_1.SecretKeySelector] = None
+class GitCreds(APIBaseModel):
+    password: v1_1.SecretKeySelector | None = None
+    username: v1_1.SecretKeySelector | None = None
 
 
-class GithubAppCreds(BaseModel):
+class GithubAppCreds(APIBaseModel):
     app_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="appID",
             title="AppID refers to the GitHub App ID for the application you created",
         ),
     ] = None
     installation_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="installationID",
             title=("InstallationID refers to the Installation ID of the GitHub app you created and installed"),
         ),
     ] = None
     private_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="privateKey",
             title=("PrivateKey refers to a K8s secret containing the GitHub app private key"),
@@ -900,9 +890,9 @@ class GithubAppCreds(BaseModel):
     ] = None
 
 
-class PubSubEventSource(BaseModel):
+class PubSubEventSource(APIBaseModel):
     credential_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="credentialSecret",
             title=(
@@ -914,7 +904,7 @@ class PubSubEventSource(BaseModel):
         ),
     ] = None
     delete_subscription_on_finish: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="deleteSubscriptionOnFinish",
             title=(
@@ -923,22 +913,22 @@ class PubSubEventSource(BaseModel):
             ),
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     project_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="projectID",
             title=(
@@ -949,7 +939,7 @@ class PubSubEventSource(BaseModel):
         ),
     ] = None
     subscription_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="subscriptionID",
             title=(
@@ -962,7 +952,7 @@ class PubSubEventSource(BaseModel):
         ),
     ] = None
     topic: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Topic to which the subscription should belongs.\nRequired if you want"
@@ -973,7 +963,7 @@ class PubSubEventSource(BaseModel):
         ),
     ] = None
     topic_project_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="topicProjectID",
             title=("TopicProjectID is GCP project ID for the topic.\nBy default, it is same as ProjectID.\n+optional"),
@@ -981,9 +971,9 @@ class PubSubEventSource(BaseModel):
     ] = None
 
 
-class SASLConfig(BaseModel):
+class SASLConfig(APIBaseModel):
     mechanism: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "SASLMechanism is the name of the enabled SASL mechanism.\nPossible"
@@ -992,11 +982,11 @@ class SASLConfig(BaseModel):
         ),
     ] = None
     password_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(alias="passwordSecret", title="Password for SASL/PLAIN authentication"),
     ] = None
     user_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="userSecret",
             title=(
@@ -1006,16 +996,16 @@ class SASLConfig(BaseModel):
     ] = None
 
 
-class SQSEventSource(BaseModel):
+class SQSEventSource(APIBaseModel):
     access_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="accessKey",
             title="AccessKey refers K8s secret containing aws access key",
         ),
     ] = None
     dlq: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             title=(
                 "DLQ specifies if a dead-letter queue is configured for messages that"
@@ -1027,50 +1017,50 @@ class SQSEventSource(BaseModel):
         ),
     ] = None
     endpoint: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=("Endpoint configures connection to a specific SQS endpoint instead of Amazons servers\n+optional")
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
-    queue: Annotated[Optional[str], Field(title="Queue is AWS SQS queue to listen to for messages")] = None
+    queue: Annotated[str | None, Field(title="Queue is AWS SQS queue to listen to for messages")] = None
     queue_account_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="queueAccountId",
             title=("QueueAccountID is the ID of the account that created the queue to monitor\n+optional"),
         ),
     ] = None
-    region: Annotated[Optional[str], Field(title="Region is AWS region")] = None
+    region: Annotated[str | None, Field(title="Region is AWS region")] = None
     role_arn: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="roleARN",
             title=("RoleARN is the Amazon Resource Name (ARN) of the role to assume.\n+optional"),
         ),
     ] = None
     secret_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="secretKey",
             title="SecretKey refers K8s secret containing aws secret key",
         ),
     ] = None
     session_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="sessionToken",
             title=(
@@ -1079,7 +1069,7 @@ class SQSEventSource(BaseModel):
         ),
     ] = None
     wait_time_seconds: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="waitTimeSeconds",
             description=(
@@ -1090,30 +1080,30 @@ class SQSEventSource(BaseModel):
     ] = None
 
 
-class TLSConfig(BaseModel):
+class TLSConfig(APIBaseModel):
     ca_cert_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="caCertSecret",
             title="CACertSecret refers to the secret that contains the CA cert",
         ),
     ] = None
     client_cert_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="clientCertSecret",
             title="ClientCertSecret refers to the secret that contains the client cert",
         ),
     ] = None
     client_key_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="clientKeySecret",
             title="ClientKeySecret refers to the secret that contains the client key",
         ),
     ] = None
     insecure_skip_verify: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="insecureSkipVerify",
             title=(
@@ -1124,17 +1114,17 @@ class TLSConfig(BaseModel):
     ] = None
 
 
-class WebhookContext(BaseModel):
+class WebhookContext(APIBaseModel):
     auth_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="authSecret",
             title=("AuthSecret holds a secret selector that contains a bearer token for authentication\n+optional"),
         ),
     ] = None
-    endpoint: Annotated[Optional[str], Field(title="REST API endpoint")] = None
+    endpoint: Annotated[str | None, Field(title="REST API endpoint")] = None
     max_payload_size: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="maxPayloadSize",
             title=(
@@ -1146,13 +1136,13 @@ class WebhookContext(BaseModel):
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     method: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Method is HTTP request method that indicates the desired action to be"
@@ -1162,50 +1152,50 @@ class WebhookContext(BaseModel):
         ),
     ] = None
     port: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Port on which HTTP server is listening for incoming events."),
     ] = None
     server_cert_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="serverCertSecret",
             description="ServerCertPath refers the file that contains the cert.",
         ),
     ] = None
     server_key_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="serverKeySecret",
             title="ServerKeyPath refers the file that contains private key",
         ),
     ] = None
-    url: Annotated[Optional[str], Field(description="URL is the url of the server.")] = None
+    url: Annotated[str | None, Field(description="URL is the url of the server.")] = None
 
 
-class ValueFromSource(BaseModel):
-    config_map_key_ref: Annotated[Optional[v1_1.ConfigMapKeySelector], Field(alias="configMapKeyRef")] = None
-    secret_key_ref: Annotated[Optional[v1_1.SecretKeySelector], Field(alias="secretKeyRef")] = None
+class ValueFromSource(APIBaseModel):
+    config_map_key_ref: Annotated[v1_1.ConfigMapKeySelector | None, Field(alias="configMapKeyRef")] = None
+    secret_key_ref: Annotated[v1_1.SecretKeySelector | None, Field(alias="secretKeyRef")] = None
 
 
-class Backoff(BaseModel):
+class Backoff(APIBaseModel):
     duration: Annotated[
-        Optional[Int64OrString],
+        Int64OrString | None,
         Field(title=('The initial duration in nanoseconds or strings like "1s", "3m"\n+optional')),
     ] = None
     factor: Annotated[
-        Optional[Amount],
+        Amount | None,
         Field(title="Duration is multiplied by factor each iteration\n+optional"),
     ] = None
     jitter: Annotated[
-        Optional[Amount],
+        Amount | None,
         Field(title="The amount of jitter applied each iteration\n+optional"),
     ] = None
-    steps: Annotated[Optional[int], Field(title="Exit with error after this many steps\n+optional")] = None
+    steps: Annotated[int | None, Field(title="Exit with error after this many steps\n+optional")] = None
 
 
-class ConditionsResetCriteria(BaseModel):
+class ConditionsResetCriteria(APIBaseModel):
     by_time: Annotated[
-        Optional[ConditionsResetByTime],
+        ConditionsResetByTime | None,
         Field(
             alias="byTime",
             title=("Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron"),
@@ -1213,20 +1203,20 @@ class ConditionsResetCriteria(BaseModel):
     ] = None
 
 
-class EventPersistence(BaseModel):
+class EventPersistence(APIBaseModel):
     catchup: Annotated[
-        Optional[CatchupConfiguration],
+        CatchupConfiguration | None,
         Field(title=("Catchup enables to triggered the missed schedule when eventsource restarts")),
     ] = None
     config_map: Annotated[
-        Optional[ConfigMapPersistence],
+        ConfigMapPersistence | None,
         Field(alias="configMap", title="ConfigMap holds configmap details for persistence"),
     ] = None
 
 
-class FileEventSource(BaseModel):
+class FileEventSource(APIBaseModel):
     event_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="eventType",
             title=(
@@ -1236,16 +1226,16 @@ class FileEventSource(BaseModel):
             ),
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
-    polling: Annotated[Optional[bool], Field(title="Use polling instead of inotify")] = None
+    polling: Annotated[bool | None, Field(title="Use polling instead of inotify")] = None
     watch_path_config: Annotated[
-        Optional[WatchPathConfig],
+        WatchPathConfig | None,
         Field(
             alias="watchPathConfig",
             title="WatchPathConfig contains configuration about the file path to watch",
@@ -1253,10 +1243,10 @@ class FileEventSource(BaseModel):
     ] = None
 
 
-class HDFSEventSource(BaseModel):
-    addresses: Optional[List[str]] = None
+class HDFSEventSource(APIBaseModel):
+    addresses: list[str] | None = None
     check_interval: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="checkInterval",
             title=(
@@ -1265,9 +1255,9 @@ class HDFSEventSource(BaseModel):
             ),
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     hdfs_user: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="hdfsUser",
             description=(
@@ -1276,7 +1266,7 @@ class HDFSEventSource(BaseModel):
         ),
     ] = None
     krb_c_cache_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="krbCCacheSecret",
             description=(
@@ -1286,7 +1276,7 @@ class HDFSEventSource(BaseModel):
         ),
     ] = None
     krb_config_config_map: Annotated[
-        Optional[v1_1.ConfigMapKeySelector],
+        v1_1.ConfigMapKeySelector | None,
         Field(
             alias="krbConfigConfigMap",
             description=(
@@ -1296,7 +1286,7 @@ class HDFSEventSource(BaseModel):
         ),
     ] = None
     krb_keytab_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="krbKeytabSecret",
             description=(
@@ -1306,7 +1296,7 @@ class HDFSEventSource(BaseModel):
         ),
     ] = None
     krb_realm: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbRealm",
             description=(
@@ -1315,7 +1305,7 @@ class HDFSEventSource(BaseModel):
         ),
     ] = None
     krb_service_principal_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbServicePrincipalName",
             description=(
@@ -1325,7 +1315,7 @@ class HDFSEventSource(BaseModel):
         ),
     ] = None
     krb_username: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbUsername",
             description=(
@@ -1334,19 +1324,19 @@ class HDFSEventSource(BaseModel):
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
-    type: Annotated[Optional[str], Field(title="Type of file operations to watch")] = None
-    watch_path_config: Annotated[Optional[WatchPathConfig], Field(alias="watchPathConfig")] = None
+    type: Annotated[str | None, Field(title="Type of file operations to watch")] = None
+    watch_path_config: Annotated[WatchPathConfig | None, Field(alias="watchPathConfig")] = None
 
 
-class SFTPEventSource(BaseModel):
-    address: Annotated[Optional[v1_1.SecretKeySelector], Field(description="Address sftp address.")] = None
+class SFTPEventSource(APIBaseModel):
+    address: Annotated[v1_1.SecretKeySelector | None, Field(description="Address sftp address.")] = None
     event_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="eventType",
             title=(
@@ -1356,19 +1346,19 @@ class SFTPEventSource(BaseModel):
             ),
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     password: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(description="Password required for authentication if any."),
     ] = None
     poll_interval_duration: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="pollIntervalDuration",
             title=(
@@ -1377,7 +1367,7 @@ class SFTPEventSource(BaseModel):
         ),
     ] = None
     ssh_key_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="sshKeySecret",
             description=(
@@ -1387,11 +1377,11 @@ class SFTPEventSource(BaseModel):
         ),
     ] = None
     username: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(description="Username required for authentication if any."),
     ] = None
     watch_path_config: Annotated[
-        Optional[WatchPathConfig],
+        WatchPathConfig | None,
         Field(
             alias="watchPathConfig",
             title="WatchPathConfig contains configuration about the file path to watch",
@@ -1399,22 +1389,22 @@ class SFTPEventSource(BaseModel):
     ] = None
 
 
-class S3Artifact(BaseModel):
-    access_key: Annotated[Optional[v1_1.SecretKeySelector], Field(alias="accessKey")] = None
-    bucket: Optional[S3Bucket] = None
-    ca_certificate: Annotated[Optional[v1_1.SecretKeySelector], Field(alias="caCertificate")] = None
-    endpoint: Optional[str] = None
-    events: Optional[List[str]] = None
-    filter: Optional[S3Filter] = None
-    insecure: Optional[bool] = None
-    metadata: Optional[Dict[str, str]] = None
-    region: Optional[str] = None
-    secret_key: Annotated[Optional[v1_1.SecretKeySelector], Field(alias="secretKey")] = None
+class S3Artifact(APIBaseModel):
+    access_key: Annotated[v1_1.SecretKeySelector | None, Field(alias="accessKey")] = None
+    bucket: S3Bucket | None = None
+    ca_certificate: Annotated[v1_1.SecretKeySelector | None, Field(alias="caCertificate")] = None
+    endpoint: str | None = None
+    events: list[str] | None = None
+    filter: S3Filter | None = None
+    insecure: bool | None = None
+    metadata: dict[str, str] | None = None
+    region: str | None = None
+    secret_key: Annotated[v1_1.SecretKeySelector | None, Field(alias="secretKey")] = None
 
 
-class TriggerParameter(BaseModel):
+class TriggerParameter(APIBaseModel):
     dest: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Dest is the JSONPath of a resource key.\nA path is a series of keys"
@@ -1426,7 +1416,7 @@ class TriggerParameter(BaseModel):
         ),
     ] = None
     operation: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Operation is what to do with the existing value at Dest, whether"
@@ -1435,14 +1425,14 @@ class TriggerParameter(BaseModel):
         ),
     ] = None
     src: Annotated[
-        Optional[TriggerParameterSource],
+        TriggerParameterSource | None,
         Field(title=("Src contains a source reference to the value of the parameter from a dependency")),
     ] = None
 
 
-class ResourceEventSource(BaseModel):
+class ResourceEventSource(APIBaseModel):
     event_types: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="eventTypes",
             description=(
@@ -1451,7 +1441,7 @@ class ResourceEventSource(BaseModel):
         ),
     ] = None
     filter: Annotated[
-        Optional[ResourceFilter],
+        ResourceFilter | None,
         Field(
             title=(
                 "Filter is applied on the metadata of the resource\nIf you apply"
@@ -1461,50 +1451,47 @@ class ResourceEventSource(BaseModel):
         ),
     ] = None
     group_version_resource: Annotated[
-        Optional[v1.GroupVersionResource],
+        v1.GroupVersionResource | None,
         Field(alias="groupVersionResource", title="Group of the resource"),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
-    namespace: Annotated[Optional[str], Field(title="Namespace where resource is deployed")] = None
+    namespace: Annotated[str | None, Field(title="Namespace where resource is deployed")] = None
 
 
-class NATSAuth(BaseModel):
+class NATSAuth(APIBaseModel):
     basic: Annotated[
-        Optional[BasicAuth],
+        BasicAuth | None,
         Field(title="Baisc auth with username and password\n+optional"),
     ] = None
     credential: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(title="credential used to connect\n+optional"),
     ] = None
-    nkey: Annotated[Optional[v1_1.SecretKeySelector], Field(title="NKey used to connect\n+optional")] = None
-    token: Annotated[
-        Optional[v1_1.SecretKeySelector],
-        Field(title="Token used to connect\n+optional"),
-    ] = None
+    nkey: Annotated[v1_1.SecretKeySelector | None, Field(title="NKey used to connect\n+optional")] = None
+    token: Annotated[v1_1.SecretKeySelector | None, Field(title="Token used to connect\n+optional")] = None
 
 
-class SchemaRegistryConfig(BaseModel):
+class SchemaRegistryConfig(APIBaseModel):
     auth: Annotated[
-        Optional[BasicAuth],
+        BasicAuth | None,
         Field(title="+optional\nSchemaRegistry - basic authentication"),
     ] = None
-    schema_id: Annotated[Optional[int], Field(alias="schemaId", title="Schema ID")] = None
-    url: Annotated[Optional[str], Field(description="Schema Registry URL.")] = None
+    schema_id: Annotated[int | None, Field(alias="schemaId", title="Schema ID")] = None
+    url: Annotated[str | None, Field(description="Schema Registry URL.")] = None
 
 
-class BitbucketAuth(BaseModel):
+class BitbucketAuth(APIBaseModel):
     basic: Annotated[
-        Optional[BitbucketBasicAuth],
+        BitbucketBasicAuth | None,
         Field(title="Basic is BasicAuth auth strategy.\n+optional"),
     ] = None
     oauth_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="oauthToken",
             title=("OAuthToken refers to the K8s secret that holds the OAuth Bearer token.\n+optional"),
@@ -1512,10 +1499,10 @@ class BitbucketAuth(BaseModel):
     ] = None
 
 
-class GitArtifact(BaseModel):
-    branch: Annotated[Optional[str], Field(title="Branch to use to pull trigger resource\n+optional")] = None
+class GitArtifact(APIBaseModel):
+    branch: Annotated[str | None, Field(title="Branch to use to pull trigger resource\n+optional")] = None
     clone_directory: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="cloneDirectory",
             description=(
@@ -1526,26 +1513,26 @@ class GitArtifact(BaseModel):
         ),
     ] = None
     creds: Annotated[
-        Optional[GitCreds],
+        GitCreds | None,
         Field(title="Creds contain reference to git username and password\n+optional"),
     ] = None
     file_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="filePath",
             title="Path to file that contains trigger resource definition",
         ),
     ] = None
     insecure_ignore_host_key: Annotated[
-        Optional[bool],
+        bool | None,
         Field(alias="insecureIgnoreHostKey", title="Whether to ignore host key\n+optional"),
     ] = None
     ref: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Ref to use to pull trigger resource. Will result in a shallow clone and\nfetch.\n+optional")),
     ] = None
     remote: Annotated[
-        Optional[GitRemoteConfig],
+        GitRemoteConfig | None,
         Field(
             title=(
                 "Remote to manage set of tracked repositories. Defaults to"
@@ -1554,19 +1541,19 @@ class GitArtifact(BaseModel):
         ),
     ] = None
     ssh_key_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="sshKeySecret",
             title="SSHKeySecret refers to the secret that contains SSH key",
         ),
     ] = None
-    tag: Annotated[Optional[str], Field(title="Tag to use to pull trigger resource\n+optional")] = None
-    url: Annotated[Optional[str], Field(title="Git URL")] = None
+    tag: Annotated[str | None, Field(title="Tag to use to pull trigger resource\n+optional")] = None
+    url: Annotated[str | None, Field(title="Git URL")] = None
 
 
-class AzureServiceBusEventSource(BaseModel):
+class AzureServiceBusEventSource(APIBaseModel):
     connection_string: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="connectionString",
             title=(
@@ -1576,9 +1563,9 @@ class AzureServiceBusEventSource(BaseModel):
             ),
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     fully_qualified_namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fullyQualifiedNamespace",
             title=(
@@ -1590,38 +1577,38 @@ class AzureServiceBusEventSource(BaseModel):
         ),
     ] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     queue_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="queueName",
             title="QueueName is the name of the Azure Service Bus Queue",
         ),
     ] = None
     subscription_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="subscriptionName",
             title=("SubscriptionName is the name of the Azure Service Bus Topic Subscription"),
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the service bus client\n+optional"),
     ] = None
     topic_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="topicName",
             title="TopicName is the name of the Azure Service Bus Topic",
@@ -1629,16 +1616,16 @@ class AzureServiceBusEventSource(BaseModel):
     ] = None
 
 
-class AzureServiceBusTrigger(BaseModel):
+class AzureServiceBusTrigger(APIBaseModel):
     connection_string: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="connectionString",
             title="ConnectionString is the connection string for the Azure Service Bus",
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             title=(
                 "Parameters is the list of key-value extracted from event's payload"
@@ -1647,7 +1634,7 @@ class AzureServiceBusTrigger(BaseModel):
         ),
     ] = None
     payload: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Payload is the list of key-value extracted from an event payload to construct the request payload."
@@ -1655,25 +1642,25 @@ class AzureServiceBusTrigger(BaseModel):
         ),
     ] = None
     queue_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="queueName",
             title="QueueName is the name of the Azure Service Bus Queue",
         ),
     ] = None
     subscription_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="subscriptionName",
             title=("SubscriptionName is the name of the Azure Service Bus Topic Subscription"),
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the service bus client\n+optional"),
     ] = None
     topic_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="topicName",
             title="TopicName is the name of the Azure Service Bus Topic",
@@ -1681,35 +1668,35 @@ class AzureServiceBusTrigger(BaseModel):
     ] = None
 
 
-class RedisEventSource(BaseModel):
-    channels: Optional[List[str]] = None
+class RedisEventSource(APIBaseModel):
+    channels: list[str] | None = None
     db: Annotated[
-        Optional[int],
+        int | None,
         Field(title="DB to use. If not specified, default DB 0 will be used.\n+optional"),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     host_address: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="hostAddress",
             title="HostAddress refers to the address of the Redis host/server",
         ),
     ] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Namespace to use to retrieve the password from. It should only be"
@@ -1718,22 +1705,22 @@ class RedisEventSource(BaseModel):
         ),
     ] = None
     password: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(title="Password required for authentication if any.\n+optional"),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the redis client.\n+optional"),
     ] = None
     username: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Username required for ACL style authentication if any.\n+optional"),
     ] = None
 
 
-class RedisStreamEventSource(BaseModel):
+class RedisStreamEventSource(APIBaseModel):
     consumer_group: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="consumerGroup",
             title=(
@@ -1744,19 +1731,19 @@ class RedisStreamEventSource(BaseModel):
         ),
     ] = None
     db: Annotated[
-        Optional[int],
+        int | None,
         Field(title="DB to use. If not specified, default DB 0 will be used.\n+optional"),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     host_address: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="hostAddress",
             title=("HostAddress refers to the address of the Redis host/server (master instance)"),
         ),
     ] = None
     max_msg_count_per_read: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="maxMsgCountPerRead",
             title=(
@@ -1770,17 +1757,17 @@ class RedisStreamEventSource(BaseModel):
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     password: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(title="Password required for authentication if any.\n+optional"),
     ] = None
     streams: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Streams to look for entries. XREADGROUP is used on all streams using a single consumer group."
@@ -1788,18 +1775,18 @@ class RedisStreamEventSource(BaseModel):
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the redis client.\n+optional"),
     ] = None
     username: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Username required for ACL style authentication if any.\n+optional"),
     ] = None
 
 
-class BitbucketServerEventSource(BaseModel):
+class BitbucketServerEventSource(APIBaseModel):
     access_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="accessToken",
             title=(
@@ -1808,14 +1795,14 @@ class BitbucketServerEventSource(BaseModel):
         ),
     ] = None
     bitbucketserver_base_url: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="bitbucketserverBaseURL",
             description=("BitbucketServerBaseURL is the base URL for API requests to a custom endpoint."),
         ),
     ] = None
     check_interval: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="checkInterval",
             title=(
@@ -1825,7 +1812,7 @@ class BitbucketServerEventSource(BaseModel):
         ),
     ] = None
     delete_hook_on_finish: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="deleteHookOnFinish",
             title=(
@@ -1835,7 +1822,7 @@ class BitbucketServerEventSource(BaseModel):
         ),
     ] = None
     events: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             title=(
                 "Events are bitbucket event to listen to.\nRefer"
@@ -1843,15 +1830,15 @@ class BitbucketServerEventSource(BaseModel):
             )
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     one_event_per_change: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="oneEventPerChange",
             title=(
@@ -1868,7 +1855,7 @@ class BitbucketServerEventSource(BaseModel):
         ),
     ] = None
     project_key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="projectKey",
             title=(
@@ -1879,7 +1866,7 @@ class BitbucketServerEventSource(BaseModel):
         ),
     ] = None
     projects: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             title=(
                 "Projects holds a list of projects for which integration needs to set"
@@ -1889,11 +1876,11 @@ class BitbucketServerEventSource(BaseModel):
         ),
     ] = None
     repositories: Annotated[
-        Optional[List[BitbucketServerRepository]],
+        list[BitbucketServerRepository] | None,
         Field(title=("Repositories holds a list of repositories for which integration needs to set up.\n+optional")),
     ] = None
     repository_slug: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="repositorySlug",
             title=(
@@ -1904,7 +1891,7 @@ class BitbucketServerEventSource(BaseModel):
         ),
     ] = None
     skip_branch_refs_changed_on_open_pr: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="skipBranchRefsChangedOnOpenPR",
             title=(
@@ -1917,15 +1904,15 @@ class BitbucketServerEventSource(BaseModel):
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the bitbucketserver client.\n+optional"),
     ] = None
     webhook: Annotated[
-        Optional[WebhookContext],
+        WebhookContext | None,
         Field(description="Webhook holds configuration to run a http server."),
     ] = None
     webhook_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="webhookSecret",
             title=(
@@ -1936,13 +1923,13 @@ class BitbucketServerEventSource(BaseModel):
     ] = None
 
 
-class GerritEventSource(BaseModel):
+class GerritEventSource(APIBaseModel):
     auth: Annotated[
-        Optional[BasicAuth],
+        BasicAuth | None,
         Field(title="Auth hosts secret selectors for username and password\n+optional"),
     ] = None
     delete_hook_on_finish: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="deleteHookOnFinish",
             title=(
@@ -1952,7 +1939,7 @@ class GerritEventSource(BaseModel):
         ),
     ] = None
     events: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             title=(
                 "Events are gerrit event to listen to.\nRefer"
@@ -1960,41 +1947,38 @@ class GerritEventSource(BaseModel):
             )
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     gerrit_base_url: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="gerritBaseURL",
             title="GerritBaseURL is the base URL for API requests to a custom endpoint",
         ),
     ] = None
-    hook_name: Annotated[
-        Optional[str],
-        Field(alias="hookName", title="HookName is the name of the webhook"),
-    ] = None
+    hook_name: Annotated[str | None, Field(alias="hookName", title="HookName is the name of the webhook")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     projects: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(description='List of project namespace paths like "whynowy/test".'),
     ] = None
     ssl_verify: Annotated[
-        Optional[bool],
+        bool | None,
         Field(alias="sslVerify", title="SslVerify to enable ssl verification\n+optional"),
     ] = None
     webhook: Annotated[
-        Optional[WebhookContext],
+        WebhookContext | None,
         Field(title="Webhook holds configuration to run a http server"),
     ] = None
 
 
-class GithubEventSource(BaseModel):
+class GithubEventSource(APIBaseModel):
     active: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             title=(
                 "Active refers to status of the webhook for event"
@@ -2003,18 +1987,18 @@ class GithubEventSource(BaseModel):
         ),
     ] = None
     api_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="apiToken",
             title=("APIToken refers to a K8s secret containing github api token\n+optional"),
         ),
     ] = None
     content_type: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="contentType", title="ContentType of the event delivery"),
     ] = None
     delete_hook_on_finish: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="deleteHookOnFinish",
             title=(
@@ -2024,46 +2008,46 @@ class GithubEventSource(BaseModel):
         ),
     ] = None
     events: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(title=("Events refer to Github events to which the event source will subscribe")),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     github_app: Annotated[
-        Optional[GithubAppCreds],
+        GithubAppCreds | None,
         Field(
             alias="githubApp",
             title="GitHubApp holds the GitHub app credentials\n+optional",
         ),
     ] = None
     github_base_url: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="githubBaseURL",
             title="GitHub base URL (for GitHub Enterprise)\n+optional",
         ),
     ] = None
     github_upload_url: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="githubUploadURL",
             title="GitHub upload URL (for GitHub Enterprise)\n+optional",
         ),
     ] = None
     id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=("Id is the webhook's id\nDeprecated: This is not used at all, will be removed in v1.6\n+optional")
         ),
     ] = None
-    insecure: Annotated[Optional[bool], Field(title="Insecure tls verification")] = None
+    insecure: Annotated[bool | None, Field(title="Insecure tls verification")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     organizations: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Organizations holds the names of organizations (used for organization"
@@ -2072,7 +2056,7 @@ class GithubEventSource(BaseModel):
         ),
     ] = None
     owner: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "DeprecatedOwner refers to GitHub owner name i.e. argoproj\nDeprecated:"
@@ -2081,7 +2065,7 @@ class GithubEventSource(BaseModel):
         ),
     ] = None
     repositories: Annotated[
-        Optional[List[OwnedRepositories]],
+        list[OwnedRepositories] | None,
         Field(
             description=(
                 "Repositories holds the information of repositories, which uses repo"
@@ -2091,7 +2075,7 @@ class GithubEventSource(BaseModel):
         ),
     ] = None
     repository: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "DeprecatedRepository refers to GitHub repo name i.e."
@@ -2101,11 +2085,11 @@ class GithubEventSource(BaseModel):
         ),
     ] = None
     webhook: Annotated[
-        Optional[WebhookContext],
+        WebhookContext | None,
         Field(title="Webhook refers to the configuration required to run a http server"),
     ] = None
     webhook_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="webhookSecret",
             title=(
@@ -2116,16 +2100,16 @@ class GithubEventSource(BaseModel):
     ] = None
 
 
-class GitlabEventSource(BaseModel):
+class GitlabEventSource(APIBaseModel):
     access_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="accessToken",
             title=("AccessToken references to k8 secret which holds the gitlab api access information"),
         ),
     ] = None
     delete_hook_on_finish: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="deleteHookOnFinish",
             title=(
@@ -2135,14 +2119,14 @@ class GitlabEventSource(BaseModel):
         ),
     ] = None
     enable_ssl_verification: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="enableSSLVerification",
             title="EnableSSLVerification to enable ssl verification\n+optional",
         ),
     ] = None
     events: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Events are gitlab event to listen to.\nRefer"
@@ -2150,16 +2134,16 @@ class GitlabEventSource(BaseModel):
             )
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     gitlab_base_url: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="gitlabBaseURL",
             title="GitlabBaseURL is the base URL for API requests to a custom endpoint",
         ),
     ] = None
     groups: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             title=(
                 'List of group IDs or group name like "test".\nGroup level hook'
@@ -2168,13 +2152,13 @@ class GitlabEventSource(BaseModel):
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     project_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="projectID",
             title=(
@@ -2185,7 +2169,7 @@ class GitlabEventSource(BaseModel):
         ),
     ] = None
     projects: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             title=(
                 "List of project IDs or project namespace paths like"
@@ -2195,122 +2179,122 @@ class GitlabEventSource(BaseModel):
         ),
     ] = None
     secret_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="secretToken",
             title=("SecretToken references to k8 secret which holds the Secret Token used by webhook config"),
         ),
     ] = None
     webhook: Annotated[
-        Optional[WebhookContext],
+        WebhookContext | None,
         Field(title="Webhook holds configuration to run a http server"),
     ] = None
 
 
-class SNSEventSource(BaseModel):
+class SNSEventSource(APIBaseModel):
     access_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="accessKey",
             title="AccessKey refers K8s secret containing aws access key",
         ),
     ] = None
     endpoint: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=("Endpoint configures connection to a specific SNS endpoint instead of Amazons servers\n+optional")
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
-    region: Annotated[Optional[str], Field(title="Region is AWS region")] = None
+    region: Annotated[str | None, Field(title="Region is AWS region")] = None
     role_arn: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="roleARN",
             title=("RoleARN is the Amazon Resource Name (ARN) of the role to assume.\n+optional"),
         ),
     ] = None
     secret_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="secretKey",
             title="SecretKey refers K8s secret containing aws secret key",
         ),
     ] = None
-    topic_arn: Annotated[Optional[str], Field(alias="topicArn", title="TopicArn")] = None
+    topic_arn: Annotated[str | None, Field(alias="topicArn", title="TopicArn")] = None
     validate_signature: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="validateSignature",
             title=("ValidateSignature is boolean that can be set to true for SNS signature verification\n+optional"),
         ),
     ] = None
-    webhook: Annotated[Optional[WebhookContext], Field(title="Webhook configuration for http server")] = None
+    webhook: Annotated[WebhookContext | None, Field(title="Webhook configuration for http server")] = None
 
 
-class SlackEventSource(BaseModel):
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+class SlackEventSource(APIBaseModel):
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     signing_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(alias="signingSecret", title="Slack App signing secret"),
     ] = None
     token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(title="Token for URL verification handshake"),
     ] = None
     webhook: Annotated[
-        Optional[WebhookContext],
+        WebhookContext | None,
         Field(title="Webhook holds configuration for a REST endpoint"),
     ] = None
 
 
-class StorageGridEventSource(BaseModel):
+class StorageGridEventSource(APIBaseModel):
     api_url: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="apiURL", description="APIURL is the url of the storagegrid api."),
     ] = None
     auth_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(alias="authToken", title="Auth token for storagegrid api"),
     ] = None
     bucket: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Name of the bucket to register notifications for."),
     ] = None
-    events: Optional[List[str]] = None
+    events: list[str] | None = None
     filter: Annotated[
-        Optional[StorageGridFilter],
+        StorageGridFilter | None,
         Field(description="Filter on object key which caused the notification."),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
-    region: Annotated[Optional[str], Field(title="S3 region.\nDefaults to us-east-1\n+optional")] = None
-    topic_arn: Annotated[Optional[str], Field(alias="topicArn", title="TopicArn")] = None
+    region: Annotated[str | None, Field(title="S3 region.\nDefaults to us-east-1\n+optional")] = None
+    topic_arn: Annotated[str | None, Field(alias="topicArn", title="TopicArn")] = None
     webhook: Annotated[
-        Optional[WebhookContext],
+        WebhookContext | None,
         Field(title="Webhook holds configuration for a REST endpoint"),
     ] = None
 
 
-class StripeEventSource(BaseModel):
+class StripeEventSource(APIBaseModel):
     api_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="apiKey",
             title=(
@@ -2320,14 +2304,14 @@ class StripeEventSource(BaseModel):
         ),
     ] = None
     create_webhook: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="createWebhook",
             title=("CreateWebhook if specified creates a new webhook programmatically.\n+optional"),
         ),
     ] = None
     event_filter: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="eventFilter",
             title=(
@@ -2338,26 +2322,26 @@ class StripeEventSource(BaseModel):
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     webhook: Annotated[
-        Optional[WebhookContext],
+        WebhookContext | None,
         Field(title="Webhook holds configuration for a REST endpoint"),
     ] = None
 
 
-class WebhookEventSource(BaseModel):
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
-    webhook_context: Annotated[Optional[WebhookContext], Field(alias="webhookContext")] = None
+class WebhookEventSource(APIBaseModel):
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
+    webhook_context: Annotated[WebhookContext | None, Field(alias="webhookContext")] = None
 
 
-class SecureHeader(BaseModel):
-    name: Optional[str] = None
+class SecureHeader(APIBaseModel):
+    name: str | None = None
     value_from: Annotated[
-        Optional[ValueFromSource],
+        ValueFromSource | None,
         Field(
             alias="valueFrom",
             title="Values can be read from either secrets or configmaps",
@@ -2365,20 +2349,20 @@ class SecureHeader(BaseModel):
     ] = None
 
 
-class AMQPEventSource(BaseModel):
+class AMQPEventSource(APIBaseModel):
     auth: Annotated[
-        Optional[BasicAuth],
+        BasicAuth | None,
         Field(title="Auth hosts secret selectors for username and password\n+optional"),
     ] = None
     connection_backoff: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="connectionBackoff",
             title="Backoff holds parameters applied to connection.\n+optional",
         ),
     ] = None
     consume: Annotated[
-        Optional[AMQPConsumeConfig],
+        AMQPConsumeConfig | None,
         Field(
             title=(
                 "Consume holds the configuration to immediately starts delivering"
@@ -2388,7 +2372,7 @@ class AMQPEventSource(BaseModel):
         ),
     ] = None
     exchange_declare: Annotated[
-        Optional[AMQPExchangeDeclareConfig],
+        AMQPExchangeDeclareConfig | None,
         Field(
             alias="exchangeDeclare",
             title=(
@@ -2399,7 +2383,7 @@ class AMQPEventSource(BaseModel):
         ),
     ] = None
     exchange_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="exchangeName",
             title=(
@@ -2409,25 +2393,25 @@ class AMQPEventSource(BaseModel):
         ),
     ] = None
     exchange_type: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="exchangeType", title="ExchangeType is rabbitmq exchange type"),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     queue_bind: Annotated[
-        Optional[AMQPQueueBindConfig],
+        AMQPQueueBindConfig | None,
         Field(
             alias="queueBind",
             title=(
@@ -2440,7 +2424,7 @@ class AMQPEventSource(BaseModel):
         ),
     ] = None
     queue_declare: Annotated[
-        Optional[AMQPQueueDeclareConfig],
+        AMQPQueueDeclareConfig | None,
         Field(
             alias="queueDeclare",
             title=(
@@ -2452,14 +2436,14 @@ class AMQPEventSource(BaseModel):
             ),
         ),
     ] = None
-    routing_key: Annotated[Optional[str], Field(alias="routingKey", title="Routing key for bindings")] = None
+    routing_key: Annotated[str | None, Field(alias="routingKey", title="Routing key for bindings")] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the amqp client.\n+optional"),
     ] = None
-    url: Annotated[Optional[str], Field(title="URL for rabbitmq service")] = None
+    url: Annotated[str | None, Field(title="URL for rabbitmq service")] = None
     url_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="urlSecret",
             title="URLSecret is secret reference for rabbitmq service URL",
@@ -2467,55 +2451,55 @@ class AMQPEventSource(BaseModel):
     ] = None
 
 
-class EmitterEventSource(BaseModel):
-    broker: Annotated[Optional[str], Field(description="Broker URI to connect to.")] = None
+class EmitterEventSource(APIBaseModel):
+    broker: Annotated[str | None, Field(description="Broker URI to connect to.")] = None
     channel_key: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="channelKey", title="ChannelKey refers to the channel key"),
     ] = None
     channel_name: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="channelName", title="ChannelName refers to the channel name"),
     ] = None
     connection_backoff: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="connectionBackoff",
             title="Backoff holds parameters applied to connection.\n+optional",
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     password: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(title="Password to use to connect to broker\n+optional"),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the emitter client.\n+optional"),
     ] = None
     username: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(title="Username to use to connect to broker\n+optional"),
     ] = None
 
 
-class K8SResourcePolicy(BaseModel):
-    backoff: Annotated[Optional[Backoff], Field(title="Backoff before checking resource state")] = None
+class K8SResourcePolicy(APIBaseModel):
+    backoff: Annotated[Backoff | None, Field(title="Backoff before checking resource state")] = None
     error_on_backoff_timeout: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="errorOnBackoffTimeout",
             title=(
@@ -2526,14 +2510,14 @@ class K8SResourcePolicy(BaseModel):
         ),
     ] = None
     labels: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(title="Labels required to identify whether a resource is in success state"),
     ] = None
 
 
-class KafkaEventSource(BaseModel):
+class KafkaEventSource(APIBaseModel):
     config: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Yaml format Sarama config for Kafka connection.\nIt follows the struct"
@@ -2544,53 +2528,53 @@ class KafkaEventSource(BaseModel):
         ),
     ] = None
     connection_backoff: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="connectionBackoff",
             description="Backoff holds parameters applied to connection.",
         ),
     ] = None
     consumer_group: Annotated[
-        Optional[KafkaConsumerGroup],
+        KafkaConsumerGroup | None,
         Field(alias="consumerGroup", title="Consumer group for kafka client\n+optional"),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     limit_events_per_second: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="limitEventsPerSecond",
             title=("Sets a limit on how many events get read from kafka per second.\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
-    partition: Annotated[Optional[str], Field(title="Partition name\n+optional")] = None
+    partition: Annotated[str | None, Field(title="Partition name\n+optional")] = None
     sasl: Annotated[
-        Optional[SASLConfig],
+        SASLConfig | None,
         Field(title="SASL configuration for the kafka client\n+optional"),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the kafka client.\n+optional"),
     ] = None
-    topic: Annotated[Optional[str], Field(title="Topic name")] = None
+    topic: Annotated[str | None, Field(title="Topic name")] = None
     url: Annotated[
-        Optional[str],
+        str | None,
         Field(title="URL to kafka cluster, multiple URLs separated by comma"),
     ] = None
     version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Specify what kafka version is being connected to enables certain"
@@ -2600,81 +2584,81 @@ class KafkaEventSource(BaseModel):
     ] = None
 
 
-class MQTTEventSource(BaseModel):
+class MQTTEventSource(APIBaseModel):
     auth: Annotated[
-        Optional[BasicAuth],
+        BasicAuth | None,
         Field(title="Auth hosts secret selectors for username and password\n+optional"),
     ] = None
-    client_id: Annotated[Optional[str], Field(alias="clientId", title="ClientID is the id of the client")] = None
+    client_id: Annotated[str | None, Field(alias="clientId", title="ClientID is the id of the client")] = None
     connection_backoff: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="connectionBackoff",
             description="ConnectionBackoff holds backoff applied to connection.",
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the mqtt client.\n+optional"),
     ] = None
-    topic: Annotated[Optional[str], Field(title="Topic name")] = None
-    url: Annotated[Optional[str], Field(title="URL to connect to broker")] = None
+    topic: Annotated[str | None, Field(title="Topic name")] = None
+    url: Annotated[str | None, Field(title="URL to connect to broker")] = None
 
 
-class NSQEventSource(BaseModel):
-    channel: Annotated[Optional[str], Field(title="Channel used for subscription")] = None
+class NSQEventSource(APIBaseModel):
+    channel: Annotated[str | None, Field(title="Channel used for subscription")] = None
     connection_backoff: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="connectionBackoff",
             title="Backoff holds parameters applied to connection.\n+optional",
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     host_address: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="hostAddress",
             title="HostAddress is the address of the host for NSQ lookup",
         ),
     ] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the nsq client.\n+optional"),
     ] = None
-    topic: Annotated[Optional[str], Field(description="Topic to subscribe to.")] = None
+    topic: Annotated[str | None, Field(description="Topic to subscribe to.")] = None
 
 
-class PulsarEventSource(BaseModel):
+class PulsarEventSource(APIBaseModel):
     auth_athenz_params: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="authAthenzParams",
             title=(
@@ -2685,7 +2669,7 @@ class PulsarEventSource(BaseModel):
         ),
     ] = None
     auth_athenz_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="authAthenzSecret",
             title=(
@@ -2696,7 +2680,7 @@ class PulsarEventSource(BaseModel):
         ),
     ] = None
     auth_token_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="authTokenSecret",
             title=(
@@ -2706,57 +2690,54 @@ class PulsarEventSource(BaseModel):
         ),
     ] = None
     connection_backoff: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="connectionBackoff",
             title="Backoff holds parameters applied to connection.\n+optional",
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the pulsar client.\n+optional"),
     ] = None
     tls_allow_insecure_connection: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="tlsAllowInsecureConnection",
             title=("Whether the Pulsar client accept untrusted TLS certificate from broker.\n+optional"),
         ),
     ] = None
     tls_trust_certs_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="tlsTrustCertsSecret",
             title="Trusted TLS certificate secret.\n+optional",
         ),
     ] = None
     tls_validate_hostname: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="tlsValidateHostname",
             title=("Whether the Pulsar client verify the validity of the host name from broker.\n+optional"),
         ),
     ] = None
-    topics: Annotated[
-        Optional[List[str]],
-        Field(title="Name of the topics to subscribe to.\n+required"),
-    ] = None
+    topics: Annotated[list[str] | None, Field(title="Name of the topics to subscribe to.\n+required")] = None
     type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 'Type of the subscription.\nOnly "exclusive" and "shared" is'
@@ -2765,14 +2746,14 @@ class PulsarEventSource(BaseModel):
         ),
     ] = None
     url: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Configure the service URL for the Pulsar service.\n+required"),
     ] = None
 
 
-class PulsarTrigger(BaseModel):
+class PulsarTrigger(APIBaseModel):
     auth_athenz_params: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="authAthenzParams",
             title=(
@@ -2783,7 +2764,7 @@ class PulsarTrigger(BaseModel):
         ),
     ] = None
     auth_athenz_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="authAthenzSecret",
             title=(
@@ -2794,7 +2775,7 @@ class PulsarTrigger(BaseModel):
         ),
     ] = None
     auth_token_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="authTokenSecret",
             title=(
@@ -2804,18 +2785,18 @@ class PulsarTrigger(BaseModel):
         ),
     ] = None
     connection_backoff: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="connectionBackoff",
             title="Backoff holds parameters applied to connection.\n+optional",
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(description=("Parameters is the list of parameters that is applied to resolved Kafka trigger object.")),
     ] = None
     payload: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Payload is the list of key-value extracted from an event payload to construct the request payload."
@@ -2823,99 +2804,99 @@ class PulsarTrigger(BaseModel):
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the pulsar client.\n+optional"),
     ] = None
     tls_allow_insecure_connection: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="tlsAllowInsecureConnection",
             title=("Whether the Pulsar client accept untrusted TLS certificate from broker.\n+optional"),
         ),
     ] = None
     tls_trust_certs_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="tlsTrustCertsSecret",
             title="Trusted TLS certificate secret.\n+optional",
         ),
     ] = None
     tls_validate_hostname: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="tlsValidateHostname",
             title=("Whether the Pulsar client verify the validity of the host name from broker.\n+optional"),
         ),
     ] = None
     topic: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Name of the topic.\nSee https://pulsar.apache.org/docs/en/concepts-messaging/")),
     ] = None
     url: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Configure the service URL for the Pulsar service.\n+required"),
     ] = None
 
 
-class CalendarEventSource(BaseModel):
+class CalendarEventSource(APIBaseModel):
     exclusion_dates: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="exclusionDates",
             description=("ExclusionDates defines the list of DATE-TIME exceptions for recurring events."),
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     interval: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...\n+optional")),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     persistence: Annotated[
-        Optional[EventPersistence],
+        EventPersistence | None,
         Field(title="Persistence hold the configuration for event persistence"),
     ] = None
     schedule: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron\n+optional"
             )
         ),
     ] = None
-    timezone: Annotated[Optional[str], Field(title="Timezone in which to run the schedule\n+optional")] = None
+    timezone: Annotated[str | None, Field(title="Timezone in which to run the schedule\n+optional")] = None
 
 
-class NATSEventsSource(BaseModel):
-    auth: Annotated[Optional[NATSAuth], Field(title="Auth information\n+optional")] = None
+class NATSEventsSource(APIBaseModel):
+    auth: Annotated[NATSAuth | None, Field(title="Auth information\n+optional")] = None
     connection_backoff: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="connectionBackoff",
             description="ConnectionBackoff holds backoff applied to connection.",
         ),
     ] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     json_body: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="jsonBody",
             title=("JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional"),
         ),
     ] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will passed along the event payload.\n+optional")
         ),
     ] = None
     queue: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Queue is the name of the queue group to subscribe as if specified."
@@ -2925,31 +2906,31 @@ class NATSEventsSource(BaseModel):
         ),
     ] = None
     subject: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Subject holds the name of the subject onto which messages are published")),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the nats client.\n+optional"),
     ] = None
-    url: Annotated[Optional[str], Field(title="URL to connect to NATS cluster")] = None
+    url: Annotated[str | None, Field(title="URL to connect to NATS cluster")] = None
 
 
-class NATSTrigger(BaseModel):
-    auth: Annotated[Optional[NATSAuth], Field(title="AuthInformation\n+optional")] = None
-    parameters: Optional[List[TriggerParameter]] = None
-    payload: Optional[List[TriggerParameter]] = None
-    subject: Annotated[Optional[str], Field(description="Name of the subject to put message on.")] = None
+class NATSTrigger(APIBaseModel):
+    auth: Annotated[NATSAuth | None, Field(title="AuthInformation\n+optional")] = None
+    parameters: list[TriggerParameter] | None = None
+    payload: list[TriggerParameter] | None = None
+    subject: Annotated[str | None, Field(description="Name of the subject to put message on.")] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the NATS producer.\n+optional"),
     ] = None
-    url: Annotated[Optional[str], Field(description="URL of the NATS cluster.")] = None
+    url: Annotated[str | None, Field(description="URL of the NATS cluster.")] = None
 
 
-class KafkaTrigger(BaseModel):
+class KafkaTrigger(APIBaseModel):
     compress: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             title=(
                 "Compress determines whether to compress message or not.\nDefaults to"
@@ -2959,7 +2940,7 @@ class KafkaTrigger(BaseModel):
         ),
     ] = None
     flush_frequency: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="flushFrequency",
             title=(
@@ -2968,24 +2949,21 @@ class KafkaTrigger(BaseModel):
             ),
         ),
     ] = None
-    headers: Annotated[
-        Optional[Dict[str, str]],
-        Field(title="Headers for the Kafka Messages.\n+optional"),
-    ] = None
+    headers: Annotated[dict[str, str] | None, Field(title="Headers for the Kafka Messages.\n+optional")] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(description=("Parameters is the list of parameters that is applied to resolved Kafka trigger object.")),
     ] = None
-    partition: Annotated[Optional[int], Field(title="+optional\nDEPRECATED")] = None
+    partition: Annotated[int | None, Field(title="+optional\nDEPRECATED")] = None
     partitioning_key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="partitioningKey",
             description=("The partitioning key for the messages put on the Kafka topic.\n+optional."),
         ),
     ] = None
     payload: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Payload is the list of key-value extracted from an event payload to construct the request payload."
@@ -2993,7 +2971,7 @@ class KafkaTrigger(BaseModel):
         ),
     ] = None
     required_acks: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="requiredAcks",
             description=(
@@ -3004,37 +2982,37 @@ class KafkaTrigger(BaseModel):
         ),
     ] = None
     sasl: Annotated[
-        Optional[SASLConfig],
+        SASLConfig | None,
         Field(title="SASL configuration for the kafka client\n+optional"),
     ] = None
     schema_registry: Annotated[
-        Optional[SchemaRegistryConfig],
+        SchemaRegistryConfig | None,
         Field(
             alias="schemaRegistry",
             title=("Schema Registry configuration to producer message with avro format\n+optional"),
         ),
     ] = None
     secure_headers: Annotated[
-        Optional[List[SecureHeader]],
+        list[SecureHeader] | None,
         Field(
             alias="secureHeaders",
             title=("Secure Headers stored in Kubernetes Secrets for the Kafka messages.\n+optional"),
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the Kafka producer.\n+optional"),
     ] = None
     topic: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Name of the topic.\nMore info at https://kafka.apache.org/documentation/#intro_topics")),
     ] = None
     url: Annotated[
-        Optional[str],
+        str | None,
         Field(description="URL of the Kafka broker, multiple URLs separated by comma."),
     ] = None
     version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Specify what kafka version is being connected to enables certain"
@@ -3044,13 +3022,13 @@ class KafkaTrigger(BaseModel):
     ] = None
 
 
-class BitbucketEventSource(BaseModel):
+class BitbucketEventSource(APIBaseModel):
     auth: Annotated[
-        Optional[BitbucketAuth],
+        BitbucketAuth | None,
         Field(description="Auth information required to connect to Bitbucket."),
     ] = None
     delete_hook_on_finish: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="deleteHookOnFinish",
             title=(
@@ -3059,16 +3037,16 @@ class BitbucketEventSource(BaseModel):
             ),
         ),
     ] = None
-    events: Annotated[Optional[List[str]], Field(description="Events this webhook is subscribed to.")] = None
-    filter: Annotated[Optional[EventSourceFilter], Field(title="Filter\n+optional")] = None
+    events: Annotated[list[str] | None, Field(description="Events this webhook is subscribed to.")] = None
+    filter: Annotated[EventSourceFilter | None, Field(title="Filter\n+optional")] = None
     metadata: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             title=("Metadata holds the user defined metadata which will be passed along the event payload.\n+optional")
         ),
     ] = None
     owner: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "DeprecatedOwner is the owner of the repository.\nDeprecated: use"
@@ -3077,7 +3055,7 @@ class BitbucketEventSource(BaseModel):
         ),
     ] = None
     project_key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="projectKey",
             title=(
@@ -3088,11 +3066,11 @@ class BitbucketEventSource(BaseModel):
         ),
     ] = None
     repositories: Annotated[
-        Optional[List[BitbucketRepository]],
+        list[BitbucketRepository] | None,
         Field(title=("Repositories holds a list of repositories for which integration needs to set up\n+optional")),
     ] = None
     repository_slug: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="repositorySlug",
             title=(
@@ -3104,36 +3082,30 @@ class BitbucketEventSource(BaseModel):
         ),
     ] = None
     webhook: Annotated[
-        Optional[WebhookContext],
+        WebhookContext | None,
         Field(title="Webhook refers to the configuration required to run an http server"),
     ] = None
 
 
-class ArtifactLocation(BaseModel):
+class ArtifactLocation(APIBaseModel):
     configmap: Annotated[
-        Optional[v1_1.ConfigMapKeySelector],
+        v1_1.ConfigMapKeySelector | None,
         Field(title="Configmap that stores the artifact"),
     ] = None
-    file: Annotated[
-        Optional[FileArtifact],
-        Field(title="File artifact is artifact stored in a file"),
-    ] = None
-    git: Annotated[Optional[GitArtifact], Field(title="Git repository hosting the artifact")] = None
+    file: Annotated[FileArtifact | None, Field(title="File artifact is artifact stored in a file")] = None
+    git: Annotated[GitArtifact | None, Field(title="Git repository hosting the artifact")] = None
     inline: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Inline artifact is embedded in sensor spec as a string"),
     ] = None
-    resource: Annotated[
-        Optional[K8SResource],
-        Field(title="Resource is generic template for K8s resource"),
-    ] = None
-    s3: Annotated[Optional[S3Artifact], Field(title="S3 compliant artifact")] = None
-    url: Annotated[Optional[URLArtifact], Field(title="URL to fetch the artifact from")] = None
+    resource: Annotated[K8SResource | None, Field(title="Resource is generic template for K8s resource")] = None
+    s3: Annotated[S3Artifact | None, Field(title="S3 compliant artifact")] = None
+    url: Annotated[URLArtifact | None, Field(title="URL to fetch the artifact from")] = None
 
 
-class TriggerPolicy(BaseModel):
+class TriggerPolicy(APIBaseModel):
     k8s: Annotated[
-        Optional[K8SResourcePolicy],
+        K8SResourcePolicy | None,
         Field(
             title=(
                 "K8SResourcePolicy refers to the policy used to check the state of K8s"
@@ -3142,18 +3114,18 @@ class TriggerPolicy(BaseModel):
         ),
     ] = None
     status: Annotated[
-        Optional[StatusPolicy],
+        StatusPolicy | None,
         Field(title=("Status refers to the policy used to check the state of the trigger using response status")),
     ] = None
 
 
-class ArgoWorkflowTrigger(BaseModel):
+class ArgoWorkflowTrigger(APIBaseModel):
     args: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(title="Args is the list of arguments to pass to the argo CLI"),
     ] = None
     operation: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Operation refers to the type of operation performed on the argo"
@@ -3162,15 +3134,15 @@ class ArgoWorkflowTrigger(BaseModel):
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(title=("Parameters is the list of parameters to pass to resolved Argo Workflow object")),
     ] = None
-    source: Annotated[Optional[ArtifactLocation], Field(title="Source of the K8s resource file(s)")] = None
+    source: Annotated[ArtifactLocation | None, Field(title="Source of the K8s resource file(s)")] = None
 
 
-class StandardK8STrigger(BaseModel):
+class StandardK8STrigger(APIBaseModel):
     live_object: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="liveObject",
             title=(
@@ -3185,7 +3157,7 @@ class StandardK8STrigger(BaseModel):
         ),
     ] = None
     operation: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Operation refers to the type of operation performed on the k8s"
@@ -3194,11 +3166,11 @@ class StandardK8STrigger(BaseModel):
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(description=("Parameters is the list of parameters that is applied to resolved K8s trigger object.")),
     ] = None
     patch_strategy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="patchStrategy",
             title=(
@@ -3209,12 +3181,12 @@ class StandardK8STrigger(BaseModel):
             ),
         ),
     ] = None
-    source: Annotated[Optional[ArtifactLocation], Field(title="Source of the K8s resource file(s)")] = None
+    source: Annotated[ArtifactLocation | None, Field(title="Source of the K8s resource file(s)")] = None
 
 
-class Status(BaseModel):
+class Status(APIBaseModel):
     conditions: Annotated[
-        Optional[List[Condition]],
+        list[Condition] | None,
         Field(
             title=(
                 "Conditions are the latest available observations of a resource's"
@@ -3224,34 +3196,34 @@ class Status(BaseModel):
     ] = None
 
 
-class ExprFilter(BaseModel):
+class ExprFilter(APIBaseModel):
     expr: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Expr refers to the expression that determines the outcome of the filter.")),
     ] = None
     fields: Annotated[
-        Optional[List[PayloadField]],
+        list[PayloadField] | None,
         Field(description=("Fields refers to set of keys that refer to the paths within event payload.")),
     ] = None
 
 
-class AWSLambdaTrigger(BaseModel):
+class AWSLambdaTrigger(APIBaseModel):
     access_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="accessKey",
             title="AccessKey refers K8s secret containing aws access key\n+optional",
         ),
     ] = None
     function_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="functionName",
             description="FunctionName refers to the name of the function to invoke.",
         ),
     ] = None
     invocation_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="invocationType",
             description=(
@@ -3268,7 +3240,7 @@ class AWSLambdaTrigger(BaseModel):
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             title=(
                 "Parameters is the list of key-value extracted from event's payload"
@@ -3277,23 +3249,23 @@ class AWSLambdaTrigger(BaseModel):
         ),
     ] = None
     payload: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Payload is the list of key-value extracted from an event payload to construct the request payload."
             )
         ),
     ] = None
-    region: Annotated[Optional[str], Field(title="Region is AWS region")] = None
+    region: Annotated[str | None, Field(title="Region is AWS region")] = None
     role_arn: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="roleARN",
             title=("RoleARN is the Amazon Resource Name (ARN) of the role to assume.\n+optional"),
         ),
     ] = None
     secret_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="secretKey",
             title="SecretKey refers K8s secret containing aws secret key\n+optional",
@@ -3301,9 +3273,9 @@ class AWSLambdaTrigger(BaseModel):
     ] = None
 
 
-class AzureEventHubsTrigger(BaseModel):
+class AzureEventHubsTrigger(APIBaseModel):
     fqdn: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "FQDN refers to the namespace dns of Azure Event Hubs to be used i.e."
@@ -3312,14 +3284,14 @@ class AzureEventHubsTrigger(BaseModel):
         ),
     ] = None
     hub_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="hubName",
             title="HubName refers to the Azure Event Hub to send events to",
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             title=(
                 "Parameters is the list of key-value extracted from event's payload"
@@ -3328,7 +3300,7 @@ class AzureEventHubsTrigger(BaseModel):
         ),
     ] = None
     payload: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Payload is the list of key-value extracted from an event payload to construct the request payload."
@@ -3336,14 +3308,14 @@ class AzureEventHubsTrigger(BaseModel):
         ),
     ] = None
     shared_access_key: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="sharedAccessKey",
             title=("SharedAccessKey refers to a K8s secret containing the primary key for the"),
         ),
     ] = None
     shared_access_key_name: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="sharedAccessKeyName",
             title="SharedAccessKeyName refers to the name of the Shared Access Key",
@@ -3351,9 +3323,9 @@ class AzureEventHubsTrigger(BaseModel):
     ] = None
 
 
-class CustomTrigger(BaseModel):
+class CustomTrigger(APIBaseModel):
     cert_secret: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="certSecret",
             description=(
@@ -3363,7 +3335,7 @@ class CustomTrigger(BaseModel):
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Parameters is the list of parameters that is applied to resolved custom trigger trigger object."
@@ -3371,7 +3343,7 @@ class CustomTrigger(BaseModel):
         ),
     ] = None
     payload: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Payload is the list of key-value extracted from an event payload to construct the request payload."
@@ -3379,11 +3351,11 @@ class CustomTrigger(BaseModel):
         ),
     ] = None
     secure: Annotated[
-        Optional[bool],
+        bool | None,
         Field(title=("Secure refers to type of the connection between sensor to custom trigger gRPC")),
     ] = None
     server_name_override: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serverNameOverride",
             description=(
@@ -3392,14 +3364,14 @@ class CustomTrigger(BaseModel):
         ),
     ] = None
     server_url: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serverURL",
             title=("ServerURL is the url of the gRPC server that executes custom trigger"),
         ),
     ] = None
     spec: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             description=(
                 "Spec is the custom trigger resource specification that custom trigger"
@@ -3409,24 +3381,24 @@ class CustomTrigger(BaseModel):
     ] = None
 
 
-class EmailTrigger(BaseModel):
+class EmailTrigger(APIBaseModel):
     body: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Body refers to the body/content of the email send.\n+optional"),
     ] = None
     from_: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="from",
             title=("From refers to the address from which the email is send from.\n+optional"),
         ),
     ] = None
     host: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Host refers to the smtp host url to which email is send."),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             title=(
                 "Parameters is the list of key-value extracted from event's payload"
@@ -3435,11 +3407,11 @@ class EmailTrigger(BaseModel):
         ),
     ] = None
     port: Annotated[
-        Optional[int],
+        int | None,
         Field(title=("Port refers to the smtp server port to which email is send.\nDefaults to 0.\n+optional")),
     ] = None
     smtp_password: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="smtpPassword",
             title=(
@@ -3449,35 +3421,35 @@ class EmailTrigger(BaseModel):
         ),
     ] = None
     subject: Annotated[
-        Optional[str],
+        str | None,
         Field(title="Subject refers to the subject line for the email send.\n+optional"),
     ] = None
     to: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(title=("To refers to the email addresses to which the emails are send.\n+optional")),
     ] = None
     username: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Username refers to the username used to connect to the smtp server.\n+optional")),
     ] = None
 
 
-class OpenWhiskTrigger(BaseModel):
+class OpenWhiskTrigger(APIBaseModel):
     action_name: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="actionName", description="Name of the action/function."),
     ] = None
     auth_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(alias="authToken", title="AuthToken for authentication.\n+optional"),
     ] = None
-    host: Annotated[Optional[str], Field(description="Host URL of the OpenWhisk.")] = None
+    host: Annotated[str | None, Field(description="Host URL of the OpenWhisk.")] = None
     namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(description='Namespace for the action.\nDefaults to "_".\n+optional.'),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             title=(
                 "Parameters is the list of key-value extracted from event's payload"
@@ -3486,27 +3458,27 @@ class OpenWhiskTrigger(BaseModel):
         ),
     ] = None
     payload: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Payload is the list of key-value extracted from an event payload to construct the request payload."
             )
         ),
     ] = None
-    version: Annotated[Optional[str], Field(title="Version for the API.\nDefaults to v1.\n+optional")] = None
+    version: Annotated[str | None, Field(title="Version for the API.\nDefaults to v1.\n+optional")] = None
 
 
-class EventSourceStatus(BaseModel):
-    status: Optional[Status] = None
+class EventSourceStatus(APIBaseModel):
+    status: Status | None = None
 
 
-class SensorStatus(BaseModel):
-    status: Optional[Status] = None
+class SensorStatus(APIBaseModel):
+    status: Status | None = None
 
 
-class Service(BaseModel):
+class Service(APIBaseModel):
     cluster_ip: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="clusterIP",
             title=(
@@ -3522,7 +3494,7 @@ class Service(BaseModel):
         ),
     ] = None
     metadata: Annotated[
-        Optional[Metadata],
+        Metadata | None,
         Field(
             title=(
                 "Metadata sets the pods's metadata, i.e. annotations and labels\ndefault={annotations: {}, labels: {}}"
@@ -3530,7 +3502,7 @@ class Service(BaseModel):
         ),
     ] = None
     ports: Annotated[
-        Optional[List[v1_1.ServicePort]],
+        list[v1_1.ServicePort] | None,
         Field(
             title=(
                 "The list of ports that are exposed by this ClusterIP"
@@ -3540,9 +3512,9 @@ class Service(BaseModel):
     ] = None
 
 
-class SlackTrigger(BaseModel):
+class SlackTrigger(APIBaseModel):
     attachments: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Attachments is a JSON format string that represents an array of Slack"
@@ -3552,7 +3524,7 @@ class SlackTrigger(BaseModel):
         ),
     ] = None
     blocks: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Blocks is a JSON format string that represents an array of Slack"
@@ -3562,15 +3534,15 @@ class SlackTrigger(BaseModel):
         ),
     ] = None
     channel: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Channel refers to which Slack channel to send Slack message.\n+optional")),
     ] = None
     message: Annotated[
-        Optional[str],
+        str | None,
         Field(title=("Message refers to the message to send to the Slack channel.\n+optional")),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             title=(
                 "Parameters is the list of key-value extracted from event's payload"
@@ -3579,7 +3551,7 @@ class SlackTrigger(BaseModel):
         ),
     ] = None
     sender: Annotated[
-        Optional[SlackSender],
+        SlackSender | None,
         Field(
             title=(
                 "Sender refers to additional configuration of the Slack application that sends the message.\n+optional"
@@ -3587,7 +3559,7 @@ class SlackTrigger(BaseModel):
         ),
     ] = None
     slack_token: Annotated[
-        Optional[v1_1.SecretKeySelector],
+        v1_1.SecretKeySelector | None,
         Field(
             alias="slackToken",
             description=(
@@ -3596,19 +3568,16 @@ class SlackTrigger(BaseModel):
         ),
     ] = None
     thread: Annotated[
-        Optional[SlackThread],
+        SlackThread | None,
         Field(title=("Thread refers to additional options for sending messages to a Slack thread.\n+optional")),
     ] = None
 
 
-class EventDependencyFilter(BaseModel):
-    context: Annotated[Optional[EventContext], Field(title="Context filter constraints")] = None
-    data: Annotated[
-        Optional[List[DataFilter]],
-        Field(title="Data filter constraints with escalation"),
-    ] = None
+class EventDependencyFilter(APIBaseModel):
+    context: Annotated[EventContext | None, Field(title="Context filter constraints")] = None
+    data: Annotated[list[DataFilter] | None, Field(title="Data filter constraints with escalation")] = None
     data_logical_operator: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="dataLogicalOperator",
             description=(
@@ -3619,7 +3588,7 @@ class EventDependencyFilter(BaseModel):
         ),
     ] = None
     expr_logical_operator: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="exprLogicalOperator",
             description=(
@@ -3630,11 +3599,11 @@ class EventDependencyFilter(BaseModel):
         ),
     ] = None
     exprs: Annotated[
-        Optional[List[ExprFilter]],
+        list[ExprFilter] | None,
         Field(description=("Exprs contains the list of expressions evaluated against the event payload.")),
     ] = None
     script: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Script refers to a Lua script evaluated to determine the validity of"
@@ -3642,23 +3611,20 @@ class EventDependencyFilter(BaseModel):
             )
         ),
     ] = None
-    time: Annotated[Optional[TimeFilter], Field(title="Time filter on the event with escalation")] = None
+    time: Annotated[TimeFilter | None, Field(title="Time filter on the event with escalation")] = None
 
 
-class HTTPTrigger(BaseModel):
+class HTTPTrigger(APIBaseModel):
     basic_auth: Annotated[
-        Optional[BasicAuth],
+        BasicAuth | None,
         Field(
             alias="basicAuth",
             title="BasicAuth configuration for the http request.\n+optional",
         ),
     ] = None
-    headers: Annotated[
-        Optional[Dict[str, str]],
-        Field(title="Headers for the HTTP request.\n+optional"),
-    ] = None
+    headers: Annotated[dict[str, str] | None, Field(title="Headers for the HTTP request.\n+optional")] = None
     method: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Method refers to the type of the HTTP request.\nRefer"
@@ -3668,7 +3634,7 @@ class HTTPTrigger(BaseModel):
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(
             description=(
                 "Parameters is the list of key-value extracted from event's payload"
@@ -3676,56 +3642,47 @@ class HTTPTrigger(BaseModel):
             )
         ),
     ] = None
-    payload: Optional[List[TriggerParameter]] = None
+    payload: list[TriggerParameter] | None = None
     secure_headers: Annotated[
-        Optional[List[SecureHeader]],
+        list[SecureHeader] | None,
         Field(
             alias="secureHeaders",
             title=("Secure Headers stored in Kubernetes Secrets for the HTTP requests.\n+optional"),
         ),
     ] = None
     timeout: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=("Timeout refers to the HTTP request timeout in seconds.\nDefault value is 60 seconds.\n+optional")
         ),
     ] = None
     tls: Annotated[
-        Optional[TLSConfig],
+        TLSConfig | None,
         Field(title="TLS configuration for the HTTP client.\n+optional"),
     ] = None
-    url: Annotated[
-        Optional[str],
-        Field(description="URL refers to the URL to send HTTP request to."),
-    ] = None
+    url: Annotated[str | None, Field(description="URL refers to the URL to send HTTP request to.")] = None
 
 
-class Container(BaseModel):
-    env: Annotated[Optional[List[v1_1.EnvVar]], Field(title="+optional")] = None
-    env_from: Annotated[Optional[List[v1_1.EnvFromSource]], Field(alias="envFrom", title="+optional")] = None
-    image_pull_policy: Annotated[Optional[str], Field(alias="imagePullPolicy", title="+optional")] = None
-    resources: Annotated[Optional[v1_1.ResourceRequirements], Field(title="+optional")] = None
-    security_context: Annotated[
-        Optional[v1_1.SecurityContext],
-        Field(alias="securityContext", title="+optional"),
-    ] = None
-    volume_mounts: Annotated[Optional[List[v1_1.VolumeMount]], Field(alias="volumeMounts", title="+optional")] = None
+class Container(APIBaseModel):
+    env: Annotated[list[v1_1.EnvVar] | None, Field(title="+optional")] = None
+    env_from: Annotated[list[v1_1.EnvFromSource] | None, Field(alias="envFrom", title="+optional")] = None
+    image_pull_policy: Annotated[str | None, Field(alias="imagePullPolicy", title="+optional")] = None
+    resources: Annotated[v1_1.ResourceRequirements | None, Field(title="+optional")] = None
+    security_context: Annotated[v1_1.SecurityContext | None, Field(alias="securityContext", title="+optional")] = None
+    volume_mounts: Annotated[list[v1_1.VolumeMount] | None, Field(alias="volumeMounts", title="+optional")] = None
 
 
-class EventDependency(BaseModel):
-    event_name: Annotated[
-        Optional[str],
-        Field(alias="eventName", title="EventName is the name of the event"),
-    ] = None
+class EventDependency(APIBaseModel):
+    event_name: Annotated[str | None, Field(alias="eventName", title="EventName is the name of the event")] = None
     event_source_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="eventSourceName",
             title="EventSourceName is the name of EventSource that Sensor depends on",
         ),
     ] = None
     filters: Annotated[
-        Optional[EventDependencyFilter],
+        EventDependencyFilter | None,
         Field(
             title=(
                 "Filters and rules governing toleration of success and constraints on the context and data of an event"
@@ -3733,7 +3690,7 @@ class EventDependency(BaseModel):
         ),
     ] = None
     filters_logical_operator: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="filtersLogicalOperator",
             description=(
@@ -3743,16 +3700,16 @@ class EventDependency(BaseModel):
             ),
         ),
     ] = None
-    name: Annotated[Optional[str], Field(title="Name is a unique name of this dependency")] = None
+    name: Annotated[str | None, Field(title="Name is a unique name of this dependency")] = None
     transform: Annotated[
-        Optional[EventDependencyTransformer],
+        EventDependencyTransformer | None,
         Field(title="Transform transforms the event data"),
     ] = None
 
 
-class TriggerTemplate(BaseModel):
+class TriggerTemplate(APIBaseModel):
     argo_workflow: Annotated[
-        Optional[ArgoWorkflowTrigger],
+        ArgoWorkflowTrigger | None,
         Field(
             alias="argoWorkflow",
             title=(
@@ -3762,7 +3719,7 @@ class TriggerTemplate(BaseModel):
         ),
     ] = None
     aws_lambda: Annotated[
-        Optional[AWSLambdaTrigger],
+        AWSLambdaTrigger | None,
         Field(
             alias="awsLambda",
             title=(
@@ -3772,21 +3729,21 @@ class TriggerTemplate(BaseModel):
         ),
     ] = None
     azure_event_hubs: Annotated[
-        Optional[AzureEventHubsTrigger],
+        AzureEventHubsTrigger | None,
         Field(
             alias="azureEventHubs",
             title=("AzureEventHubs refers to the trigger send an event to an Azure Event Hub.\n+optional"),
         ),
     ] = None
     azure_service_bus: Annotated[
-        Optional[AzureServiceBusTrigger],
+        AzureServiceBusTrigger | None,
         Field(
             alias="azureServiceBus",
             title=("AzureServiceBus refers to the trigger designed to place messages on Azure Service Bus\n+optional"),
         ),
     ] = None
     conditions: Annotated[
-        Optional[str],
+        str | None,
         Field(
             title=(
                 "Conditions is the conditions to execute the trigger.\nFor example:"
@@ -3795,11 +3752,11 @@ class TriggerTemplate(BaseModel):
         ),
     ] = None
     conditions_reset: Annotated[
-        Optional[List[ConditionsResetCriteria]],
+        list[ConditionsResetCriteria] | None,
         Field(alias="conditionsReset", title="Criteria to reset the conditons\n+optional"),
     ] = None
     custom: Annotated[
-        Optional[CustomTrigger],
+        CustomTrigger | None,
         Field(
             title=(
                 "CustomTrigger refers to the trigger designed to connect to a gRPC"
@@ -3808,11 +3765,11 @@ class TriggerTemplate(BaseModel):
         ),
     ] = None
     email: Annotated[
-        Optional[EmailTrigger],
+        EmailTrigger | None,
         Field(title=("Email refers to the trigger designed to send an email notification\n+optional")),
     ] = None
     http: Annotated[
-        Optional[HTTPTrigger],
+        HTTPTrigger | None,
         Field(
             title=(
                 "HTTP refers to the trigger designed to dispatch a HTTP request with"
@@ -3821,7 +3778,7 @@ class TriggerTemplate(BaseModel):
         ),
     ] = None
     k8s: Annotated[
-        Optional[StandardK8STrigger],
+        StandardK8STrigger | None,
         Field(
             title=(
                 "StandardK8STrigger refers to the trigger designed to create or update"
@@ -3830,40 +3787,40 @@ class TriggerTemplate(BaseModel):
         ),
     ] = None
     kafka: Annotated[
-        Optional[KafkaTrigger],
+        KafkaTrigger | None,
         Field(description=("Kafka refers to the trigger designed to place messages on Kafka topic.\n+optional.")),
     ] = None
     log: Annotated[
-        Optional[LogTrigger],
+        LogTrigger | None,
         Field(
             title=("Log refers to the trigger designed to invoke log the io.argoproj.workflow.v1alpha1.\n+optional")
         ),
     ] = None
-    name: Annotated[Optional[str], Field(description="Name is a unique name of the action to take.")] = None
+    name: Annotated[str | None, Field(description="Name is a unique name of the action to take.")] = None
     nats: Annotated[
-        Optional[NATSTrigger],
+        NATSTrigger | None,
         Field(description=("NATS refers to the trigger designed to place message on NATS subject.\n+optional.")),
     ] = None
     open_whisk: Annotated[
-        Optional[OpenWhiskTrigger],
+        OpenWhiskTrigger | None,
         Field(
             alias="openWhisk",
             title=("OpenWhisk refers to the trigger designed to invoke OpenWhisk action.\n+optional"),
         ),
     ] = None
     pulsar: Annotated[
-        Optional[PulsarTrigger],
+        PulsarTrigger | None,
         Field(title=("Pulsar refers to the trigger designed to place messages on Pulsar topic.\n+optional")),
     ] = None
     slack: Annotated[
-        Optional[SlackTrigger],
+        SlackTrigger | None,
         Field(title=("Slack refers to the trigger designed to send slack notification message.\n+optional")),
     ] = None
 
 
-class Trigger(BaseModel):
+class Trigger(APIBaseModel):
     at_least_once: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="atLeastOnce",
             title=(
@@ -3875,7 +3832,7 @@ class Trigger(BaseModel):
         ),
     ] = None
     dlq_trigger: Annotated[
-        Optional[Trigger],
+        Trigger | None,
         Field(
             alias="dlqTrigger",
             title=(
@@ -3888,41 +3845,41 @@ class Trigger(BaseModel):
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[TriggerParameter]],
+        list[TriggerParameter] | None,
         Field(title=("Parameters is the list of parameters applied to the trigger template definition")),
     ] = None
     policy: Annotated[
-        Optional[TriggerPolicy],
+        TriggerPolicy | None,
         Field(title=("Policy to configure backoff and execution criteria for the trigger\n+optional")),
     ] = None
     rate_limit: Annotated[
-        Optional[RateLimit],
+        RateLimit | None,
         Field(alias="rateLimit", title="Rate limit, default unit is Second\n+optional"),
     ] = None
     retry_strategy: Annotated[
-        Optional[Backoff],
+        Backoff | None,
         Field(
             alias="retryStrategy",
             title="Retry strategy, defaults to no retry\n+optional",
         ),
     ] = None
     template: Annotated[
-        Optional[TriggerTemplate],
+        TriggerTemplate | None,
         Field(description="Template describes the trigger specification."),
     ] = None
 
 
-class Template(BaseModel):
+class Template(APIBaseModel):
     affinity: Annotated[
-        Optional[v1_1.Affinity],
+        v1_1.Affinity | None,
         Field(title="If specified, the pod's scheduling constraints\n+optional"),
     ] = None
     container: Annotated[
-        Optional[Container],
+        Container | None,
         Field(title=("Container is the main container image to run in the sensor pod\n+optional")),
     ] = None
     image_pull_secrets: Annotated[
-        Optional[List[v1_1.LocalObjectReference]],
+        list[v1_1.LocalObjectReference] | None,
         Field(
             alias="imagePullSecrets",
             title=(
@@ -3936,11 +3893,11 @@ class Template(BaseModel):
         ),
     ] = None
     metadata: Annotated[
-        Optional[Metadata],
+        Metadata | None,
         Field(title="Metadata sets the pods's metadata, i.e. annotations and labels"),
     ] = None
     node_selector: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="nodeSelector",
             title=(
@@ -3952,7 +3909,7 @@ class Template(BaseModel):
         ),
     ] = None
     priority: Annotated[
-        Optional[int],
+        int | None,
         Field(
             title=(
                 "The priority value. Various system components use this field to find"
@@ -3966,7 +3923,7 @@ class Template(BaseModel):
         ),
     ] = None
     priority_class_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="priorityClassName",
             title=(
@@ -3981,7 +3938,7 @@ class Template(BaseModel):
         ),
     ] = None
     security_context: Annotated[
-        Optional[v1_1.PodSecurityContext],
+        v1_1.PodSecurityContext | None,
         Field(
             alias="securityContext",
             title=(
@@ -3992,7 +3949,7 @@ class Template(BaseModel):
         ),
     ] = None
     service_account_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serviceAccountName",
             title=(
@@ -4003,11 +3960,11 @@ class Template(BaseModel):
         ),
     ] = None
     tolerations: Annotated[
-        Optional[List[v1_1.Toleration]],
+        list[v1_1.Toleration] | None,
         Field(title="If specified, the pod's tolerations.\n+optional"),
     ] = None
     volumes: Annotated[
-        Optional[List[v1_1.Volume]],
+        list[v1_1.Volume] | None,
         Field(
             title=(
                 "Volumes is a list of volumes that can be mounted by containers in a"
@@ -4017,87 +3974,84 @@ class Template(BaseModel):
     ] = None
 
 
-class EventSourceSpec(BaseModel):
-    amqp: Annotated[Optional[Dict[str, AMQPEventSource]], Field(title="AMQP event sources")] = None
+class EventSourceSpec(APIBaseModel):
+    amqp: Annotated[dict[str, AMQPEventSource] | None, Field(title="AMQP event sources")] = None
     azure_events_hub: Annotated[
-        Optional[Dict[str, AzureEventsHubEventSource]],
+        dict[str, AzureEventsHubEventSource] | None,
         Field(alias="azureEventsHub", title="AzureEventsHub event sources"),
     ] = None
     azure_queue_storage: Annotated[
-        Optional[Dict[str, AzureQueueStorageEventSource]],
+        dict[str, AzureQueueStorageEventSource] | None,
         Field(alias="azureQueueStorage", title="AzureQueueStorage event source"),
     ] = None
     azure_service_bus: Annotated[
-        Optional[Dict[str, AzureServiceBusEventSource]],
+        dict[str, AzureServiceBusEventSource] | None,
         Field(alias="azureServiceBus", title="Azure Service Bus event source"),
     ] = None
-    bitbucket: Annotated[
-        Optional[Dict[str, BitbucketEventSource]],
-        Field(title="Bitbucket event sources"),
-    ] = None
+    bitbucket: Annotated[dict[str, BitbucketEventSource] | None, Field(title="Bitbucket event sources")] = None
     bitbucketserver: Annotated[
-        Optional[Dict[str, BitbucketServerEventSource]],
+        dict[str, BitbucketServerEventSource] | None,
         Field(title="Bitbucket Server event sources"),
     ] = None
-    calendar: Annotated[Optional[Dict[str, CalendarEventSource]], Field(title="Calendar event sources")] = None
-    emitter: Annotated[Optional[Dict[str, EmitterEventSource]], Field(title="Emitter event source")] = None
+    calendar: Annotated[dict[str, CalendarEventSource] | None, Field(title="Calendar event sources")] = None
+    emitter: Annotated[dict[str, EmitterEventSource] | None, Field(title="Emitter event source")] = None
     event_bus_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="eventBusName",
             title=('EventBusName references to a EventBus name. By default the value is "default"'),
         ),
     ] = None
-    file: Annotated[Optional[Dict[str, FileEventSource]], Field(title="File event sources")] = None
-    generic: Annotated[Optional[Dict[str, GenericEventSource]], Field(title="Generic event source")] = None
-    gerrit: Annotated[Optional[Dict[str, GerritEventSource]], Field(title="Gerrit event source")] = None
-    github: Annotated[Optional[Dict[str, GithubEventSource]], Field(title="Github event sources")] = None
-    gitlab: Annotated[Optional[Dict[str, GitlabEventSource]], Field(title="Gitlab event sources")] = None
-    hdfs: Annotated[Optional[Dict[str, HDFSEventSource]], Field(title="HDFS event sources")] = None
-    kafka: Annotated[Optional[Dict[str, KafkaEventSource]], Field(title="Kafka event sources")] = None
-    minio: Annotated[Optional[Dict[str, S3Artifact]], Field(title="Minio event sources")] = None
-    mqtt: Annotated[Optional[Dict[str, MQTTEventSource]], Field(title="MQTT event sources")] = None
-    nats: Annotated[Optional[Dict[str, NATSEventsSource]], Field(title="NATS event sources")] = None
-    nsq: Annotated[Optional[Dict[str, NSQEventSource]], Field(title="NSQ event source")] = None
+    file: Annotated[dict[str, FileEventSource] | None, Field(title="File event sources")] = None
+    generic: Annotated[dict[str, GenericEventSource] | None, Field(title="Generic event source")] = None
+    gerrit: Annotated[dict[str, GerritEventSource] | None, Field(title="Gerrit event source")] = None
+    github: Annotated[dict[str, GithubEventSource] | None, Field(title="Github event sources")] = None
+    gitlab: Annotated[dict[str, GitlabEventSource] | None, Field(title="Gitlab event sources")] = None
+    hdfs: Annotated[dict[str, HDFSEventSource] | None, Field(title="HDFS event sources")] = None
+    kafka: Annotated[dict[str, KafkaEventSource] | None, Field(title="Kafka event sources")] = None
+    minio: Annotated[dict[str, S3Artifact] | None, Field(title="Minio event sources")] = None
+    mqtt: Annotated[dict[str, MQTTEventSource] | None, Field(title="MQTT event sources")] = None
+    nats: Annotated[dict[str, NATSEventsSource] | None, Field(title="NATS event sources")] = None
+    nsq: Annotated[dict[str, NSQEventSource] | None, Field(title="NSQ event source")] = None
     pub_sub: Annotated[
-        Optional[Dict[str, PubSubEventSource]],
+        dict[str, PubSubEventSource] | None,
         Field(alias="pubSub", title="PubSub event sources"),
     ] = None
-    pulsar: Annotated[Optional[Dict[str, PulsarEventSource]], Field(title="Pulsar event source")] = None
-    redis: Annotated[Optional[Dict[str, RedisEventSource]], Field(title="Redis event source")] = None
+    pulsar: Annotated[dict[str, PulsarEventSource] | None, Field(title="Pulsar event source")] = None
+    redis: Annotated[dict[str, RedisEventSource] | None, Field(title="Redis event source")] = None
     redis_stream: Annotated[
-        Optional[Dict[str, RedisStreamEventSource]],
+        dict[str, RedisStreamEventSource] | None,
         Field(alias="redisStream", title="Redis stream source"),
     ] = None
-    replicas: Annotated[Optional[int], Field(title="Replicas is the event source deployment replicas")] = None
-    resource: Annotated[Optional[Dict[str, ResourceEventSource]], Field(title="Resource event sources")] = None
+    replicas: Annotated[int | None, Field(title="Replicas is the event source deployment replicas")] = None
+    resource: Annotated[dict[str, ResourceEventSource] | None, Field(title="Resource event sources")] = None
     service: Annotated[
-        Optional[Service],
+        Service | None,
         Field(title=("Service is the specifications of the service to expose the event source\n+optional")),
     ] = None
-    sftp: Annotated[Optional[Dict[str, SFTPEventSource]], Field(title="SFTP event sources")] = None
-    slack: Annotated[Optional[Dict[str, SlackEventSource]], Field(title="Slack event sources")] = None
-    sns: Annotated[Optional[Dict[str, SNSEventSource]], Field(title="SNS event sources")] = None
-    sqs: Annotated[Optional[Dict[str, SQSEventSource]], Field(title="SQS event sources")] = None
+    sftp: Annotated[dict[str, SFTPEventSource] | None, Field(title="SFTP event sources")] = None
+    slack: Annotated[dict[str, SlackEventSource] | None, Field(title="Slack event sources")] = None
+    sns: Annotated[dict[str, SNSEventSource] | None, Field(title="SNS event sources")] = None
+    sqs: Annotated[dict[str, SQSEventSource] | None, Field(title="SQS event sources")] = None
     storage_grid: Annotated[
-        Optional[Dict[str, StorageGridEventSource]],
+        dict[str, StorageGridEventSource] | None,
         Field(alias="storageGrid", title="StorageGrid event sources"),
     ] = None
-    stripe: Annotated[Optional[Dict[str, StripeEventSource]], Field(title="Stripe event sources")] = None
+    stripe: Annotated[dict[str, StripeEventSource] | None, Field(title="Stripe event sources")] = None
     template: Annotated[
-        Optional[Template],
+        Template | None,
         Field(title="Template is the pod specification for the event source\n+optional"),
     ] = None
-    webhook: Annotated[Optional[Dict[str, WebhookEventSource]], Field(title="Webhook event sources")] = None
+    webhook: Annotated[dict[str, WebhookEventSource] | None, Field(title="Webhook event sources")] = None
 
 
-class SensorSpec(BaseModel):
+class SensorSpec(APIBaseModel):
     dependencies: Annotated[
-        Optional[List[EventDependency]],
+        list[EventDependency] | None,
         Field(description=("Dependencies is a list of the events that this sensor is dependent on.")),
     ] = None
     error_on_failed_round: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="errorOnFailedRound",
             description=(
@@ -4108,33 +4062,33 @@ class SensorSpec(BaseModel):
         ),
     ] = None
     event_bus_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="eventBusName",
             title=('EventBusName references to a EventBus name. By default the value is "default"'),
         ),
     ] = None
     logging_fields: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="loggingFields",
             title=("LoggingFields add additional key-value pairs when logging happens\n+optional"),
         ),
     ] = None
-    replicas: Annotated[Optional[int], Field(title="Replicas is the sensor deployment replicas")] = None
+    replicas: Annotated[int | None, Field(title="Replicas is the sensor deployment replicas")] = None
     revision_history_limit: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="revisionHistoryLimit",
             title=("RevisionHistoryLimit specifies how many old deployment revisions to retain\n+optional"),
         ),
     ] = None
     template: Annotated[
-        Optional[Template],
+        Template | None,
         Field(title="Template is the pod specification for the sensor\n+optional"),
     ] = None
     triggers: Annotated[
-        Optional[List[Trigger]],
+        list[Trigger] | None,
         Field(
             description=(
                 "Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor."
@@ -4143,26 +4097,26 @@ class SensorSpec(BaseModel):
     ] = None
 
 
-class EventSource(BaseModel):
-    metadata: Optional[v1.ObjectMeta] = None
-    spec: Optional[EventSourceSpec] = None
-    status: Annotated[Optional[EventSourceStatus], Field(title="+optional")] = None
+class EventSource(APIBaseModel):
+    metadata: v1.ObjectMeta | None = None
+    spec: EventSourceSpec | None = None
+    status: Annotated[EventSourceStatus | None, Field(title="+optional")] = None
 
 
-class Sensor(BaseModel):
-    metadata: Optional[v1.ObjectMeta] = None
-    spec: Optional[SensorSpec] = None
-    status: Annotated[Optional[SensorStatus], Field(title="+optional")] = None
+class Sensor(APIBaseModel):
+    metadata: v1.ObjectMeta | None = None
+    spec: SensorSpec | None = None
+    status: Annotated[SensorStatus | None, Field(title="+optional")] = None
 
 
-class EventSourceList(BaseModel):
-    items: Optional[List[EventSource]] = None
-    metadata: Optional[v1.ListMeta] = None
+class EventSourceList(APIBaseModel):
+    items: list[EventSource] | None = None
+    metadata: v1.ListMeta | None = None
 
 
-class SensorList(BaseModel):
-    items: Optional[List[Sensor]] = None
-    metadata: Optional[v1.ListMeta] = None
+class SensorList(APIBaseModel):
+    items: list[Sensor] | None = None
+    metadata: v1.ListMeta | None = None
 
 
-Trigger.update_forward_refs()
+Trigger.model_rebuild()

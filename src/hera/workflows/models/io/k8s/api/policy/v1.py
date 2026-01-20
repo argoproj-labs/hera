@@ -3,17 +3,19 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated
 
-from hera.shared._pydantic import BaseModel, Field
+from pydantic import Field
+
+from hera.shared._pydantic import APIBaseModel
 
 from ...apimachinery.pkg.apis.meta import v1
 from ...apimachinery.pkg.util import intstr
 
 
-class PodDisruptionBudgetSpec(BaseModel):
+class PodDisruptionBudgetSpec(APIBaseModel):
     max_unavailable: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(
             alias="maxUnavailable",
             description=(
@@ -26,7 +28,7 @@ class PodDisruptionBudgetSpec(BaseModel):
         ),
     ] = None
     min_available: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(
             alias="minAvailable",
             description=(
@@ -38,7 +40,7 @@ class PodDisruptionBudgetSpec(BaseModel):
         ),
     ] = None
     selector: Annotated[
-        Optional[v1.LabelSelector],
+        v1.LabelSelector | None,
         Field(
             description=(
                 "Label query over pods whose evictions are managed by the disruption"
@@ -48,7 +50,7 @@ class PodDisruptionBudgetSpec(BaseModel):
         ),
     ] = None
     unhealthy_pod_eviction_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="unhealthyPodEvictionPolicy",
             description=(

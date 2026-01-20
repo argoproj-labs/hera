@@ -3,48 +3,50 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated
 
-from hera.shared._pydantic import BaseModel, Field
+from pydantic import Field
+
+from hera.shared._pydantic import APIBaseModel
 
 from .github.com.argoproj.argo_events.pkg.apis.events import v1alpha1
 from .io.k8s.apimachinery.pkg.apis.meta import v1
 
 
-class EventSourceDeletedResponse(BaseModel):
+class EventSourceDeletedResponse(APIBaseModel):
     pass
 
 
-class LogEntry(BaseModel):
+class LogEntry(APIBaseModel):
     event_name: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="eventName", title="optional - the event name (e.g. `example`)"),
     ] = None
-    event_source_name: Annotated[Optional[str], Field(alias="eventSourceName")] = None
+    event_source_name: Annotated[str | None, Field(alias="eventSourceName")] = None
     event_source_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="eventSourceType",
             title="optional - the event source type (e.g. `webhook`)",
         ),
     ] = None
-    level: Optional[str] = None
-    msg: Optional[str] = None
-    namespace: Optional[str] = None
-    time: Optional[v1.Time] = None
+    level: str | None = None
+    msg: str | None = None
+    namespace: str | None = None
+    time: v1.Time | None = None
 
 
-class CreateEventSourceRequest(BaseModel):
-    event_source: Annotated[Optional[v1alpha1.EventSource], Field(alias="eventSource")] = None
-    namespace: Optional[str] = None
+class CreateEventSourceRequest(APIBaseModel):
+    event_source: Annotated[v1alpha1.EventSource | None, Field(alias="eventSource")] = None
+    namespace: str | None = None
 
 
-class EventSourceWatchEvent(BaseModel):
-    object: Optional[v1alpha1.EventSource] = None
-    type: Optional[str] = None
+class EventSourceWatchEvent(APIBaseModel):
+    object: v1alpha1.EventSource | None = None
+    type: str | None = None
 
 
-class UpdateEventSourceRequest(BaseModel):
-    event_source: Annotated[Optional[v1alpha1.EventSource], Field(alias="eventSource")] = None
-    name: Optional[str] = None
-    namespace: Optional[str] = None
+class UpdateEventSourceRequest(APIBaseModel):
+    event_source: Annotated[v1alpha1.EventSource | None, Field(alias="eventSource")] = None
+    name: str | None = None
+    namespace: str | None = None

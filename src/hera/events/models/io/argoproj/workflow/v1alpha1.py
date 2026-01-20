@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any
 
-from hera.shared._pydantic import BaseModel, Field
+from pydantic import Base64Str, Field, RootModel
+
+from hera.shared._pydantic import APIBaseModel
 
 from ...k8s.api.core import v1
 from ...k8s.api.policy import v1 as v1_2
@@ -13,17 +15,17 @@ from ...k8s.apimachinery.pkg.apis.meta import v1 as v1_1
 from ...k8s.apimachinery.pkg.util import intstr
 
 
-class Amount(BaseModel):
-    __root__: Annotated[float, Field(description="Amount represent a numeric amount.")]
+class Amount(RootModel[float]):
+    root: Annotated[float, Field(description="Amount represent a numeric amount.")]
 
 
-class NoneStrategy(BaseModel):
+class NoneStrategy(APIBaseModel):
     pass
 
 
-class TarStrategy(BaseModel):
+class TarStrategy(APIBaseModel):
     compression_level: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="compressionLevel",
             description=(
@@ -34,24 +36,24 @@ class TarStrategy(BaseModel):
     ] = None
 
 
-class ZipStrategy(BaseModel):
+class ZipStrategy(APIBaseModel):
     pass
 
 
-class ArchivedWorkflowDeletedResponse(BaseModel):
+class ArchivedWorkflowDeletedResponse(APIBaseModel):
     pass
 
 
-class ArtGCStatus(BaseModel):
+class ArtGCStatus(APIBaseModel):
     not_specified: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="notSpecified",
             description=("if this is true, we already checked to see if we need to do it and we don't"),
         ),
     ] = None
     pods_recouped: Annotated[
-        Optional[Dict[str, bool]],
+        dict[str, bool] | None,
         Field(
             alias="podsRecouped",
             description=(
@@ -61,7 +63,7 @@ class ArtGCStatus(BaseModel):
         ),
     ] = None
     strategies_processed: Annotated[
-        Optional[Dict[str, bool]],
+        dict[str, bool] | None,
         Field(
             alias="strategiesProcessed",
             description=(
@@ -72,25 +74,25 @@ class ArtGCStatus(BaseModel):
     ] = None
 
 
-class RawArtifact(BaseModel):
+class RawArtifact(APIBaseModel):
     data: Annotated[str, Field(description="Data is the string contents of the artifact")]
 
 
-class Metadata(BaseModel):
-    annotations: Optional[Dict[str, str]] = None
-    labels: Optional[Dict[str, str]] = None
+class Metadata(APIBaseModel):
+    annotations: dict[str, str] | None = None
+    labels: dict[str, str] | None = None
 
 
-class ArtifactRepositoryRef(BaseModel):
+class ArtifactRepositoryRef(APIBaseModel):
     config_map: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="configMap",
             description=('The name of the config map. Defaults to "artifact-repositories".'),
         ),
     ] = None
     key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "The config map key. Defaults to the value of the"
@@ -100,19 +102,19 @@ class ArtifactRepositoryRef(BaseModel):
     ] = None
 
 
-class ClusterWorkflowTemplateDeleteResponse(BaseModel):
+class ClusterWorkflowTemplateDeleteResponse(APIBaseModel):
     pass
 
 
-class CollectEventRequest(BaseModel):
-    name: Optional[str] = None
+class CollectEventRequest(APIBaseModel):
+    name: str | None = None
 
 
-class CollectEventResponse(BaseModel):
+class CollectEventResponse(APIBaseModel):
     pass
 
 
-class Column(BaseModel):
+class Column(APIBaseModel):
     key: Annotated[
         str,
         Field(description=('The key of the label or annotation, e.g., "workflows.argoproj.io/completed".')),
@@ -121,38 +123,38 @@ class Column(BaseModel):
     type: Annotated[str, Field(description='The type of this column, "label" or "annotation".')]
 
 
-class Condition(BaseModel):
-    message: Annotated[Optional[str], Field(description="Message is the condition message")] = None
-    status: Annotated[Optional[str], Field(description="Status is the status of the condition")] = None
-    type: Annotated[Optional[str], Field(description="Type is the type of condition")] = None
+class Condition(APIBaseModel):
+    message: Annotated[str | None, Field(description="Message is the condition message")] = None
+    status: Annotated[str | None, Field(description="Status is the status of the condition")] = None
+    type: Annotated[str | None, Field(description="Type is the type of condition")] = None
 
 
-class ContinueOn(BaseModel):
-    error: Optional[bool] = None
-    failed: Optional[bool] = None
+class ContinueOn(APIBaseModel):
+    error: bool | None = None
+    failed: bool | None = None
 
 
-class Counter(BaseModel):
+class Counter(APIBaseModel):
     value: Annotated[str, Field(description="Value is the value of the metric")]
 
 
-class CreateS3BucketOptions(BaseModel):
+class CreateS3BucketOptions(APIBaseModel):
     object_locking: Annotated[
-        Optional[bool],
+        bool | None,
         Field(alias="objectLocking", description="ObjectLocking Enable object locking"),
     ] = None
 
 
-class CronWorkflowDeletedResponse(BaseModel):
+class CronWorkflowDeletedResponse(APIBaseModel):
     pass
 
 
-class CronWorkflowResumeRequest(BaseModel):
-    name: Optional[str] = None
-    namespace: Optional[str] = None
+class CronWorkflowResumeRequest(APIBaseModel):
+    name: str | None = None
+    namespace: str | None = None
 
 
-class StopStrategy(BaseModel):
+class StopStrategy(APIBaseModel):
     expression: Annotated[
         str,
         Field(
@@ -166,14 +168,14 @@ class StopStrategy(BaseModel):
     ]
 
 
-class CronWorkflowSuspendRequest(BaseModel):
-    name: Optional[str] = None
-    namespace: Optional[str] = None
+class CronWorkflowSuspendRequest(APIBaseModel):
+    name: str | None = None
+    namespace: str | None = None
 
 
-class TemplateRef(BaseModel):
+class TemplateRef(APIBaseModel):
     cluster_scope: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="clusterScope",
             description=(
@@ -181,14 +183,14 @@ class TemplateRef(BaseModel):
             ),
         ),
     ] = None
-    name: Annotated[Optional[str], Field(description="Name is the resource name of the template.")] = None
+    name: Annotated[str | None, Field(description="Name is the resource name of the template.")] = None
     template: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Template is the name of referred template in the resource."),
     ] = None
 
 
-class Event(BaseModel):
+class Event(APIBaseModel):
     selector: Annotated[
         str,
         Field(
@@ -200,13 +202,13 @@ class Event(BaseModel):
     ]
 
 
-class EventResponse(BaseModel):
+class EventResponse(APIBaseModel):
     pass
 
 
-class ExecutorConfig(BaseModel):
+class ExecutorConfig(APIBaseModel):
     service_account_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serviceAccountName",
             description=("ServiceAccountName specifies the service account name of the executor container."),
@@ -214,9 +216,9 @@ class ExecutorConfig(BaseModel):
     ] = None
 
 
-class Gauge(BaseModel):
+class Gauge(APIBaseModel):
     operation: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Operation defines the operation to apply with value and the metrics' current value")),
     ] = None
     realtime: Annotated[bool, Field(description="Realtime emits this metric in real time if applicable")]
@@ -232,36 +234,36 @@ class Gauge(BaseModel):
     ]
 
 
-class GetUserInfoResponse(BaseModel):
-    email: Optional[str] = None
-    email_verified: Annotated[Optional[bool], Field(alias="emailVerified")] = None
-    groups: Optional[List[str]] = None
-    issuer: Optional[str] = None
-    name: Optional[str] = None
-    service_account_name: Annotated[Optional[str], Field(alias="serviceAccountName")] = None
-    service_account_namespace: Annotated[Optional[str], Field(alias="serviceAccountNamespace")] = None
-    subject: Optional[str] = None
+class GetUserInfoResponse(APIBaseModel):
+    email: str | None = None
+    email_verified: Annotated[bool | None, Field(alias="emailVerified")] = None
+    groups: list[str] | None = None
+    issuer: str | None = None
+    name: str | None = None
+    service_account_name: Annotated[str | None, Field(alias="serviceAccountName")] = None
+    service_account_namespace: Annotated[str | None, Field(alias="serviceAccountNamespace")] = None
+    subject: str | None = None
 
 
-class HTTPBodySource(BaseModel):
-    bytes: Optional[str] = None
+class HTTPBodySource(APIBaseModel):
+    bytes: Base64Str | None = None
 
 
-class Header(BaseModel):
+class Header(APIBaseModel):
     name: Annotated[str, Field(description="Name is the header name")]
     value: Annotated[str, Field(description="Value is the literal value to use for the header")]
 
 
-class Histogram(BaseModel):
+class Histogram(APIBaseModel):
     buckets: Annotated[
-        List[Amount],
+        list[Amount],
         Field(description="Buckets is a list of bucket divisors for the histogram"),
     ]
     value: Annotated[str, Field(description="Value is the value of the metric")]
 
 
-class Item(BaseModel):
-    __root__: Annotated[
+class Item(RootModel[Any]):
+    root: Annotated[
         Any,
         Field(
             description=(
@@ -272,19 +274,19 @@ class Item(BaseModel):
     ]
 
 
-class LabelKeys(BaseModel):
-    items: Optional[List[str]] = None
+class LabelKeys(APIBaseModel):
+    items: list[str] | None = None
 
 
-class LabelValueFrom(BaseModel):
+class LabelValueFrom(APIBaseModel):
     expression: str
 
 
-class LabelValues(BaseModel):
-    items: Optional[List[str]] = None
+class LabelValues(APIBaseModel):
+    items: list[str] | None = None
 
 
-class Link(BaseModel):
+class Link(APIBaseModel):
     name: Annotated[
         str,
         Field(description='The name of the link, E.g. "Workflow Logs" or "Pod Logs"'),
@@ -310,12 +312,12 @@ class Link(BaseModel):
     ]
 
 
-class LogEntry(BaseModel):
-    content: Optional[str] = None
-    pod_name: Annotated[Optional[str], Field(alias="podName")] = None
+class LogEntry(APIBaseModel):
+    content: str | None = None
+    pod_name: Annotated[str | None, Field(alias="podName")] = None
 
 
-class MemoizationStatus(BaseModel):
+class MemoizationStatus(APIBaseModel):
     cache_name: Annotated[
         str,
         Field(
@@ -330,26 +332,26 @@ class MemoizationStatus(BaseModel):
     key: Annotated[str, Field(description="Key is the name of the key used for this node's cache")]
 
 
-class MetricLabel(BaseModel):
+class MetricLabel(APIBaseModel):
     key: str
     value: str
 
 
-class Mutex(BaseModel):
+class Mutex(APIBaseModel):
     database: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("Database specifies this is database controlled if this is set true")),
     ] = None
-    name: Annotated[Optional[str], Field(description="name of the mutex")] = None
+    name: Annotated[str | None, Field(description="name of the mutex")] = None
     namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Namespace is the namespace of the mutex, default: [namespace of workflow]")),
     ] = None
 
 
-class MutexHolding(BaseModel):
+class MutexHolding(APIBaseModel):
     holder: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Holder is a reference to the object which holds the Mutex. Holding"
@@ -361,14 +363,14 @@ class MutexHolding(BaseModel):
         ),
     ] = None
     mutex: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Reference for the mutex e.g: ${namespace}/mutex/${mutexName}"),
     ] = None
 
 
-class MutexStatus(BaseModel):
+class MutexStatus(APIBaseModel):
     holding: Annotated[
-        Optional[List[MutexHolding]],
+        list[MutexHolding] | None,
         Field(
             description=(
                 "Holding is a list of mutexes and their respective objects that are"
@@ -377,47 +379,47 @@ class MutexStatus(BaseModel):
         ),
     ] = None
     waiting: Annotated[
-        Optional[List[MutexHolding]],
+        list[MutexHolding] | None,
         Field(description=("Waiting is a list of mutexes and their respective objects this workflow is waiting for.")),
     ] = None
 
 
-class NodeFlag(BaseModel):
+class NodeFlag(APIBaseModel):
     hooked: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("Hooked tracks whether or not this node was triggered by hook or onExit")),
     ] = None
     retried: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("Retried tracks whether or not this node was retried by retryStrategy")),
     ] = None
 
 
-class NodeSynchronizationStatus(BaseModel):
+class NodeSynchronizationStatus(APIBaseModel):
     waiting: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Waiting is the name of the lock that this node is waiting for"),
     ] = None
 
 
-class OAuth2EndpointParam(BaseModel):
+class OAuth2EndpointParam(APIBaseModel):
     key: Annotated[str, Field(description="Name is the header name")]
     value: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Value is the literal value to use for the header"),
     ] = None
 
 
-class OSSLifecycleRule(BaseModel):
+class OSSLifecycleRule(APIBaseModel):
     mark_deletion_after_days: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="markDeletionAfterDays",
             description=("MarkDeletionAfterDays is the number of days before we delete objects in the bucket"),
         ),
     ] = None
     mark_infrequent_access_after_days: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="markInfrequentAccessAfterDays",
             description=(
@@ -428,57 +430,57 @@ class OSSLifecycleRule(BaseModel):
     ] = None
 
 
-class Plugin(BaseModel):
+class Plugin(APIBaseModel):
     pass
 
 
-class ResubmitArchivedWorkflowRequest(BaseModel):
-    memoized: Optional[bool] = None
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    parameters: Optional[List[str]] = None
-    uid: Optional[str] = None
+class ResubmitArchivedWorkflowRequest(APIBaseModel):
+    memoized: bool | None = None
+    name: str | None = None
+    namespace: str | None = None
+    parameters: list[str] | None = None
+    uid: str | None = None
 
 
-class RetryNodeAntiAffinity(BaseModel):
+class RetryNodeAntiAffinity(APIBaseModel):
     pass
 
 
-class RetryArchivedWorkflowRequest(BaseModel):
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    node_field_selector: Annotated[Optional[str], Field(alias="nodeFieldSelector")] = None
-    parameters: Optional[List[str]] = None
-    restart_successful: Annotated[Optional[bool], Field(alias="restartSuccessful")] = None
-    uid: Optional[str] = None
+class RetryArchivedWorkflowRequest(APIBaseModel):
+    name: str | None = None
+    namespace: str | None = None
+    node_field_selector: Annotated[str | None, Field(alias="nodeFieldSelector")] = None
+    parameters: list[str] | None = None
+    restart_successful: Annotated[bool | None, Field(alias="restartSuccessful")] = None
+    uid: str | None = None
 
 
-class SemaphoreHolding(BaseModel):
+class SemaphoreHolding(APIBaseModel):
     holders: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(description=("Holders stores the list of current holder names in the io.argoproj.workflow.v1alpha1.")),
     ] = None
-    semaphore: Annotated[Optional[str], Field(description="Semaphore stores the semaphore name.")] = None
+    semaphore: Annotated[str | None, Field(description="Semaphore stores the semaphore name.")] = None
 
 
-class SyncDatabaseRef(BaseModel):
+class SyncDatabaseRef(APIBaseModel):
     key: str
 
 
-class SemaphoreStatus(BaseModel):
+class SemaphoreStatus(APIBaseModel):
     holding: Annotated[
-        Optional[List[SemaphoreHolding]],
+        list[SemaphoreHolding] | None,
         Field(description=("Holding stores the list of resource acquired synchronization lock for workflows.")),
     ] = None
     waiting: Annotated[
-        Optional[List[SemaphoreHolding]],
+        list[SemaphoreHolding] | None,
         Field(description=("Waiting indicates the list of current synchronization lock holders.")),
     ] = None
 
 
-class WorkflowTemplateRef(BaseModel):
+class WorkflowTemplateRef(APIBaseModel):
     cluster_scope: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="clusterScope",
             description=(
@@ -487,18 +489,18 @@ class WorkflowTemplateRef(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Name is the resource name of the workflow template."),
     ] = None
 
 
-class SuppliedValueFrom(BaseModel):
+class SuppliedValueFrom(APIBaseModel):
     pass
 
 
-class SuspendTemplate(BaseModel):
+class SuspendTemplate(APIBaseModel):
     duration: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Duration is the seconds to wait before automatically resuming a"
@@ -509,23 +511,23 @@ class SuspendTemplate(BaseModel):
     ] = None
 
 
-class TTLStrategy(BaseModel):
+class TTLStrategy(APIBaseModel):
     seconds_after_completion: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="secondsAfterCompletion",
             description=("SecondsAfterCompletion is the number of seconds to live after completion"),
         ),
     ] = None
     seconds_after_failure: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="secondsAfterFailure",
             description=("SecondsAfterFailure is the number of seconds to live after failure"),
         ),
     ] = None
     seconds_after_success: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="secondsAfterSuccess",
             description=("SecondsAfterSuccess is the number of seconds to live after success"),
@@ -533,11 +535,11 @@ class TTLStrategy(BaseModel):
     ] = None
 
 
-class TransformationStep(BaseModel):
+class TransformationStep(APIBaseModel):
     expression: Annotated[str, Field(description="Expression defines an expr expression to apply")]
 
 
-class Version(BaseModel):
+class Version(APIBaseModel):
     build_date: Annotated[str, Field(alias="buildDate")]
     compiler: str
     git_commit: Annotated[str, Field(alias="gitCommit")]
@@ -548,9 +550,9 @@ class Version(BaseModel):
     version: str
 
 
-class VolumeClaimGC(BaseModel):
+class VolumeClaimGC(APIBaseModel):
     strategy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 'Strategy is the strategy to use. One of "OnWorkflowCompletion",'
@@ -560,89 +562,89 @@ class VolumeClaimGC(BaseModel):
     ] = None
 
 
-class WorkflowDeleteResponse(BaseModel):
+class WorkflowDeleteResponse(APIBaseModel):
     pass
 
 
-class WorkflowMetadata(BaseModel):
-    annotations: Optional[Dict[str, str]] = None
-    labels: Optional[Dict[str, str]] = None
-    labels_from: Annotated[Optional[Dict[str, LabelValueFrom]], Field(alias="labelsFrom")] = None
+class WorkflowMetadata(APIBaseModel):
+    annotations: dict[str, str] | None = None
+    labels: dict[str, str] | None = None
+    labels_from: Annotated[dict[str, LabelValueFrom] | None, Field(alias="labelsFrom")] = None
 
 
-class WorkflowResubmitRequest(BaseModel):
-    memoized: Optional[bool] = None
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    parameters: Optional[List[str]] = None
+class WorkflowResubmitRequest(APIBaseModel):
+    memoized: bool | None = None
+    name: str | None = None
+    namespace: str | None = None
+    parameters: list[str] | None = None
 
 
-class WorkflowResumeRequest(BaseModel):
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    node_field_selector: Annotated[Optional[str], Field(alias="nodeFieldSelector")] = None
+class WorkflowResumeRequest(APIBaseModel):
+    name: str | None = None
+    namespace: str | None = None
+    node_field_selector: Annotated[str | None, Field(alias="nodeFieldSelector")] = None
 
 
-class WorkflowRetryRequest(BaseModel):
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    node_field_selector: Annotated[Optional[str], Field(alias="nodeFieldSelector")] = None
-    parameters: Optional[List[str]] = None
-    restart_successful: Annotated[Optional[bool], Field(alias="restartSuccessful")] = None
+class WorkflowRetryRequest(APIBaseModel):
+    name: str | None = None
+    namespace: str | None = None
+    node_field_selector: Annotated[str | None, Field(alias="nodeFieldSelector")] = None
+    parameters: list[str] | None = None
+    restart_successful: Annotated[bool | None, Field(alias="restartSuccessful")] = None
 
 
-class WorkflowSetRequest(BaseModel):
-    message: Optional[str] = None
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    node_field_selector: Annotated[Optional[str], Field(alias="nodeFieldSelector")] = None
-    output_parameters: Annotated[Optional[str], Field(alias="outputParameters")] = None
-    phase: Optional[str] = None
+class WorkflowSetRequest(APIBaseModel):
+    message: str | None = None
+    name: str | None = None
+    namespace: str | None = None
+    node_field_selector: Annotated[str | None, Field(alias="nodeFieldSelector")] = None
+    output_parameters: Annotated[str | None, Field(alias="outputParameters")] = None
+    phase: str | None = None
 
 
-class WorkflowStopRequest(BaseModel):
-    message: Optional[str] = None
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    node_field_selector: Annotated[Optional[str], Field(alias="nodeFieldSelector")] = None
+class WorkflowStopRequest(APIBaseModel):
+    message: str | None = None
+    name: str | None = None
+    namespace: str | None = None
+    node_field_selector: Annotated[str | None, Field(alias="nodeFieldSelector")] = None
 
 
-class WorkflowSuspendRequest(BaseModel):
-    name: Optional[str] = None
-    namespace: Optional[str] = None
+class WorkflowSuspendRequest(APIBaseModel):
+    name: str | None = None
+    namespace: str | None = None
 
 
-class WorkflowTemplateDeleteResponse(BaseModel):
+class WorkflowTemplateDeleteResponse(APIBaseModel):
     pass
 
 
-class WorkflowTerminateRequest(BaseModel):
-    name: Optional[str] = None
-    namespace: Optional[str] = None
+class WorkflowTerminateRequest(APIBaseModel):
+    name: str | None = None
+    namespace: str | None = None
 
 
-class CronWorkflowStatus(BaseModel):
+class CronWorkflowStatus(APIBaseModel):
     active: Annotated[
-        Optional[List[v1.ObjectReference]],
+        list[v1.ObjectReference] | None,
         Field(description=("Active is a list of active workflows stemming from this CronWorkflow")),
     ] = None
     conditions: Annotated[
-        Optional[List[Condition]],
+        list[Condition] | None,
         Field(description="Conditions is a list of conditions the CronWorkflow may have"),
     ] = None
     failed: Annotated[
-        Optional[int],
+        int | None,
         Field(description=("v3.6 and after: Failed counts how many times child workflows failed")),
     ] = None
     last_scheduled_time: Annotated[
-        Optional[v1_1.Time],
+        v1_1.Time | None,
         Field(
             alias="lastScheduledTime",
             description=("LastScheduleTime is the last time the CronWorkflow was scheduled"),
         ),
     ] = None
     phase: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "v3.6 and after: Phase is an enum of Active or Stopped. It changes to"
@@ -651,14 +653,14 @@ class CronWorkflowStatus(BaseModel):
         ),
     ] = None
     succeeded: Annotated[
-        Optional[int],
+        int | None,
         Field(description=("v3.6 and after: Succeeded counts how many times child workflows succeeded")),
     ] = None
 
 
-class ArtifactoryArtifact(BaseModel):
+class ArtifactoryArtifact(APIBaseModel):
     password_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="passwordSecret",
             description=("PasswordSecret is the secret selector to the repository password"),
@@ -666,7 +668,7 @@ class ArtifactoryArtifact(BaseModel):
     ] = None
     url: Annotated[str, Field(description="URL of the artifact")]
     username_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="usernameSecret",
             description=("UsernameSecret is the secret selector to the repository username"),
@@ -674,27 +676,27 @@ class ArtifactoryArtifact(BaseModel):
     ] = None
 
 
-class ArtifactoryArtifactRepository(BaseModel):
+class ArtifactoryArtifactRepository(APIBaseModel):
     key_format: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="keyFormat",
             description=("KeyFormat defines the format of how to store keys and can reference workflow variables."),
         ),
     ] = None
     password_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="passwordSecret",
             description=("PasswordSecret is the secret selector to the repository password"),
         ),
     ] = None
     repo_url: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="repoURL", description="RepoURL is the url for artifactory repo."),
     ] = None
     username_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="usernameSecret",
             description=("UsernameSecret is the secret selector to the repository username"),
@@ -702,9 +704,9 @@ class ArtifactoryArtifactRepository(BaseModel):
     ] = None
 
 
-class AzureArtifact(BaseModel):
+class AzureArtifact(APIBaseModel):
     account_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="accountKeySecret",
             description=("AccountKeySecret is the secret selector to the Azure Blob Storage account access key"),
@@ -728,7 +730,7 @@ class AzureArtifact(BaseModel):
         ),
     ]
     use_sdk_creds: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="useSDKCreds",
             description=("UseSDKCreds tells the driver to figure out credentials based on sdk defaults."),
@@ -736,16 +738,16 @@ class AzureArtifact(BaseModel):
     ] = None
 
 
-class AzureArtifactRepository(BaseModel):
+class AzureArtifactRepository(APIBaseModel):
     account_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="accountKeySecret",
             description=("AccountKeySecret is the secret selector to the Azure Blob Storage account access key"),
         ),
     ] = None
     blob_name_format: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="blobNameFormat",
             description=(
@@ -767,7 +769,7 @@ class AzureArtifactRepository(BaseModel):
         ),
     ]
     use_sdk_creds: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="useSDKCreds",
             description=("UseSDKCreds tells the driver to figure out credentials based on sdk defaults."),
@@ -775,16 +777,16 @@ class AzureArtifactRepository(BaseModel):
     ] = None
 
 
-class BasicAuth(BaseModel):
+class BasicAuth(APIBaseModel):
     password_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="passwordSecret",
             description=("PasswordSecret is the secret selector to the repository password"),
         ),
     ] = None
     username_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="usernameSecret",
             description=("UsernameSecret is the secret selector to the repository username"),
@@ -792,19 +794,19 @@ class BasicAuth(BaseModel):
     ] = None
 
 
-class ClientCertAuth(BaseModel):
-    client_cert_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientCertSecret")] = None
-    client_key_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientKeySecret")] = None
+class ClientCertAuth(APIBaseModel):
+    client_cert_secret: Annotated[v1.SecretKeySelector | None, Field(alias="clientCertSecret")] = None
+    client_key_secret: Annotated[v1.SecretKeySelector | None, Field(alias="clientKeySecret")] = None
 
 
-class GCSArtifact(BaseModel):
-    bucket: Annotated[Optional[str], Field(description="Bucket is the name of the bucket")] = None
+class GCSArtifact(APIBaseModel):
+    bucket: Annotated[str | None, Field(description="Bucket is the name of the bucket")] = None
     key: Annotated[
         str,
         Field(description="Key is the path in the bucket where the artifact resides"),
     ]
     service_account_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="serviceAccountKeySecret",
             description=("ServiceAccountKeySecret is the secret selector to the bucket's service account key"),
@@ -812,17 +814,17 @@ class GCSArtifact(BaseModel):
     ] = None
 
 
-class GCSArtifactRepository(BaseModel):
-    bucket: Annotated[Optional[str], Field(description="Bucket is the name of the bucket")] = None
+class GCSArtifactRepository(APIBaseModel):
+    bucket: Annotated[str | None, Field(description="Bucket is the name of the bucket")] = None
     key_format: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="keyFormat",
             description=("KeyFormat defines the format of how to store keys and can reference workflow variables."),
         ),
     ] = None
     service_account_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="serviceAccountKeySecret",
             description=("ServiceAccountKeySecret is the secret selector to the bucket's service account key"),
@@ -830,13 +832,13 @@ class GCSArtifactRepository(BaseModel):
     ] = None
 
 
-class GitArtifact(BaseModel):
+class GitArtifact(APIBaseModel):
     branch: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Branch is the branch to fetch when `SingleBranch` is enabled"),
     ] = None
     depth: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "Depth specifies clones/fetches should be shallow and include the given"
@@ -845,25 +847,25 @@ class GitArtifact(BaseModel):
         ),
     ] = None
     disable_submodules: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="disableSubmodules",
             description="DisableSubmodules disables submodules during git clone",
         ),
     ] = None
     fetch: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(description=("Fetch specifies a number of refs that should be fetched before checkout")),
     ] = None
     insecure_ignore_host_key: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="insecureIgnoreHostKey",
             description=("InsecureIgnoreHostKey disables SSH strict host key checking during git clone"),
         ),
     ] = None
     insecure_skip_tls: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="insecureSkipTLS",
             description=(
@@ -872,7 +874,7 @@ class GitArtifact(BaseModel):
         ),
     ] = None
     password_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="passwordSecret",
             description=("PasswordSecret is the secret selector to the repository password"),
@@ -880,25 +882,25 @@ class GitArtifact(BaseModel):
     ] = None
     repo: Annotated[str, Field(description="Repo is the git repository")]
     revision: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Revision is the git commit, tag, branch to checkout"),
     ] = None
     single_branch: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="singleBranch",
             description=("SingleBranch enables single branch clone, using the `branch` parameter"),
         ),
     ] = None
     ssh_private_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="sshPrivateKeySecret",
             description=("SSHPrivateKeySecret is the secret selector to the repository ssh private key"),
         ),
     ] = None
     username_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="usernameSecret",
             description=("UsernameSecret is the secret selector to the repository username"),
@@ -906,21 +908,21 @@ class GitArtifact(BaseModel):
     ] = None
 
 
-class HTTPHeaderSource(BaseModel):
-    secret_key_ref: Annotated[Optional[v1.SecretKeySelector], Field(alias="secretKeyRef")] = None
+class HTTPHeaderSource(APIBaseModel):
+    secret_key_ref: Annotated[v1.SecretKeySelector | None, Field(alias="secretKeyRef")] = None
 
 
-class OAuth2Auth(BaseModel):
-    client_id_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientIDSecret")] = None
-    client_secret_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientSecretSecret")] = None
-    endpoint_params: Annotated[Optional[List[OAuth2EndpointParam]], Field(alias="endpointParams")] = None
-    scopes: Optional[List[str]] = None
-    token_url_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="tokenURLSecret")] = None
+class OAuth2Auth(APIBaseModel):
+    client_id_secret: Annotated[v1.SecretKeySelector | None, Field(alias="clientIDSecret")] = None
+    client_secret_secret: Annotated[v1.SecretKeySelector | None, Field(alias="clientSecretSecret")] = None
+    endpoint_params: Annotated[list[OAuth2EndpointParam] | None, Field(alias="endpointParams")] = None
+    scopes: list[str] | None = None
+    token_url_secret: Annotated[v1.SecretKeySelector | None, Field(alias="tokenURLSecret")] = None
 
 
-class S3EncryptionOptions(BaseModel):
+class S3EncryptionOptions(APIBaseModel):
     enable_encryption: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="enableEncryption",
             description=(
@@ -931,7 +933,7 @@ class S3EncryptionOptions(BaseModel):
         ),
     ] = None
     kms_encryption_context: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="kmsEncryptionContext",
             description=(
@@ -943,14 +945,14 @@ class S3EncryptionOptions(BaseModel):
         ),
     ] = None
     kms_key_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="kmsKeyId",
             description=("KMSKeyId tells the driver to encrypt the object using the specified KMS Key."),
         ),
     ] = None
     server_side_customer_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="serverSideCustomerKeySecret",
             description=(
@@ -961,20 +963,20 @@ class S3EncryptionOptions(BaseModel):
     ] = None
 
 
-class Cache(BaseModel):
+class Cache(APIBaseModel):
     config_map: Annotated[
         v1.ConfigMapKeySelector,
         Field(alias="configMap", description="ConfigMap sets a ConfigMap-based cache"),
     ]
 
 
-class HDFSArtifact(BaseModel):
+class HDFSArtifact(APIBaseModel):
     addresses: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(description="Addresses is accessible addresses of HDFS name nodes"),
     ] = None
     data_transfer_protection: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="dataTransferProtection",
             description=(
@@ -984,12 +986,9 @@ class HDFSArtifact(BaseModel):
             ),
         ),
     ] = None
-    force: Annotated[
-        Optional[bool],
-        Field(description="Force copies a file forcibly even if it exists"),
-    ] = None
+    force: Annotated[bool | None, Field(description="Force copies a file forcibly even if it exists")] = None
     hdfs_user: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="hdfsUser",
             description=(
@@ -998,7 +997,7 @@ class HDFSArtifact(BaseModel):
         ),
     ] = None
     krb_c_cache_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="krbCCacheSecret",
             description=(
@@ -1008,7 +1007,7 @@ class HDFSArtifact(BaseModel):
         ),
     ] = None
     krb_config_config_map: Annotated[
-        Optional[v1.ConfigMapKeySelector],
+        v1.ConfigMapKeySelector | None,
         Field(
             alias="krbConfigConfigMap",
             description=(
@@ -1018,7 +1017,7 @@ class HDFSArtifact(BaseModel):
         ),
     ] = None
     krb_keytab_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="krbKeytabSecret",
             description=(
@@ -1028,14 +1027,14 @@ class HDFSArtifact(BaseModel):
         ),
     ] = None
     krb_realm: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbRealm",
             description=("KrbRealm is the Kerberos realm used with Kerberos keytab It must be set if keytab is used."),
         ),
     ] = None
     krb_service_principal_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbServicePrincipalName",
             description=(
@@ -1045,7 +1044,7 @@ class HDFSArtifact(BaseModel):
         ),
     ] = None
     krb_username: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbUsername",
             description=(
@@ -1056,13 +1055,13 @@ class HDFSArtifact(BaseModel):
     path: Annotated[str, Field(description="Path is a file path in HDFS")]
 
 
-class HDFSArtifactRepository(BaseModel):
+class HDFSArtifactRepository(APIBaseModel):
     addresses: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(description="Addresses is accessible addresses of HDFS name nodes"),
     ] = None
     data_transfer_protection: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="dataTransferProtection",
             description=(
@@ -1072,12 +1071,9 @@ class HDFSArtifactRepository(BaseModel):
             ),
         ),
     ] = None
-    force: Annotated[
-        Optional[bool],
-        Field(description="Force copies a file forcibly even if it exists"),
-    ] = None
+    force: Annotated[bool | None, Field(description="Force copies a file forcibly even if it exists")] = None
     hdfs_user: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="hdfsUser",
             description=(
@@ -1086,7 +1082,7 @@ class HDFSArtifactRepository(BaseModel):
         ),
     ] = None
     krb_c_cache_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="krbCCacheSecret",
             description=(
@@ -1096,7 +1092,7 @@ class HDFSArtifactRepository(BaseModel):
         ),
     ] = None
     krb_config_config_map: Annotated[
-        Optional[v1.ConfigMapKeySelector],
+        v1.ConfigMapKeySelector | None,
         Field(
             alias="krbConfigConfigMap",
             description=(
@@ -1106,7 +1102,7 @@ class HDFSArtifactRepository(BaseModel):
         ),
     ] = None
     krb_keytab_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="krbKeytabSecret",
             description=(
@@ -1116,14 +1112,14 @@ class HDFSArtifactRepository(BaseModel):
         ),
     ] = None
     krb_realm: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbRealm",
             description=("KrbRealm is the Kerberos realm used with Kerberos keytab It must be set if keytab is used."),
         ),
     ] = None
     krb_service_principal_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbServicePrincipalName",
             description=(
@@ -1133,7 +1129,7 @@ class HDFSArtifactRepository(BaseModel):
         ),
     ] = None
     krb_username: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="krbUsername",
             description=(
@@ -1142,7 +1138,7 @@ class HDFSArtifactRepository(BaseModel):
         ),
     ] = None
     path_format: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="pathFormat",
             description=("PathFormat is defines the format of path to store a file. Can reference workflow variables"),
@@ -1150,15 +1146,15 @@ class HDFSArtifactRepository(BaseModel):
     ] = None
 
 
-class ArchiveStrategy(BaseModel):
-    none: Optional[NoneStrategy] = None
-    tar: Optional[TarStrategy] = None
-    zip: Optional[ZipStrategy] = None
+class ArchiveStrategy(APIBaseModel):
+    none: NoneStrategy | None = None
+    tar: TarStrategy | None = None
+    zip: ZipStrategy | None = None
 
 
-class ArtifactGC(BaseModel):
+class ArtifactGC(APIBaseModel):
     pod_metadata: Annotated[
-        Optional[Metadata],
+        Metadata | None,
         Field(
             alias="podMetadata",
             description=(
@@ -1168,7 +1164,7 @@ class ArtifactGC(BaseModel):
         ),
     ] = None
     service_account_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serviceAccountName",
             description=(
@@ -1177,12 +1173,12 @@ class ArtifactGC(BaseModel):
             ),
         ),
     ] = None
-    strategy: Annotated[Optional[str], Field(description="Strategy is the strategy to use.")] = None
+    strategy: Annotated[str | None, Field(description="Strategy is the strategy to use.")] = None
 
 
-class WorkflowLevelArtifactGC(BaseModel):
+class WorkflowLevelArtifactGC(APIBaseModel):
     force_finalizer_removal: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="forceFinalizerRemoval",
             description=(
@@ -1192,7 +1188,7 @@ class WorkflowLevelArtifactGC(BaseModel):
         ),
     ] = None
     pod_metadata: Annotated[
-        Optional[Metadata],
+        Metadata | None,
         Field(
             alias="podMetadata",
             description=(
@@ -1202,14 +1198,14 @@ class WorkflowLevelArtifactGC(BaseModel):
         ),
     ] = None
     pod_spec_patch: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="podSpecPatch",
             description=("PodSpecPatch holds strategic merge patch to apply against the artgc pod spec."),
         ),
     ] = None
     service_account_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serviceAccountName",
             description=(
@@ -1218,12 +1214,12 @@ class WorkflowLevelArtifactGC(BaseModel):
             ),
         ),
     ] = None
-    strategy: Annotated[Optional[str], Field(description="Strategy is the strategy to use.")] = None
+    strategy: Annotated[str | None, Field(description="Strategy is the strategy to use.")] = None
 
 
-class Backoff(BaseModel):
+class Backoff(APIBaseModel):
     cap: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Cap is a limit on revised values of the duration parameter. If a"
@@ -1233,7 +1229,7 @@ class Backoff(BaseModel):
         ),
     ] = None
     duration: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Duration is the amount to back off. Default unit is seconds, but could"
@@ -1242,11 +1238,11 @@ class Backoff(BaseModel):
         ),
     ] = None
     factor: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(description=("Factor is a factor to multiply the base duration after each failed retry")),
     ] = None
     max_duration: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="maxDuration",
             description=(
@@ -1262,9 +1258,9 @@ class Backoff(BaseModel):
     ] = None
 
 
-class ContainerSetRetryStrategy(BaseModel):
+class ContainerSetRetryStrategy(APIBaseModel):
     duration: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 'Duration is the time between each retry, examples values are "300ms",'
@@ -1285,52 +1281,49 @@ class ContainerSetRetryStrategy(BaseModel):
     ]
 
 
-class Sequence(BaseModel):
+class Sequence(APIBaseModel):
     count: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(description=("Count is number of elements in the sequence (default: 0). Not to be used with end")),
     ] = None
     end: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(description=("Number at which to end the sequence (default: 0). Not to be used with Count")),
     ] = None
     format: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Format is a printf format string to format the value in the sequence")),
     ] = None
     start: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(description="Number at which to start the sequence (default: 0)"),
     ] = None
 
 
-class Prometheus(BaseModel):
-    counter: Annotated[Optional[Counter], Field(description="Counter is a counter metric")] = None
-    gauge: Annotated[Optional[Gauge], Field(description="Gauge is a gauge metric")] = None
+class Prometheus(APIBaseModel):
+    counter: Annotated[Counter | None, Field(description="Counter is a counter metric")] = None
+    gauge: Annotated[Gauge | None, Field(description="Gauge is a gauge metric")] = None
     help: Annotated[str, Field(description="Help is a string that describes the metric")]
-    histogram: Annotated[Optional[Histogram], Field(description="Histogram is a histogram metric")] = None
-    labels: Annotated[
-        Optional[List[MetricLabel]],
-        Field(description="Labels is a list of metric labels"),
-    ] = None
+    histogram: Annotated[Histogram | None, Field(description="Histogram is a histogram metric")] = None
+    labels: Annotated[list[MetricLabel] | None, Field(description="Labels is a list of metric labels")] = None
     name: Annotated[str, Field(description="Name is the name of the metric")]
     when: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("When is a conditional statement that decides when to emit the metric")),
     ] = None
 
 
-class OSSArtifact(BaseModel):
+class OSSArtifact(APIBaseModel):
     access_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="accessKeySecret",
             description=("AccessKeySecret is the secret selector to the bucket's access key"),
         ),
     ] = None
-    bucket: Annotated[Optional[str], Field(description="Bucket is the name of the bucket")] = None
+    bucket: Annotated[str | None, Field(description="Bucket is the name of the bucket")] = None
     create_bucket_if_not_present: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="createBucketIfNotPresent",
             description=(
@@ -1339,30 +1332,27 @@ class OSSArtifact(BaseModel):
             ),
         ),
     ] = None
-    endpoint: Annotated[
-        Optional[str],
-        Field(description="Endpoint is the hostname of the bucket endpoint"),
-    ] = None
+    endpoint: Annotated[str | None, Field(description="Endpoint is the hostname of the bucket endpoint")] = None
     key: Annotated[
         str,
         Field(description="Key is the path in the bucket where the artifact resides"),
     ]
     lifecycle_rule: Annotated[
-        Optional[OSSLifecycleRule],
+        OSSLifecycleRule | None,
         Field(
             alias="lifecycleRule",
             description="LifecycleRule specifies how to manage bucket's lifecycle",
         ),
     ] = None
     secret_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="secretKeySecret",
             description=("SecretKeySecret is the secret selector to the bucket's secret key"),
         ),
     ] = None
     security_token: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="securityToken",
             description=(
@@ -1373,7 +1363,7 @@ class OSSArtifact(BaseModel):
         ),
     ] = None
     use_sdk_creds: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="useSDKCreds",
             description=("UseSDKCreds tells the driver to figure out credentials based on sdk defaults."),
@@ -1381,17 +1371,17 @@ class OSSArtifact(BaseModel):
     ] = None
 
 
-class OSSArtifactRepository(BaseModel):
+class OSSArtifactRepository(APIBaseModel):
     access_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="accessKeySecret",
             description=("AccessKeySecret is the secret selector to the bucket's access key"),
         ),
     ] = None
-    bucket: Annotated[Optional[str], Field(description="Bucket is the name of the bucket")] = None
+    bucket: Annotated[str | None, Field(description="Bucket is the name of the bucket")] = None
     create_bucket_if_not_present: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="createBucketIfNotPresent",
             description=(
@@ -1400,33 +1390,30 @@ class OSSArtifactRepository(BaseModel):
             ),
         ),
     ] = None
-    endpoint: Annotated[
-        Optional[str],
-        Field(description="Endpoint is the hostname of the bucket endpoint"),
-    ] = None
+    endpoint: Annotated[str | None, Field(description="Endpoint is the hostname of the bucket endpoint")] = None
     key_format: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="keyFormat",
             description=("KeyFormat defines the format of how to store keys and can reference workflow variables."),
         ),
     ] = None
     lifecycle_rule: Annotated[
-        Optional[OSSLifecycleRule],
+        OSSLifecycleRule | None,
         Field(
             alias="lifecycleRule",
             description="LifecycleRule specifies how to manage bucket's lifecycle",
         ),
     ] = None
     secret_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="secretKeySecret",
             description=("SecretKeySecret is the secret selector to the bucket's secret key"),
         ),
     ] = None
     security_token: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="securityToken",
             description=(
@@ -1437,7 +1424,7 @@ class OSSArtifactRepository(BaseModel):
         ),
     ] = None
     use_sdk_creds: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="useSDKCreds",
             description=("UseSDKCreds tells the driver to figure out credentials based on sdk defaults."),
@@ -1445,43 +1432,43 @@ class OSSArtifactRepository(BaseModel):
     ] = None
 
 
-class RetryAffinity(BaseModel):
-    node_anti_affinity: Annotated[Optional[RetryNodeAntiAffinity], Field(alias="nodeAntiAffinity")] = None
+class RetryAffinity(APIBaseModel):
+    node_anti_affinity: Annotated[RetryNodeAntiAffinity | None, Field(alias="nodeAntiAffinity")] = None
 
 
-class SemaphoreRef(BaseModel):
+class SemaphoreRef(APIBaseModel):
     config_map_key_ref: Annotated[
-        Optional[v1.ConfigMapKeySelector],
+        v1.ConfigMapKeySelector | None,
         Field(
             alias="configMapKeyRef",
             description=("ConfigMapKeyRef is a configmap selector for Semaphore configuration"),
         ),
     ] = None
     database: Annotated[
-        Optional[SyncDatabaseRef],
+        SyncDatabaseRef | None,
         Field(description=("SyncDatabaseRef is a database reference for Semaphore configuration")),
     ] = None
     namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Namespace is the namespace of the configmap, default: [namespace of workflow]")),
     ] = None
 
 
-class SynchronizationStatus(BaseModel):
+class SynchronizationStatus(APIBaseModel):
     mutex: Annotated[
-        Optional[MutexStatus],
+        MutexStatus | None,
         Field(description="Mutex stores this workflow's mutex holder details"),
     ] = None
     semaphore: Annotated[
-        Optional[SemaphoreStatus],
+        SemaphoreStatus | None,
         Field(description="Semaphore stores this workflow's Semaphore holder details"),
     ] = None
 
 
-class SubmitOpts(BaseModel):
-    annotations: Annotated[Optional[str], Field(description="Annotations adds to metadata.labels")] = None
+class SubmitOpts(APIBaseModel):
+    annotations: Annotated[str | None, Field(description="Annotations adds to metadata.labels")] = None
     dry_run: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="dryRun",
             description=(
@@ -1491,38 +1478,38 @@ class SubmitOpts(BaseModel):
         ),
     ] = None
     entry_point: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="entryPoint", description="Entrypoint overrides spec.entrypoint"),
     ] = None
     generate_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="generateName",
             description="GenerateName overrides metadata.generateName",
         ),
     ] = None
-    labels: Annotated[Optional[str], Field(description="Labels adds to metadata.labels")] = None
-    name: Annotated[Optional[str], Field(description="Name overrides metadata.name")] = None
+    labels: Annotated[str | None, Field(description="Labels adds to metadata.labels")] = None
+    name: Annotated[str | None, Field(description="Name overrides metadata.name")] = None
     owner_reference: Annotated[
-        Optional[v1_1.OwnerReference],
+        v1_1.OwnerReference | None,
         Field(
             alias="ownerReference",
             description="OwnerReference creates a metadata.ownerReference",
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(description="Parameters passes input parameters to workflow"),
     ] = None
     pod_priority_class_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="podPriorityClassName",
             description="Set the podPriorityClassName of the workflow",
         ),
     ] = None
     priority: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "Priority is used if controller is configured to process limited number"
@@ -1532,14 +1519,14 @@ class SubmitOpts(BaseModel):
         ),
     ] = None
     server_dry_run: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="serverDryRun",
             description=("ServerDryRun validates the workflow on the server-side without creating it"),
         ),
     ] = None
     service_account: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serviceAccount",
             description=("ServiceAccount runs all pods in the workflow using specified ServiceAccount."),
@@ -1547,16 +1534,16 @@ class SubmitOpts(BaseModel):
     ] = None
 
 
-class ValueFrom(BaseModel):
+class ValueFrom(APIBaseModel):
     config_map_key_ref: Annotated[
-        Optional[v1.ConfigMapKeySelector],
+        v1.ConfigMapKeySelector | None,
         Field(
             alias="configMapKeyRef",
             description=("ConfigMapKeyRef is configmap selector for input parameter configuration"),
         ),
     ] = None
     default: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Default specifies a value to be used if retrieving the value from the specified source fails"
@@ -1564,7 +1551,7 @@ class ValueFrom(BaseModel):
         ),
     ] = None
     event: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Selector (https://github.com/expr-lang/expr) that is evaluated against"
@@ -1573,25 +1560,25 @@ class ValueFrom(BaseModel):
         ),
     ] = None
     expression: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Expression, if defined, is evaluated to specify the value for the parameter")),
     ] = None
     jq_filter: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="jqFilter",
             description=("JQFilter expression against the resource object in resource templates"),
         ),
     ] = None
     json_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="jsonPath",
             description=("JSONPath of a resource to retrieve an output parameter value from in resource templates"),
         ),
     ] = None
     parameter: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Parameter reference to a step or dag task in which to retrieve an"
@@ -1600,45 +1587,45 @@ class ValueFrom(BaseModel):
         ),
     ] = None
     path: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Path in the container to retrieve an output parameter value from in container templates")),
     ] = None
     supplied: Annotated[
-        Optional[SuppliedValueFrom],
+        SuppliedValueFrom | None,
         Field(description=("Supplied value to be filled in directly, either through the CLI, API, etc.")),
     ] = None
 
 
-class HTTPHeader(BaseModel):
+class HTTPHeader(APIBaseModel):
     name: str
-    value: Optional[str] = None
-    value_from: Annotated[Optional[HTTPHeaderSource], Field(alias="valueFrom")] = None
+    value: str | None = None
+    value_from: Annotated[HTTPHeaderSource | None, Field(alias="valueFrom")] = None
 
 
-class HTTPAuth(BaseModel):
-    basic_auth: Annotated[Optional[BasicAuth], Field(alias="basicAuth")] = None
-    client_cert: Annotated[Optional[ClientCertAuth], Field(alias="clientCert")] = None
-    oauth2: Optional[OAuth2Auth] = None
+class HTTPAuth(APIBaseModel):
+    basic_auth: Annotated[BasicAuth | None, Field(alias="basicAuth")] = None
+    client_cert: Annotated[ClientCertAuth | None, Field(alias="clientCert")] = None
+    oauth2: OAuth2Auth | None = None
 
 
-class S3Artifact(BaseModel):
+class S3Artifact(APIBaseModel):
     access_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="accessKeySecret",
             description=("AccessKeySecret is the secret selector to the bucket's access key"),
         ),
     ] = None
-    bucket: Annotated[Optional[str], Field(description="Bucket is the name of the bucket")] = None
+    bucket: Annotated[str | None, Field(description="Bucket is the name of the bucket")] = None
     ca_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="caSecret",
             description=("CASecret specifies the secret that contains the CA, used to verify the TLS connection"),
         ),
     ] = None
     create_bucket_if_not_present: Annotated[
-        Optional[CreateS3BucketOptions],
+        CreateS3BucketOptions | None,
         Field(
             alias="createBucketIfNotPresent",
             description=(
@@ -1649,36 +1636,30 @@ class S3Artifact(BaseModel):
             ),
         ),
     ] = None
-    encryption_options: Annotated[Optional[S3EncryptionOptions], Field(alias="encryptionOptions")] = None
-    endpoint: Annotated[
-        Optional[str],
-        Field(description="Endpoint is the hostname of the bucket endpoint"),
-    ] = None
-    insecure: Annotated[
-        Optional[bool],
-        Field(description="Insecure will connect to the service with TLS"),
-    ] = None
+    encryption_options: Annotated[S3EncryptionOptions | None, Field(alias="encryptionOptions")] = None
+    endpoint: Annotated[str | None, Field(description="Endpoint is the hostname of the bucket endpoint")] = None
+    insecure: Annotated[bool | None, Field(description="Insecure will connect to the service with TLS")] = None
     key: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Key is the key in the bucket where the artifact resides"),
     ] = None
-    region: Annotated[Optional[str], Field(description="Region contains the optional bucket region")] = None
+    region: Annotated[str | None, Field(description="Region contains the optional bucket region")] = None
     role_arn: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="roleARN",
             description=("RoleARN is the Amazon Resource Name (ARN) of the role to assume."),
         ),
     ] = None
     secret_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="secretKeySecret",
             description=("SecretKeySecret is the secret selector to the bucket's secret key"),
         ),
     ] = None
     session_token_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="sessionTokenSecret",
             description=(
@@ -1687,7 +1668,7 @@ class S3Artifact(BaseModel):
         ),
     ] = None
     use_sdk_creds: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="useSDKCreds",
             description=("UseSDKCreds tells the driver to figure out credentials based on sdk defaults."),
@@ -1695,24 +1676,24 @@ class S3Artifact(BaseModel):
     ] = None
 
 
-class S3ArtifactRepository(BaseModel):
+class S3ArtifactRepository(APIBaseModel):
     access_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="accessKeySecret",
             description=("AccessKeySecret is the secret selector to the bucket's access key"),
         ),
     ] = None
-    bucket: Annotated[Optional[str], Field(description="Bucket is the name of the bucket")] = None
+    bucket: Annotated[str | None, Field(description="Bucket is the name of the bucket")] = None
     ca_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="caSecret",
             description=("CASecret specifies the secret that contains the CA, used to verify the TLS connection"),
         ),
     ] = None
     create_bucket_if_not_present: Annotated[
-        Optional[CreateS3BucketOptions],
+        CreateS3BucketOptions | None,
         Field(
             alias="createBucketIfNotPresent",
             description=(
@@ -1723,24 +1704,18 @@ class S3ArtifactRepository(BaseModel):
             ),
         ),
     ] = None
-    encryption_options: Annotated[Optional[S3EncryptionOptions], Field(alias="encryptionOptions")] = None
-    endpoint: Annotated[
-        Optional[str],
-        Field(description="Endpoint is the hostname of the bucket endpoint"),
-    ] = None
-    insecure: Annotated[
-        Optional[bool],
-        Field(description="Insecure will connect to the service with TLS"),
-    ] = None
+    encryption_options: Annotated[S3EncryptionOptions | None, Field(alias="encryptionOptions")] = None
+    endpoint: Annotated[str | None, Field(description="Endpoint is the hostname of the bucket endpoint")] = None
+    insecure: Annotated[bool | None, Field(description="Insecure will connect to the service with TLS")] = None
     key_format: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="keyFormat",
             description=("KeyFormat defines the format of how to store keys and can reference workflow variables."),
         ),
     ] = None
     key_prefix: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="keyPrefix",
             description=(
@@ -1749,23 +1724,23 @@ class S3ArtifactRepository(BaseModel):
             ),
         ),
     ] = None
-    region: Annotated[Optional[str], Field(description="Region contains the optional bucket region")] = None
+    region: Annotated[str | None, Field(description="Region contains the optional bucket region")] = None
     role_arn: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="roleARN",
             description=("RoleARN is the Amazon Resource Name (ARN) of the role to assume."),
         ),
     ] = None
     secret_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="secretKeySecret",
             description=("SecretKeySecret is the secret selector to the bucket's secret key"),
         ),
     ] = None
     session_token_secret: Annotated[
-        Optional[v1.SecretKeySelector],
+        v1.SecretKeySelector | None,
         Field(
             alias="sessionTokenSecret",
             description=(
@@ -1774,7 +1749,7 @@ class S3ArtifactRepository(BaseModel):
         ),
     ] = None
     use_sdk_creds: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="useSDKCreds",
             description=("UseSDKCreds tells the driver to figure out credentials based on sdk defaults."),
@@ -1782,7 +1757,7 @@ class S3ArtifactRepository(BaseModel):
     ] = None
 
 
-class Memoize(BaseModel):
+class Memoize(APIBaseModel):
     cache: Annotated[Cache, Field(description="Cache sets and configures the kind of cache")]
     key: Annotated[str, Field(description="Key is the key to use as the caching key")]
     max_age: Annotated[
@@ -1798,14 +1773,14 @@ class Memoize(BaseModel):
     ]
 
 
-class RetryStrategy(BaseModel):
+class RetryStrategy(APIBaseModel):
     affinity: Annotated[
-        Optional[RetryAffinity],
+        RetryAffinity | None,
         Field(description="Affinity prevents running workflow's step on the same host"),
     ] = None
-    backoff: Annotated[Optional[Backoff], Field(description="Backoff is a backoff strategy")] = None
+    backoff: Annotated[Backoff | None, Field(description="Backoff is a backoff strategy")] = None
     expression: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Expression is a condition expression for when a node will be retried."
@@ -1815,7 +1790,7 @@ class RetryStrategy(BaseModel):
         ),
     ] = None
     limit: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(
             description=(
                 "Limit is the maximum number of retry attempts when retrying a"
@@ -1825,7 +1800,7 @@ class RetryStrategy(BaseModel):
         ),
     ] = None
     retry_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="retryPolicy",
             description=("RetryPolicy is a policy of NodePhase statuses that will be retried"),
@@ -1833,46 +1808,46 @@ class RetryStrategy(BaseModel):
     ] = None
 
 
-class Synchronization(BaseModel):
+class Synchronization(APIBaseModel):
     mutex: Annotated[
-        Optional[Mutex],
+        Mutex | None,
         Field(description=("Mutex holds the Mutex lock details - deprecated, use mutexes instead")),
     ] = None
     mutexes: Annotated[
-        Optional[List[Mutex]],
+        list[Mutex] | None,
         Field(description="v3.6 and after: Mutexes holds the list of Mutex lock details"),
     ] = None
     semaphore: Annotated[
-        Optional[SemaphoreRef],
+        SemaphoreRef | None,
         Field(description=("Semaphore holds the Semaphore configuration - deprecated, use semaphores instead")),
     ] = None
     semaphores: Annotated[
-        Optional[List[SemaphoreRef]],
+        list[SemaphoreRef] | None,
         Field(description=("v3.6 and after: Semaphores holds the list of Semaphores configuration")),
     ] = None
 
 
-class WorkflowSubmitRequest(BaseModel):
-    namespace: Optional[str] = None
-    resource_kind: Annotated[Optional[str], Field(alias="resourceKind")] = None
-    resource_name: Annotated[Optional[str], Field(alias="resourceName")] = None
-    submit_options: Annotated[Optional[SubmitOpts], Field(alias="submitOptions")] = None
+class WorkflowSubmitRequest(APIBaseModel):
+    namespace: str | None = None
+    resource_kind: Annotated[str | None, Field(alias="resourceKind")] = None
+    resource_name: Annotated[str | None, Field(alias="resourceName")] = None
+    submit_options: Annotated[SubmitOpts | None, Field(alias="submitOptions")] = None
 
 
-class Parameter(BaseModel):
+class Parameter(APIBaseModel):
     default: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Default is the default value to use for an input parameter if a value was not supplied")),
     ] = None
-    description: Annotated[Optional[str], Field(description="Description is the parameter description")] = None
+    description: Annotated[str | None, Field(description="Description is the parameter description")] = None
     enum: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=("Enum holds a list of string values to choose from, for the actual value of the parameter")
         ),
     ] = None
     global_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="globalName",
             description=(
@@ -1885,7 +1860,7 @@ class Parameter(BaseModel):
     ] = None
     name: Annotated[str, Field(description="Name is the parameter name")]
     value: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Value is the literal value to use for the parameter. If specified in"
@@ -1895,7 +1870,7 @@ class Parameter(BaseModel):
         ),
     ] = None
     value_from: Annotated[
-        Optional[ValueFrom],
+        ValueFrom | None,
         Field(
             alias="valueFrom",
             description="ValueFrom is the source for the output parameter's value",
@@ -1903,63 +1878,63 @@ class Parameter(BaseModel):
     ] = None
 
 
-class HTTPArtifact(BaseModel):
+class HTTPArtifact(APIBaseModel):
     auth: Annotated[
-        Optional[HTTPAuth],
+        HTTPAuth | None,
         Field(description="Auth contains information for client authentication"),
     ] = None
     headers: Annotated[
-        Optional[List[Header]],
+        list[Header] | None,
         Field(description=("Headers are an optional list of headers to send with HTTP requests for artifacts")),
     ] = None
     url: Annotated[str, Field(description="URL of the artifact")]
 
 
-class ArtifactRepository(BaseModel):
+class ArtifactRepository(APIBaseModel):
     archive_logs: Annotated[
-        Optional[bool],
+        bool | None,
         Field(alias="archiveLogs", description="ArchiveLogs enables log archiving"),
     ] = None
     artifactory: Annotated[
-        Optional[ArtifactoryArtifactRepository],
+        ArtifactoryArtifactRepository | None,
         Field(description="Artifactory stores artifacts to JFrog Artifactory"),
     ] = None
     azure: Annotated[
-        Optional[AzureArtifactRepository],
+        AzureArtifactRepository | None,
         Field(description="Azure stores artifact in an Azure Storage account"),
     ] = None
     gcs: Annotated[
-        Optional[GCSArtifactRepository],
+        GCSArtifactRepository | None,
         Field(description="GCS stores artifact in a GCS object store"),
     ] = None
     hdfs: Annotated[
-        Optional[HDFSArtifactRepository],
+        HDFSArtifactRepository | None,
         Field(description="HDFS stores artifacts in HDFS"),
     ] = None
     oss: Annotated[
-        Optional[OSSArtifactRepository],
+        OSSArtifactRepository | None,
         Field(description="OSS stores artifact in a OSS-compliant object store"),
     ] = None
     s3: Annotated[
-        Optional[S3ArtifactRepository],
+        S3ArtifactRepository | None,
         Field(description="S3 stores artifact in a S3-compliant object store"),
     ] = None
 
 
-class Artifact(BaseModel):
+class Artifact(APIBaseModel):
     archive: Annotated[
-        Optional[ArchiveStrategy],
+        ArchiveStrategy | None,
         Field(description=("Archive controls how the artifact will be saved to the artifact repository.")),
     ] = None
     archive_logs: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="archiveLogs",
             description=("ArchiveLogs indicates if the container logs should be archived"),
         ),
     ] = None
     artifact_gc: Annotated[
-        Optional[ArtifactGC],
+        ArtifactGC | None,
         Field(
             alias="artifactGC",
             description=(
@@ -1969,38 +1944,38 @@ class Artifact(BaseModel):
         ),
     ] = None
     artifactory: Annotated[
-        Optional[ArtifactoryArtifact],
+        ArtifactoryArtifact | None,
         Field(description="Artifactory contains artifactory artifact location details"),
     ] = None
     azure: Annotated[
-        Optional[AzureArtifact],
+        AzureArtifact | None,
         Field(description="Azure contains Azure Storage artifact location details"),
     ] = None
-    deleted: Annotated[Optional[bool], Field(description="Has this been deleted?")] = None
+    deleted: Annotated[bool | None, Field(description="Has this been deleted?")] = None
     from_: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="from",
             description=("From allows an artifact to reference an artifact from a previous step"),
         ),
     ] = None
     from_expression: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fromExpression",
             description=("FromExpression, if defined, is evaluated to specify the value for the artifact"),
         ),
     ] = None
     gcs: Annotated[
-        Optional[GCSArtifact],
+        GCSArtifact | None,
         Field(description="GCS contains GCS artifact location details"),
     ] = None
     git: Annotated[
-        Optional[GitArtifact],
+        GitArtifact | None,
         Field(description="Git contains git artifact location details"),
     ] = None
     global_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="globalName",
             description=(
@@ -2012,15 +1987,15 @@ class Artifact(BaseModel):
         ),
     ] = None
     hdfs: Annotated[
-        Optional[HDFSArtifact],
+        HDFSArtifact | None,
         Field(description="HDFS contains HDFS artifact location details"),
     ] = None
     http: Annotated[
-        Optional[HTTPArtifact],
+        HTTPArtifact | None,
         Field(description="HTTP contains HTTP artifact location details"),
     ] = None
     mode: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "mode bits to use on this file, must be a value between 0 and 0777 set when loading input artifacts."
@@ -2032,31 +2007,28 @@ class Artifact(BaseModel):
         Field(description=("name of the artifact. must be unique within a template's inputs/outputs.")),
     ]
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("Make Artifacts optional, if Artifacts doesn't generate or exist")),
     ] = None
     oss: Annotated[
-        Optional[OSSArtifact],
+        OSSArtifact | None,
         Field(description="OSS contains OSS artifact location details"),
     ] = None
-    path: Annotated[Optional[str], Field(description="Path is the container path to the artifact")] = None
+    path: Annotated[str | None, Field(description="Path is the container path to the artifact")] = None
     raw: Annotated[
-        Optional[RawArtifact],
+        RawArtifact | None,
         Field(description="Raw contains raw artifact location details"),
     ] = None
     recurse_mode: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="recurseMode",
             description=("If mode is set, apply the permission recursively into the artifact if it is a folder"),
         ),
     ] = None
-    s3: Annotated[
-        Optional[S3Artifact],
-        Field(description="S3 contains S3 artifact location details"),
-    ] = None
+    s3: Annotated[S3Artifact | None, Field(description="S3 contains S3 artifact location details")] = None
     sub_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="subPath",
             description=("SubPath allows an artifact to be sourced from a subpath within the specified source"),
@@ -2064,66 +2036,63 @@ class Artifact(BaseModel):
     ] = None
 
 
-class ArtifactLocation(BaseModel):
+class ArtifactLocation(APIBaseModel):
     archive_logs: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="archiveLogs",
             description=("ArchiveLogs indicates if the container logs should be archived"),
         ),
     ] = None
     artifactory: Annotated[
-        Optional[ArtifactoryArtifact],
+        ArtifactoryArtifact | None,
         Field(description="Artifactory contains artifactory artifact location details"),
     ] = None
     azure: Annotated[
-        Optional[AzureArtifact],
+        AzureArtifact | None,
         Field(description="Azure contains Azure Storage artifact location details"),
     ] = None
     gcs: Annotated[
-        Optional[GCSArtifact],
+        GCSArtifact | None,
         Field(description="GCS contains GCS artifact location details"),
     ] = None
     git: Annotated[
-        Optional[GitArtifact],
+        GitArtifact | None,
         Field(description="Git contains git artifact location details"),
     ] = None
     hdfs: Annotated[
-        Optional[HDFSArtifact],
+        HDFSArtifact | None,
         Field(description="HDFS contains HDFS artifact location details"),
     ] = None
     http: Annotated[
-        Optional[HTTPArtifact],
+        HTTPArtifact | None,
         Field(description="HTTP contains HTTP artifact location details"),
     ] = None
     oss: Annotated[
-        Optional[OSSArtifact],
+        OSSArtifact | None,
         Field(description="OSS contains OSS artifact location details"),
     ] = None
     raw: Annotated[
-        Optional[RawArtifact],
+        RawArtifact | None,
         Field(description="Raw contains raw artifact location details"),
     ] = None
-    s3: Annotated[
-        Optional[S3Artifact],
-        Field(description="S3 contains S3 artifact location details"),
-    ] = None
+    s3: Annotated[S3Artifact | None, Field(description="S3 contains S3 artifact location details")] = None
 
 
-class ArtifactPaths(BaseModel):
+class ArtifactPaths(APIBaseModel):
     archive: Annotated[
-        Optional[ArchiveStrategy],
+        ArchiveStrategy | None,
         Field(description=("Archive controls how the artifact will be saved to the artifact repository.")),
     ] = None
     archive_logs: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="archiveLogs",
             description=("ArchiveLogs indicates if the container logs should be archived"),
         ),
     ] = None
     artifact_gc: Annotated[
-        Optional[ArtifactGC],
+        ArtifactGC | None,
         Field(
             alias="artifactGC",
             description=(
@@ -2133,38 +2102,38 @@ class ArtifactPaths(BaseModel):
         ),
     ] = None
     artifactory: Annotated[
-        Optional[ArtifactoryArtifact],
+        ArtifactoryArtifact | None,
         Field(description="Artifactory contains artifactory artifact location details"),
     ] = None
     azure: Annotated[
-        Optional[AzureArtifact],
+        AzureArtifact | None,
         Field(description="Azure contains Azure Storage artifact location details"),
     ] = None
-    deleted: Annotated[Optional[bool], Field(description="Has this been deleted?")] = None
+    deleted: Annotated[bool | None, Field(description="Has this been deleted?")] = None
     from_: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="from",
             description=("From allows an artifact to reference an artifact from a previous step"),
         ),
     ] = None
     from_expression: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fromExpression",
             description=("FromExpression, if defined, is evaluated to specify the value for the artifact"),
         ),
     ] = None
     gcs: Annotated[
-        Optional[GCSArtifact],
+        GCSArtifact | None,
         Field(description="GCS contains GCS artifact location details"),
     ] = None
     git: Annotated[
-        Optional[GitArtifact],
+        GitArtifact | None,
         Field(description="Git contains git artifact location details"),
     ] = None
     global_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="globalName",
             description=(
@@ -2176,15 +2145,15 @@ class ArtifactPaths(BaseModel):
         ),
     ] = None
     hdfs: Annotated[
-        Optional[HDFSArtifact],
+        HDFSArtifact | None,
         Field(description="HDFS contains HDFS artifact location details"),
     ] = None
     http: Annotated[
-        Optional[HTTPArtifact],
+        HTTPArtifact | None,
         Field(description="HTTP contains HTTP artifact location details"),
     ] = None
     mode: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "mode bits to use on this file, must be a value between 0 and 0777 set when loading input artifacts."
@@ -2196,31 +2165,28 @@ class ArtifactPaths(BaseModel):
         Field(description=("name of the artifact. must be unique within a template's inputs/outputs.")),
     ]
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("Make Artifacts optional, if Artifacts doesn't generate or exist")),
     ] = None
     oss: Annotated[
-        Optional[OSSArtifact],
+        OSSArtifact | None,
         Field(description="OSS contains OSS artifact location details"),
     ] = None
-    path: Annotated[Optional[str], Field(description="Path is the container path to the artifact")] = None
+    path: Annotated[str | None, Field(description="Path is the container path to the artifact")] = None
     raw: Annotated[
-        Optional[RawArtifact],
+        RawArtifact | None,
         Field(description="Raw contains raw artifact location details"),
     ] = None
     recurse_mode: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="recurseMode",
             description=("If mode is set, apply the permission recursively into the artifact if it is a folder"),
         ),
     ] = None
-    s3: Annotated[
-        Optional[S3Artifact],
-        Field(description="S3 contains S3 artifact location details"),
-    ] = None
+    s3: Annotated[S3Artifact | None, Field(description="S3 contains S3 artifact location details")] = None
     sub_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="subPath",
             description=("SubPath allows an artifact to be sourced from a subpath within the specified source"),
@@ -2228,27 +2194,27 @@ class ArtifactPaths(BaseModel):
     ] = None
 
 
-class ArtifactRepositoryRefStatus(BaseModel):
+class ArtifactRepositoryRefStatus(APIBaseModel):
     artifact_repository: Annotated[
-        Optional[ArtifactRepository],
+        ArtifactRepository | None,
         Field(
             alias="artifactRepository",
             description=("The repository the workflow will use. This maybe empty before v3.1."),
         ),
     ] = None
     config_map: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="configMap",
             description=('The name of the config map. Defaults to "artifact-repositories".'),
         ),
     ] = None
     default: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("If this ref represents the default artifact repository, rather than a config map.")),
     ] = None
     key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "The config map key. Defaults to the value of the"
@@ -2257,7 +2223,7 @@ class ArtifactRepositoryRefStatus(BaseModel):
         ),
     ] = None
     namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "The namespace of the config map. Defaults to the workflow's namespace,"
@@ -2267,13 +2233,13 @@ class ArtifactRepositoryRefStatus(BaseModel):
     ] = None
 
 
-class ManifestFrom(BaseModel):
+class ManifestFrom(APIBaseModel):
     artifact: Annotated[Artifact, Field(description="Artifact contains the artifact to use")]
 
 
-class DataSource(BaseModel):
+class DataSource(APIBaseModel):
     artifact_paths: Annotated[
-        Optional[ArtifactPaths],
+        ArtifactPaths | None,
         Field(
             alias="artifactPaths",
             description=("ArtifactPaths is a data transformation that collects a list of artifact paths"),
@@ -2281,7 +2247,7 @@ class DataSource(BaseModel):
     ] = None
 
 
-class ResourceTemplate(BaseModel):
+class ResourceTemplate(APIBaseModel):
     action: Annotated[
         str,
         Field(
@@ -2292,7 +2258,7 @@ class ResourceTemplate(BaseModel):
         ),
     ]
     failure_condition: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="failureCondition",
             description=(
@@ -2303,7 +2269,7 @@ class ResourceTemplate(BaseModel):
         ),
     ] = None
     flags: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Flags is a set of additional options passed to kubectl before"
@@ -2312,16 +2278,16 @@ class ResourceTemplate(BaseModel):
             )
         ),
     ] = None
-    manifest: Annotated[Optional[str], Field(description="Manifest contains the kubernetes manifest")] = None
+    manifest: Annotated[str | None, Field(description="Manifest contains the kubernetes manifest")] = None
     manifest_from: Annotated[
-        Optional[ManifestFrom],
+        ManifestFrom | None,
         Field(
             alias="manifestFrom",
             description="ManifestFrom is the source for a single kubernetes manifest",
         ),
     ] = None
     merge_strategy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="mergeStrategy",
             description=(
@@ -2331,7 +2297,7 @@ class ResourceTemplate(BaseModel):
         ),
     ] = None
     set_owner_reference: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="setOwnerReference",
             description=(
@@ -2340,7 +2306,7 @@ class ResourceTemplate(BaseModel):
         ),
     ] = None
     success_condition: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="successCondition",
             description=(
@@ -2352,72 +2318,72 @@ class ResourceTemplate(BaseModel):
     ] = None
 
 
-class Data(BaseModel):
+class Data(APIBaseModel):
     source: Annotated[
         DataSource,
         Field(description="Source sources external data into a data template"),
     ]
     transformation: Annotated[
-        List[TransformationStep],
+        list[TransformationStep],
         Field(description="Transformation applies a set of transformations"),
     ]
 
 
-class Arguments(BaseModel):
+class Arguments(APIBaseModel):
     artifacts: Annotated[
-        Optional[List[Artifact]],
+        list[Artifact] | None,
         Field(description=("Artifacts is the list of artifacts to pass to the template or workflow")),
     ] = None
     parameters: Annotated[
-        Optional[List[Parameter]],
+        list[Parameter] | None,
         Field(description=("Parameters is the list of parameters to pass to the template or workflow")),
     ] = None
 
 
-class InfoResponse(BaseModel):
-    columns: Optional[List[Column]] = None
-    links: Optional[List[Link]] = None
-    managed_namespace: Annotated[Optional[str], Field(alias="managedNamespace")] = None
-    modals: Annotated[Optional[Dict[str, bool]], Field(title="which modals to show")] = None
-    nav_color: Annotated[Optional[str], Field(alias="navColor")] = None
+class InfoResponse(APIBaseModel):
+    columns: list[Column] | None = None
+    links: list[Link] | None = None
+    managed_namespace: Annotated[str | None, Field(alias="managedNamespace")] = None
+    modals: Annotated[dict[str, bool] | None, Field(title="which modals to show")] = None
+    nav_color: Annotated[str | None, Field(alias="navColor")] = None
 
 
-class Inputs(BaseModel):
+class Inputs(APIBaseModel):
     artifacts: Annotated[
-        Optional[List[Artifact]],
+        list[Artifact] | None,
         Field(description="Artifact are a list of artifacts passed as inputs"),
     ] = None
     parameters: Annotated[
-        Optional[List[Parameter]],
+        list[Parameter] | None,
         Field(description="Parameters are a list of parameters passed as inputs"),
     ] = None
 
 
-class Metrics(BaseModel):
+class Metrics(APIBaseModel):
     prometheus: Annotated[
-        Optional[List[Prometheus]],
+        list[Prometheus] | None,
         Field(description="Prometheus is a list of prometheus metrics to be emitted"),
     ] = None
 
 
-class Outputs(BaseModel):
+class Outputs(APIBaseModel):
     artifacts: Annotated[
-        Optional[List[Artifact]],
+        list[Artifact] | None,
         Field(description=("Artifacts holds the list of output artifacts produced by a step")),
     ] = None
     exit_code: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="exitCode",
             description="ExitCode holds the exit code of a script template",
         ),
     ] = None
     parameters: Annotated[
-        Optional[List[Parameter]],
+        list[Parameter] | None,
         Field(description=("Parameters holds the list of output parameters produced by a step")),
     ] = None
     result: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Result holds the result (stdout) of a script or container template, or"
@@ -2427,13 +2393,10 @@ class Outputs(BaseModel):
     ] = None
 
 
-class LifecycleHook(BaseModel):
-    arguments: Annotated[
-        Optional[Arguments],
-        Field(description="Arguments hold arguments to the template"),
-    ] = None
+class LifecycleHook(APIBaseModel):
+    arguments: Annotated[Arguments | None, Field(description="Arguments hold arguments to the template")] = None
     expression: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Expression is a condition expression for when a node will be retried."
@@ -2443,11 +2406,11 @@ class LifecycleHook(BaseModel):
         ),
     ] = None
     template: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Template is the name of the template to execute by the hook"),
     ] = None
     template_ref: Annotated[
-        Optional[TemplateRef],
+        TemplateRef | None,
         Field(
             alias="templateRef",
             description=("TemplateRef is the reference to the template resource to execute by the hook"),
@@ -2455,21 +2418,21 @@ class LifecycleHook(BaseModel):
     ] = None
 
 
-class HTTP(BaseModel):
-    body: Annotated[Optional[str], Field(description="Body is content of the HTTP Request")] = None
+class HTTP(APIBaseModel):
+    body: Annotated[str | None, Field(description="Body is content of the HTTP Request")] = None
     body_from: Annotated[
-        Optional[HTTPBodySource],
+        HTTPBodySource | None,
         Field(
             alias="bodyFrom",
             description="BodyFrom is  content of the HTTP Request as Bytes",
         ),
     ] = None
     headers: Annotated[
-        Optional[List[HTTPHeader]],
+        list[HTTPHeader] | None,
         Field(description=("Headers are an optional list of headers to send with HTTP requests")),
     ] = None
     insecure_skip_verify: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="insecureSkipVerify",
             description=(
@@ -2477,16 +2440,16 @@ class HTTP(BaseModel):
             ),
         ),
     ] = None
-    method: Annotated[Optional[str], Field(description="Method is HTTP methods for HTTP Request")] = None
+    method: Annotated[str | None, Field(description="Method is HTTP methods for HTTP Request")] = None
     success_condition: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="successCondition",
             description=("SuccessCondition is an expression if evaluated to true is considered successful"),
         ),
     ] = None
     timeout_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="timeoutSeconds",
             description=("TimeoutSeconds is request timeout for HTTP Request. Default is 30 seconds"),
@@ -2495,9 +2458,9 @@ class HTTP(BaseModel):
     url: Annotated[str, Field(description="URL of the HTTP Request")]
 
 
-class NodeStatus(BaseModel):
+class NodeStatus(APIBaseModel):
     boundary_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="boundaryID",
             description=(
@@ -2505,13 +2468,13 @@ class NodeStatus(BaseModel):
             ),
         ),
     ] = None
-    children: Annotated[Optional[List[str]], Field(description="Children is a list of child node IDs")] = None
+    children: Annotated[list[str] | None, Field(description="Children is a list of child node IDs")] = None
     daemoned: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("Daemoned tracks whether or not this node was daemoned and need to be terminated")),
     ] = None
     display_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="displayName",
             description=(
@@ -2520,15 +2483,15 @@ class NodeStatus(BaseModel):
         ),
     ] = None
     estimated_duration: Annotated[
-        Optional[int],
+        int | None,
         Field(alias="estimatedDuration", description="EstimatedDuration in seconds."),
     ] = None
     finished_at: Annotated[
-        Optional[v1_1.Time],
+        v1_1.Time | None,
         Field(alias="finishedAt", description="Time at which this node completed"),
     ] = None
     host_node_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="hostNodeName",
             description=("HostNodeName name of the Kubernetes node on which the Pod is running, if applicable"),
@@ -2545,7 +2508,7 @@ class NodeStatus(BaseModel):
         ),
     ]
     inputs: Annotated[
-        Optional[Inputs],
+        Inputs | None,
         Field(
             description=(
                 "Inputs captures input parameter values and artifact locations supplied to this template invocation"
@@ -2553,14 +2516,14 @@ class NodeStatus(BaseModel):
         ),
     ] = None
     memoization_status: Annotated[
-        Optional[MemoizationStatus],
+        MemoizationStatus | None,
         Field(
             alias="memoizationStatus",
             description="MemoizationStatus holds information about cached nodes",
         ),
     ] = None
     message: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("A human readable message indicating details about why the node is in this condition.")),
     ] = None
     name: Annotated[
@@ -2568,14 +2531,14 @@ class NodeStatus(BaseModel):
         Field(description=("Name is unique name in the node tree used to generate the node ID")),
     ]
     node_flag: Annotated[
-        Optional[NodeFlag],
+        NodeFlag | None,
         Field(
             alias="nodeFlag",
             description=("NodeFlag tracks some history of node. e.g.) hooked, retried, etc."),
         ),
     ] = None
     outbound_nodes: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="outboundNodes",
             description=(
@@ -2598,7 +2561,7 @@ class NodeStatus(BaseModel):
         ),
     ] = None
     outputs: Annotated[
-        Optional[Outputs],
+        Outputs | None,
         Field(
             description=(
                 "Outputs captures output parameter values and artifact locations produced by this template invocation"
@@ -2606,7 +2569,7 @@ class NodeStatus(BaseModel):
         ),
     ] = None
     phase: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Phase a simple, high-level summary of where the node is in its"
@@ -2618,15 +2581,15 @@ class NodeStatus(BaseModel):
         ),
     ] = None
     pod_ip: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="podIP",
             description="PodIP captures the IP of the pod for daemoned steps",
         ),
     ] = None
-    progress: Annotated[Optional[str], Field(description="Progress to completion")] = None
+    progress: Annotated[str | None, Field(description="Progress to completion")] = None
     resources_duration: Annotated[
-        Optional[Dict[str, int]],
+        dict[str, int] | None,
         Field(
             alias="resourcesDuration",
             description=(
@@ -2636,25 +2599,25 @@ class NodeStatus(BaseModel):
         ),
     ] = None
     started_at: Annotated[
-        Optional[v1_1.Time],
+        v1_1.Time | None,
         Field(alias="startedAt", description="Time at which this node started"),
     ] = None
     synchronization_status: Annotated[
-        Optional[NodeSynchronizationStatus],
+        NodeSynchronizationStatus | None,
         Field(
             alias="synchronizationStatus",
             description=("SynchronizationStatus is the synchronization status of the node"),
         ),
     ] = None
     task_result_synced: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="taskResultSynced",
             description=("TaskResultSynced is used to determine if the node's output has been received"),
         ),
     ] = None
     template_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="templateName",
             description=(
@@ -2664,7 +2627,7 @@ class NodeStatus(BaseModel):
         ),
     ] = None
     template_ref: Annotated[
-        Optional[TemplateRef],
+        TemplateRef | None,
         Field(
             alias="templateRef",
             description=(
@@ -2675,7 +2638,7 @@ class NodeStatus(BaseModel):
         ),
     ] = None
     template_scope: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="templateScope",
             description=("TemplateScope is the template scope in which the template of this node was retrieved."),
@@ -2684,16 +2647,16 @@ class NodeStatus(BaseModel):
     type: Annotated[str, Field(description="Type indicates type of node")]
 
 
-class PodGC(BaseModel):
+class PodGC(APIBaseModel):
     delete_delay_duration: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="deleteDelayDuration",
             description=("DeleteDelayDuration specifies the duration before pods in the GC queue get deleted."),
         ),
     ] = None
     label_selector: Annotated[
-        Optional[v1_1.LabelSelector],
+        v1_1.LabelSelector | None,
         Field(
             alias="labelSelector",
             description=(
@@ -2703,7 +2666,7 @@ class PodGC(BaseModel):
         ),
     ] = None
     strategy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 'Strategy is the strategy to use. One of "OnPodCompletion",'
@@ -2714,13 +2677,13 @@ class PodGC(BaseModel):
     ] = None
 
 
-class Submit(BaseModel):
+class Submit(APIBaseModel):
     arguments: Annotated[
-        Optional[Arguments],
+        Arguments | None,
         Field(description=("Arguments extracted from the event and then set as arguments to the workflow created.")),
     ] = None
     metadata: Annotated[
-        Optional[v1_1.ObjectMeta],
+        v1_1.ObjectMeta | None,
         Field(description=("Metadata optional means to customize select fields of the workflow metadata")),
     ] = None
     workflow_template_ref: Annotated[
@@ -2732,14 +2695,14 @@ class Submit(BaseModel):
     ]
 
 
-class WorkflowEventBindingSpec(BaseModel):
+class WorkflowEventBindingSpec(APIBaseModel):
     event: Annotated[Event, Field(description="Event is the event to bind to")]
-    submit: Annotated[Optional[Submit], Field(description="Submit is the workflow template to submit")] = None
+    submit: Annotated[Submit | None, Field(description="Submit is the workflow template to submit")] = None
 
 
-class WorkflowEventBinding(BaseModel):
+class WorkflowEventBinding(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -2751,7 +2714,7 @@ class WorkflowEventBinding(BaseModel):
         ),
     ] = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -2765,9 +2728,9 @@ class WorkflowEventBinding(BaseModel):
     spec: WorkflowEventBindingSpec
 
 
-class ContainerNode(BaseModel):
+class ContainerNode(APIBaseModel):
     args: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Arguments to the entrypoint. The container image's CMD is used if"
@@ -2783,7 +2746,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     command: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Entrypoint array. Not executed within a shell. The container image's"
@@ -2799,13 +2762,13 @@ class ContainerNode(BaseModel):
             )
         ),
     ] = None
-    dependencies: Optional[List[str]] = None
+    dependencies: list[str] | None = None
     env: Annotated[
-        Optional[List[v1.EnvVar]],
+        list[v1.EnvVar] | None,
         Field(description=("List of environment variables to set in the container. Cannot be updated.")),
     ] = None
     env_from: Annotated[
-        Optional[List[v1.EnvFromSource]],
+        list[v1.EnvFromSource] | None,
         Field(
             alias="envFrom",
             description=(
@@ -2819,7 +2782,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     image: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Container image name. More info:"
@@ -2831,7 +2794,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     image_pull_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="imagePullPolicy",
             description=(
@@ -2843,7 +2806,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     lifecycle: Annotated[
-        Optional[v1.Lifecycle],
+        v1.Lifecycle | None,
         Field(
             description=(
                 "Actions that the management system should take in response to"
@@ -2852,7 +2815,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     liveness_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="livenessProbe",
             description=(
@@ -2872,7 +2835,7 @@ class ContainerNode(BaseModel):
         ),
     ]
     ports: Annotated[
-        Optional[List[v1.ContainerPort]],
+        list[v1.ContainerPort] | None,
         Field(
             description=(
                 "List of ports to expose from the container. Not specifying a port here"
@@ -2886,7 +2849,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     readiness_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="readinessProbe",
             description=(
@@ -2898,14 +2861,14 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     resize_policy: Annotated[
-        Optional[List[v1.ContainerResizePolicy]],
+        list[v1.ContainerResizePolicy] | None,
         Field(
             alias="resizePolicy",
             description="Resources resize policy for the container.",
         ),
     ] = None
     resources: Annotated[
-        Optional[v1.ResourceRequirements],
+        v1.ResourceRequirements | None,
         Field(
             description=(
                 "Compute Resources required by this container. Cannot be updated. More"
@@ -2915,7 +2878,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     restart_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="restartPolicy",
             description=(
@@ -2939,7 +2902,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     security_context: Annotated[
-        Optional[v1.SecurityContext],
+        v1.SecurityContext | None,
         Field(
             alias="securityContext",
             description=(
@@ -2951,7 +2914,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     startup_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="startupProbe",
             description=(
@@ -2967,7 +2930,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     stdin: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Whether this container should allocate a buffer for stdin in the"
@@ -2977,7 +2940,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     stdin_once: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="stdinOnce",
             description=(
@@ -2994,7 +2957,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     termination_message_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="terminationMessagePath",
             description=(
@@ -3009,7 +2972,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     termination_message_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="terminationMessagePolicy",
             description=(
@@ -3024,7 +2987,7 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     tty: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Whether this container should allocate a TTY for itself, also requires"
@@ -3033,21 +2996,21 @@ class ContainerNode(BaseModel):
         ),
     ] = None
     volume_devices: Annotated[
-        Optional[List[v1.VolumeDevice]],
+        list[v1.VolumeDevice] | None,
         Field(
             alias="volumeDevices",
             description=("volumeDevices is the list of block devices to be used by the container."),
         ),
     ] = None
     volume_mounts: Annotated[
-        Optional[List[v1.VolumeMount]],
+        list[v1.VolumeMount] | None,
         Field(
             alias="volumeMounts",
             description=("Pod volumes to mount into the container's filesystem. Cannot be updated."),
         ),
     ] = None
     working_dir: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="workingDir",
             description=(
@@ -3059,9 +3022,9 @@ class ContainerNode(BaseModel):
     ] = None
 
 
-class ScriptTemplate(BaseModel):
+class ScriptTemplate(APIBaseModel):
     args: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Arguments to the entrypoint. The container image's CMD is used if"
@@ -3077,7 +3040,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     command: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Entrypoint array. Not executed within a shell. The container image's"
@@ -3094,11 +3057,11 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     env: Annotated[
-        Optional[List[v1.EnvVar]],
+        list[v1.EnvVar] | None,
         Field(description=("List of environment variables to set in the container. Cannot be updated.")),
     ] = None
     env_from: Annotated[
-        Optional[List[v1.EnvFromSource]],
+        list[v1.EnvFromSource] | None,
         Field(
             alias="envFrom",
             description=(
@@ -3124,7 +3087,7 @@ class ScriptTemplate(BaseModel):
         ),
     ]
     image_pull_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="imagePullPolicy",
             description=(
@@ -3136,7 +3099,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     lifecycle: Annotated[
-        Optional[v1.Lifecycle],
+        v1.Lifecycle | None,
         Field(
             description=(
                 "Actions that the management system should take in response to"
@@ -3145,7 +3108,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     liveness_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="livenessProbe",
             description=(
@@ -3156,7 +3119,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the container specified as a DNS_LABEL. Each container in a"
@@ -3165,7 +3128,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     ports: Annotated[
-        Optional[List[v1.ContainerPort]],
+        list[v1.ContainerPort] | None,
         Field(
             description=(
                 "List of ports to expose from the container. Not specifying a port here"
@@ -3179,7 +3142,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     readiness_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="readinessProbe",
             description=(
@@ -3191,14 +3154,14 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     resize_policy: Annotated[
-        Optional[List[v1.ContainerResizePolicy]],
+        list[v1.ContainerResizePolicy] | None,
         Field(
             alias="resizePolicy",
             description="Resources resize policy for the container.",
         ),
     ] = None
     resources: Annotated[
-        Optional[v1.ResourceRequirements],
+        v1.ResourceRequirements | None,
         Field(
             description=(
                 "Compute Resources required by this container. Cannot be updated. More"
@@ -3208,7 +3171,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     restart_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="restartPolicy",
             description=(
@@ -3232,7 +3195,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     security_context: Annotated[
-        Optional[v1.SecurityContext],
+        v1.SecurityContext | None,
         Field(
             alias="securityContext",
             description=(
@@ -3248,7 +3211,7 @@ class ScriptTemplate(BaseModel):
         Field(description="Source contains the source code of the script to execute"),
     ]
     startup_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="startupProbe",
             description=(
@@ -3264,7 +3227,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     stdin: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Whether this container should allocate a buffer for stdin in the"
@@ -3274,7 +3237,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     stdin_once: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="stdinOnce",
             description=(
@@ -3291,7 +3254,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     termination_message_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="terminationMessagePath",
             description=(
@@ -3306,7 +3269,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     termination_message_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="terminationMessagePolicy",
             description=(
@@ -3321,7 +3284,7 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     tty: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Whether this container should allocate a TTY for itself, also requires"
@@ -3330,21 +3293,21 @@ class ScriptTemplate(BaseModel):
         ),
     ] = None
     volume_devices: Annotated[
-        Optional[List[v1.VolumeDevice]],
+        list[v1.VolumeDevice] | None,
         Field(
             alias="volumeDevices",
             description=("volumeDevices is the list of block devices to be used by the container."),
         ),
     ] = None
     volume_mounts: Annotated[
-        Optional[List[v1.VolumeMount]],
+        list[v1.VolumeMount] | None,
         Field(
             alias="volumeMounts",
             description=("Pod volumes to mount into the container's filesystem. Cannot be updated."),
         ),
     ] = None
     working_dir: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="workingDir",
             description=(
@@ -3356,9 +3319,9 @@ class ScriptTemplate(BaseModel):
     ] = None
 
 
-class UserContainer(BaseModel):
+class UserContainer(APIBaseModel):
     args: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Arguments to the entrypoint. The container image's CMD is used if"
@@ -3374,7 +3337,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     command: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Entrypoint array. Not executed within a shell. The container image's"
@@ -3391,11 +3354,11 @@ class UserContainer(BaseModel):
         ),
     ] = None
     env: Annotated[
-        Optional[List[v1.EnvVar]],
+        list[v1.EnvVar] | None,
         Field(description=("List of environment variables to set in the container. Cannot be updated.")),
     ] = None
     env_from: Annotated[
-        Optional[List[v1.EnvFromSource]],
+        list[v1.EnvFromSource] | None,
         Field(
             alias="envFrom",
             description=(
@@ -3409,7 +3372,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     image: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Container image name. More info:"
@@ -3421,7 +3384,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     image_pull_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="imagePullPolicy",
             description=(
@@ -3433,7 +3396,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     lifecycle: Annotated[
-        Optional[v1.Lifecycle],
+        v1.Lifecycle | None,
         Field(
             description=(
                 "Actions that the management system should take in response to"
@@ -3442,7 +3405,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     liveness_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="livenessProbe",
             description=(
@@ -3453,7 +3416,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     mirror_volume_mounts: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="mirrorVolumeMounts",
             description=(
@@ -3475,7 +3438,7 @@ class UserContainer(BaseModel):
         ),
     ]
     ports: Annotated[
-        Optional[List[v1.ContainerPort]],
+        list[v1.ContainerPort] | None,
         Field(
             description=(
                 "List of ports to expose from the container. Not specifying a port here"
@@ -3489,7 +3452,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     readiness_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="readinessProbe",
             description=(
@@ -3501,14 +3464,14 @@ class UserContainer(BaseModel):
         ),
     ] = None
     resize_policy: Annotated[
-        Optional[List[v1.ContainerResizePolicy]],
+        list[v1.ContainerResizePolicy] | None,
         Field(
             alias="resizePolicy",
             description="Resources resize policy for the container.",
         ),
     ] = None
     resources: Annotated[
-        Optional[v1.ResourceRequirements],
+        v1.ResourceRequirements | None,
         Field(
             description=(
                 "Compute Resources required by this container. Cannot be updated. More"
@@ -3518,7 +3481,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     restart_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="restartPolicy",
             description=(
@@ -3542,7 +3505,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     security_context: Annotated[
-        Optional[v1.SecurityContext],
+        v1.SecurityContext | None,
         Field(
             alias="securityContext",
             description=(
@@ -3554,7 +3517,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     startup_probe: Annotated[
-        Optional[v1.Probe],
+        v1.Probe | None,
         Field(
             alias="startupProbe",
             description=(
@@ -3570,7 +3533,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     stdin: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Whether this container should allocate a buffer for stdin in the"
@@ -3580,7 +3543,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     stdin_once: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="stdinOnce",
             description=(
@@ -3597,7 +3560,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     termination_message_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="terminationMessagePath",
             description=(
@@ -3612,7 +3575,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     termination_message_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="terminationMessagePolicy",
             description=(
@@ -3627,7 +3590,7 @@ class UserContainer(BaseModel):
         ),
     ] = None
     tty: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Whether this container should allocate a TTY for itself, also requires"
@@ -3636,21 +3599,21 @@ class UserContainer(BaseModel):
         ),
     ] = None
     volume_devices: Annotated[
-        Optional[List[v1.VolumeDevice]],
+        list[v1.VolumeDevice] | None,
         Field(
             alias="volumeDevices",
             description=("volumeDevices is the list of block devices to be used by the container."),
         ),
     ] = None
     volume_mounts: Annotated[
-        Optional[List[v1.VolumeMount]],
+        list[v1.VolumeMount] | None,
         Field(
             alias="volumeMounts",
             description=("Pod volumes to mount into the container's filesystem. Cannot be updated."),
         ),
     ] = None
     working_dir: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="workingDir",
             description=(
@@ -3662,9 +3625,9 @@ class UserContainer(BaseModel):
     ] = None
 
 
-class WorkflowEventBindingList(BaseModel):
+class WorkflowEventBindingList(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -3675,9 +3638,9 @@ class WorkflowEventBindingList(BaseModel):
             ),
         ),
     ] = None
-    items: Optional[List[WorkflowEventBinding]] = None
+    items: list[WorkflowEventBinding] | None = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -3690,10 +3653,10 @@ class WorkflowEventBindingList(BaseModel):
     metadata: v1_1.ListMeta
 
 
-class ContainerSetTemplate(BaseModel):
-    containers: List[ContainerNode]
+class ContainerSetTemplate(APIBaseModel):
+    containers: list[ContainerNode]
     retry_strategy: Annotated[
-        Optional[ContainerSetRetryStrategy],
+        ContainerSetRetryStrategy | None,
         Field(
             alias="retryStrategy",
             description=(
@@ -3704,12 +3667,12 @@ class ContainerSetTemplate(BaseModel):
             ),
         ),
     ] = None
-    volume_mounts: Annotated[Optional[List[v1.VolumeMount]], Field(alias="volumeMounts")] = None
+    volume_mounts: Annotated[list[v1.VolumeMount] | None, Field(alias="volumeMounts")] = None
 
 
-class DAGTemplate(BaseModel):
+class DAGTemplate(APIBaseModel):
     fail_fast: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="failFast",
             description=(
@@ -3726,19 +3689,15 @@ class DAGTemplate(BaseModel):
         ),
     ] = None
     target: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Target are one or more names of targets to execute in a DAG"),
     ] = None
-    tasks: Annotated[List[DAGTask], Field(description="Tasks are a list of DAG tasks")]
+    tasks: Annotated[list[DAGTask], Field(description="Tasks are a list of DAG tasks")]
 
 
-class ParallelSteps(BaseModel):
-    __root__: List[WorkflowStep]
-
-
-class ClusterWorkflowTemplateList(BaseModel):
+class ClusterWorkflowTemplateList(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -3749,9 +3708,9 @@ class ClusterWorkflowTemplateList(BaseModel):
             ),
         ),
     ] = None
-    items: Optional[List[ClusterWorkflowTemplate]] = None
+    items: list[ClusterWorkflowTemplate] | None = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -3764,9 +3723,9 @@ class ClusterWorkflowTemplateList(BaseModel):
     metadata: v1_1.ListMeta
 
 
-class CronWorkflowList(BaseModel):
+class CronWorkflowList(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -3777,9 +3736,9 @@ class CronWorkflowList(BaseModel):
             ),
         ),
     ] = None
-    items: Optional[List[CronWorkflow]] = None
+    items: list[CronWorkflow] | None = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -3792,9 +3751,9 @@ class CronWorkflowList(BaseModel):
     metadata: v1_1.ListMeta
 
 
-class WorkflowList(BaseModel):
+class WorkflowList(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -3805,9 +3764,9 @@ class WorkflowList(BaseModel):
             ),
         ),
     ] = None
-    items: Optional[List[Workflow]] = None
+    items: list[Workflow] | None = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -3820,9 +3779,9 @@ class WorkflowList(BaseModel):
     metadata: v1_1.ListMeta
 
 
-class WorkflowTemplateList(BaseModel):
+class WorkflowTemplateList(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -3833,9 +3792,9 @@ class WorkflowTemplateList(BaseModel):
             ),
         ),
     ] = None
-    items: Optional[List[WorkflowTemplate]] = None
+    items: list[WorkflowTemplate] | None = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -3848,9 +3807,9 @@ class WorkflowTemplateList(BaseModel):
     metadata: v1_1.ListMeta
 
 
-class Template(BaseModel):
+class Template(APIBaseModel):
     active_deadline_seconds: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(
             alias="activeDeadlineSeconds",
             description=(
@@ -3862,7 +3821,7 @@ class Template(BaseModel):
         ),
     ] = None
     affinity: Annotated[
-        Optional[v1.Affinity],
+        v1.Affinity | None,
         Field(
             description=(
                 "Affinity sets the pod's scheduling constraints Overrides the affinity"
@@ -3871,11 +3830,11 @@ class Template(BaseModel):
         ),
     ] = None
     annotations: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(description=("Annotations is a list of annotations to add to the template at runtime")),
     ] = None
     archive_location: Annotated[
-        Optional[ArtifactLocation],
+        ArtifactLocation | None,
         Field(
             alias="archiveLocation",
             description=(
@@ -3888,7 +3847,7 @@ class Template(BaseModel):
         ),
     ] = None
     automount_service_account_token: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="automountServiceAccountToken",
             description=(
@@ -3899,35 +3858,32 @@ class Template(BaseModel):
         ),
     ] = None
     container: Annotated[
-        Optional[v1.Container],
+        v1.Container | None,
         Field(description="Container is the main container image to run in the pod"),
     ] = None
     container_set: Annotated[
-        Optional[ContainerSetTemplate],
+        ContainerSetTemplate | None,
         Field(
             alias="containerSet",
             description="ContainerSet groups multiple containers within a single pod.",
         ),
     ] = None
     daemon: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Daemon will allow a workflow to proceed to the next step so long as the container reaches readiness"
             )
         ),
     ] = None
-    dag: Annotated[
-        Optional[DAGTemplate],
-        Field(description="DAG template subtype which runs a DAG"),
-    ] = None
-    data: Annotated[Optional[Data], Field(description="Data is a data template")] = None
+    dag: Annotated[DAGTemplate | None, Field(description="DAG template subtype which runs a DAG")] = None
+    data: Annotated[Data | None, Field(description="Data is a data template")] = None
     executor: Annotated[
-        Optional[ExecutorConfig],
+        ExecutorConfig | None,
         Field(description="Executor holds configurations of the executor container."),
     ] = None
     fail_fast: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="failFast",
             description=(
@@ -3938,39 +3894,39 @@ class Template(BaseModel):
         ),
     ] = None
     host_aliases: Annotated[
-        Optional[List[v1.HostAlias]],
+        list[v1.HostAlias] | None,
         Field(
             alias="hostAliases",
             description=("HostAliases is an optional list of hosts and IPs that will be injected into the pod spec"),
         ),
     ] = None
-    http: Annotated[Optional[HTTP], Field(description="HTTP makes a HTTP request")] = None
+    http: Annotated[HTTP | None, Field(description="HTTP makes a HTTP request")] = None
     init_containers: Annotated[
-        Optional[List[UserContainer]],
+        list[UserContainer] | None,
         Field(
             alias="initContainers",
             description=("InitContainers is a list of containers which run before the main container."),
         ),
     ] = None
     inputs: Annotated[
-        Optional[Inputs],
+        Inputs | None,
         Field(description=("Inputs describe what inputs parameters and artifacts are supplied to this template")),
     ] = None
     memoize: Annotated[
-        Optional[Memoize],
+        Memoize | None,
         Field(description=("Memoize allows templates to use outputs generated from already executed templates")),
     ] = None
     metadata: Annotated[
-        Optional[Metadata],
+        Metadata | None,
         Field(description="Metdata sets the pods's metadata, i.e. annotations and labels"),
     ] = None
     metrics: Annotated[
-        Optional[Metrics],
+        Metrics | None,
         Field(description="Metrics are a list of metrics emitted from this template"),
     ] = None
-    name: Annotated[Optional[str], Field(description="Name is the name of the template")] = None
+    name: Annotated[str | None, Field(description="Name is the name of the template")] = None
     node_selector: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="nodeSelector",
             description=(
@@ -3981,11 +3937,11 @@ class Template(BaseModel):
         ),
     ] = None
     outputs: Annotated[
-        Optional[Outputs],
+        Outputs | None,
         Field(description=("Outputs describe the parameters and artifacts that this template produces")),
     ] = None
     parallelism: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "Parallelism limits the max total parallel pods that can execute at the"
@@ -3996,7 +3952,7 @@ class Template(BaseModel):
         ),
     ] = None
     plugin: Annotated[
-        Optional[Plugin],
+        Plugin | None,
         Field(
             description=(
                 "Plugin is a plugin template Note: the structure of a plugin template"
@@ -4007,7 +3963,7 @@ class Template(BaseModel):
         ),
     ] = None
     pod_spec_patch: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="podSpecPatch",
             description=(
@@ -4018,25 +3974,25 @@ class Template(BaseModel):
         ),
     ] = None
     priority_class_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="priorityClassName",
             description="PriorityClassName to apply to workflow pods.",
         ),
     ] = None
     resource: Annotated[
-        Optional[ResourceTemplate],
+        ResourceTemplate | None,
         Field(description="Resource template subtype which can run k8s resources"),
     ] = None
     retry_strategy: Annotated[
-        Optional[RetryStrategy],
+        RetryStrategy | None,
         Field(
             alias="retryStrategy",
             description="RetryStrategy describes how to retry a template when it fails",
         ),
     ] = None
     scheduler_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="schedulerName",
             description=(
@@ -4047,11 +4003,11 @@ class Template(BaseModel):
         ),
     ] = None
     script: Annotated[
-        Optional[ScriptTemplate],
+        ScriptTemplate | None,
         Field(description="Script runs a portion of code against an interpreter"),
     ] = None
     security_context: Annotated[
-        Optional[v1.PodSecurityContext],
+        v1.PodSecurityContext | None,
         Field(
             alias="securityContext",
             description=(
@@ -4062,14 +4018,14 @@ class Template(BaseModel):
         ),
     ] = None
     service_account_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serviceAccountName",
             description="ServiceAccountName to apply to workflow pods",
         ),
     ] = None
     sidecars: Annotated[
-        Optional[List[UserContainer]],
+        list[UserContainer] | None,
         Field(
             description=(
                 "Sidecars is a list of containers which run alongside the main"
@@ -4079,19 +4035,19 @@ class Template(BaseModel):
         ),
     ] = None
     steps: Annotated[
-        Optional[List[ParallelSteps]],
+        list[ParallelSteps] | None,
         Field(description="Steps define a series of sequential/parallel workflow steps"),
     ] = None
     suspend: Annotated[
-        Optional[SuspendTemplate],
+        SuspendTemplate | None,
         Field(description=("Suspend template subtype which can suspend a workflow when reaching the step")),
     ] = None
     synchronization: Annotated[
-        Optional[Synchronization],
+        Synchronization | None,
         Field(description=("Synchronization holds synchronization lock configuration for this template")),
     ] = None
     timeout: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Timeout allows to set the total node execution timeout duration"
@@ -4102,22 +4058,22 @@ class Template(BaseModel):
         ),
     ] = None
     tolerations: Annotated[
-        Optional[List[v1.Toleration]],
+        list[v1.Toleration] | None,
         Field(description="Tolerations to apply to workflow pods."),
     ] = None
     volumes: Annotated[
-        Optional[List[v1.Volume]],
+        list[v1.Volume] | None,
         Field(description=("Volumes is a list of volumes that can be mounted by containers in a template.")),
     ] = None
 
 
-class DAGTask(BaseModel):
+class DAGTask(APIBaseModel):
     arguments: Annotated[
-        Optional[Arguments],
+        Arguments | None,
         Field(description=("Arguments are the parameter and artifact arguments to the template")),
     ] = None
     continue_on: Annotated[
-        Optional[ContinueOn],
+        ContinueOn | None,
         Field(
             alias="continueOn",
             description=(
@@ -4127,15 +4083,15 @@ class DAGTask(BaseModel):
         ),
     ] = None
     dependencies: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(description="Dependencies are name of other targets which this depends on"),
     ] = None
     depends: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Depends are name of other targets which this depends on"),
     ] = None
     hooks: Annotated[
-        Optional[Dict[str, LifecycleHook]],
+        dict[str, LifecycleHook] | None,
         Field(
             description=(
                 "Hooks hold the lifecycle hook which is invoked at lifecycle of task,"
@@ -4145,7 +4101,7 @@ class DAGTask(BaseModel):
         ),
     ] = None
     inline: Annotated[
-        Optional[Template],
+        Template | None,
         Field(
             description=(
                 "Inline is the template. Template must be empty if this is declared"
@@ -4158,7 +4114,7 @@ class DAGTask(BaseModel):
     ] = None
     name: Annotated[str, Field(description="Name is the name of the target")]
     on_exit: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="onExit",
             description=(
@@ -4168,20 +4124,20 @@ class DAGTask(BaseModel):
             ),
         ),
     ] = None
-    template: Annotated[Optional[str], Field(description="Name of template to execute")] = None
+    template: Annotated[str | None, Field(description="Name of template to execute")] = None
     template_ref: Annotated[
-        Optional[TemplateRef],
+        TemplateRef | None,
         Field(
             alias="templateRef",
             description=("TemplateRef is the reference to the template resource to execute."),
         ),
     ] = None
     when: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("When is an expression in which the task should conditionally execute")),
     ] = None
     with_items: Annotated[
-        Optional[List[Item]],
+        list[Item] | None,
         Field(
             alias="withItems",
             description=(
@@ -4193,7 +4149,7 @@ class DAGTask(BaseModel):
         ),
     ] = None
     with_param: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="withParam",
             description=(
@@ -4203,7 +4159,7 @@ class DAGTask(BaseModel):
         ),
     ] = None
     with_sequence: Annotated[
-        Optional[Sequence],
+        Sequence | None,
         Field(
             alias="withSequence",
             description="WithSequence expands a task into a numeric sequence",
@@ -4211,9 +4167,9 @@ class DAGTask(BaseModel):
     ] = None
 
 
-class WorkflowSpec(BaseModel):
+class WorkflowSpec(APIBaseModel):
     active_deadline_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="activeDeadlineSeconds",
             description=(
@@ -4225,7 +4181,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     affinity: Annotated[
-        Optional[v1.Affinity],
+        v1.Affinity | None,
         Field(
             description=(
                 "Affinity sets the scheduling constraints for all pods in the"
@@ -4235,14 +4191,14 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     archive_logs: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="archiveLogs",
             description=("ArchiveLogs indicates if the container logs should be archived"),
         ),
     ] = None
     arguments: Annotated[
-        Optional[Arguments],
+        Arguments | None,
         Field(
             description=(
                 "Arguments contain the parameters and artifacts sent to the workflow"
@@ -4253,7 +4209,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     artifact_gc: Annotated[
-        Optional[WorkflowLevelArtifactGC],
+        WorkflowLevelArtifactGC | None,
         Field(
             alias="artifactGC",
             description=(
@@ -4264,7 +4220,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     artifact_repository_ref: Annotated[
-        Optional[ArtifactRepositoryRef],
+        ArtifactRepositoryRef | None,
         Field(
             alias="artifactRepositoryRef",
             description=(
@@ -4273,7 +4229,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     automount_service_account_token: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="automountServiceAccountToken",
             description=(
@@ -4284,7 +4240,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     dns_config: Annotated[
-        Optional[v1.PodDNSConfig],
+        v1.PodDNSConfig | None,
         Field(
             alias="dnsConfig",
             description=(
@@ -4293,7 +4249,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     dns_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="dnsPolicy",
             description=(
@@ -4307,7 +4263,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     entrypoint: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Entrypoint is a template reference to the starting point of the io.argoproj.workflow.v1alpha1."
@@ -4315,13 +4271,13 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     executor: Annotated[
-        Optional[ExecutorConfig],
+        ExecutorConfig | None,
         Field(
             description=("Executor holds configurations of executor containers of the io.argoproj.workflow.v1alpha1.")
         ),
     ] = None
     hooks: Annotated[
-        Optional[Dict[str, LifecycleHook]],
+        dict[str, LifecycleHook] | None,
         Field(
             description=(
                 "Hooks holds the lifecycle hook which is invoked at lifecycle of step,"
@@ -4330,16 +4286,16 @@ class WorkflowSpec(BaseModel):
             )
         ),
     ] = None
-    host_aliases: Annotated[Optional[List[v1.HostAlias]], Field(alias="hostAliases")] = None
+    host_aliases: Annotated[list[v1.HostAlias] | None, Field(alias="hostAliases")] = None
     host_network: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="hostNetwork",
             description=("Host networking requested for this workflow pod. Default to false."),
         ),
     ] = None
     image_pull_secrets: Annotated[
-        Optional[List[v1.LocalObjectReference]],
+        list[v1.LocalObjectReference] | None,
         Field(
             alias="imagePullSecrets",
             description=(
@@ -4353,11 +4309,11 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     metrics: Annotated[
-        Optional[Metrics],
+        Metrics | None,
         Field(description="Metrics are a list of metrics emitted from this Workflow"),
     ] = None
     node_selector: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="nodeSelector",
             description=(
@@ -4368,7 +4324,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     on_exit: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="onExit",
             description=(
@@ -4379,7 +4335,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     parallelism: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "Parallelism limits the max total parallel pods that can execute at the same time in a workflow"
@@ -4387,7 +4343,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     pod_disruption_budget: Annotated[
-        Optional[v1_2.PodDisruptionBudgetSpec],
+        v1_2.PodDisruptionBudgetSpec | None,
         Field(
             alias="podDisruptionBudget",
             description=(
@@ -4399,28 +4355,28 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     pod_gc: Annotated[
-        Optional[PodGC],
+        PodGC | None,
         Field(
             alias="podGC",
             description=("PodGC describes the strategy to use when deleting completed pods"),
         ),
     ] = None
     pod_metadata: Annotated[
-        Optional[Metadata],
+        Metadata | None,
         Field(
             alias="podMetadata",
             description=("PodMetadata defines additional metadata that should be applied to workflow pods"),
         ),
     ] = None
     pod_priority_class_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="podPriorityClassName",
             description="PriorityClassName to apply to workflow pods.",
         ),
     ] = None
     pod_spec_patch: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="podSpecPatch",
             description=(
@@ -4431,7 +4387,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     priority: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "Priority is used if controller is configured to process limited number"
@@ -4441,14 +4397,14 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     retry_strategy: Annotated[
-        Optional[RetryStrategy],
+        RetryStrategy | None,
         Field(
             alias="retryStrategy",
             description=("RetryStrategy for all templates in the io.argoproj.workflow.v1alpha1."),
         ),
     ] = None
     scheduler_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="schedulerName",
             description=(
@@ -4459,7 +4415,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     security_context: Annotated[
-        Optional[v1.PodSecurityContext],
+        v1.PodSecurityContext | None,
         Field(
             alias="securityContext",
             description=(
@@ -4470,28 +4426,28 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     service_account_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="serviceAccountName",
             description=("ServiceAccountName is the name of the ServiceAccount to run all pods of the workflow as."),
         ),
     ] = None
     shutdown: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Shutdown will shutdown the workflow according to its ShutdownStrategy")),
     ] = None
     suspend: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=("Suspend will suspend the workflow and prevent execution of any future steps in the workflow")
         ),
     ] = None
     synchronization: Annotated[
-        Optional[Synchronization],
+        Synchronization | None,
         Field(description=("Synchronization holds synchronization lock configuration for this Workflow")),
     ] = None
     template_defaults: Annotated[
-        Optional[Template],
+        Template | None,
         Field(
             alias="templateDefaults",
             description=(
@@ -4501,15 +4457,15 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     templates: Annotated[
-        Optional[List[Template]],
+        list[Template] | None,
         Field(description="Templates is a list of workflow templates used in a workflow"),
     ] = None
     tolerations: Annotated[
-        Optional[List[v1.Toleration]],
+        list[v1.Toleration] | None,
         Field(description="Tolerations to apply to workflow pods."),
     ] = None
     ttl_strategy: Annotated[
-        Optional[TTLStrategy],
+        TTLStrategy | None,
         Field(
             alias="ttlStrategy",
             description=(
@@ -4522,14 +4478,14 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     volume_claim_gc: Annotated[
-        Optional[VolumeClaimGC],
+        VolumeClaimGC | None,
         Field(
             alias="volumeClaimGC",
             description=("VolumeClaimGC describes the strategy to use when deleting volumes from completed workflows"),
         ),
     ] = None
     volume_claim_templates: Annotated[
-        Optional[List[v1.PersistentVolumeClaim]],
+        list[v1.PersistentVolumeClaim] | None,
         Field(
             alias="volumeClaimTemplates",
             description=(
@@ -4541,7 +4497,7 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     volumes: Annotated[
-        Optional[List[v1.Volume]],
+        list[v1.Volume] | None,
         Field(
             description=(
                 "Volumes is a list of volumes that can be mounted by containers in a io.argoproj.workflow.v1alpha1."
@@ -4549,14 +4505,14 @@ class WorkflowSpec(BaseModel):
         ),
     ] = None
     workflow_metadata: Annotated[
-        Optional[WorkflowMetadata],
+        WorkflowMetadata | None,
         Field(
             alias="workflowMetadata",
             description=("WorkflowMetadata contains some metadata of the workflow to refer to"),
         ),
     ] = None
     workflow_template_ref: Annotated[
-        Optional[WorkflowTemplateRef],
+        WorkflowTemplateRef | None,
         Field(
             alias="workflowTemplateRef",
             description=("WorkflowTemplateRef holds a reference to a WorkflowTemplate for execution"),
@@ -4564,13 +4520,10 @@ class WorkflowSpec(BaseModel):
     ] = None
 
 
-class WorkflowStep(BaseModel):
-    arguments: Annotated[
-        Optional[Arguments],
-        Field(description="Arguments hold arguments to the template"),
-    ] = None
+class WorkflowStep(APIBaseModel):
+    arguments: Annotated[Arguments | None, Field(description="Arguments hold arguments to the template")] = None
     continue_on: Annotated[
-        Optional[ContinueOn],
+        ContinueOn | None,
         Field(
             alias="continueOn",
             description=(
@@ -4580,7 +4533,7 @@ class WorkflowStep(BaseModel):
         ),
     ] = None
     hooks: Annotated[
-        Optional[Dict[str, LifecycleHook]],
+        dict[str, LifecycleHook] | None,
         Field(
             description=(
                 "Hooks holds the lifecycle hook which is invoked at lifecycle of step,"
@@ -4590,7 +4543,7 @@ class WorkflowStep(BaseModel):
         ),
     ] = None
     inline: Annotated[
-        Optional[Template],
+        Template | None,
         Field(
             description=(
                 "Inline is the template. Template must be empty if this is declared"
@@ -4602,9 +4555,9 @@ class WorkflowStep(BaseModel):
             )
         ),
     ] = None
-    name: Annotated[Optional[str], Field(description="Name of the step")] = None
+    name: Annotated[str | None, Field(description="Name of the step")] = None
     on_exit: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="onExit",
             description=(
@@ -4615,22 +4568,22 @@ class WorkflowStep(BaseModel):
         ),
     ] = None
     template: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Template is the name of the template to execute as the step"),
     ] = None
     template_ref: Annotated[
-        Optional[TemplateRef],
+        TemplateRef | None,
         Field(
             alias="templateRef",
             description=("TemplateRef is the reference to the template resource to execute as the step."),
         ),
     ] = None
     when: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("When is an expression in which the step should conditionally execute")),
     ] = None
     with_items: Annotated[
-        Optional[List[Item]],
+        list[Item] | None,
         Field(
             alias="withItems",
             description=(
@@ -4642,7 +4595,7 @@ class WorkflowStep(BaseModel):
         ),
     ] = None
     with_param: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="withParam",
             description=(
@@ -4652,7 +4605,7 @@ class WorkflowStep(BaseModel):
         ),
     ] = None
     with_sequence: Annotated[
-        Optional[Sequence],
+        Sequence | None,
         Field(
             alias="withSequence",
             description="WithSequence expands a step into a numeric sequence",
@@ -4660,9 +4613,9 @@ class WorkflowStep(BaseModel):
     ] = None
 
 
-class ClusterWorkflowTemplate(BaseModel):
+class ClusterWorkflowTemplate(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -4674,7 +4627,7 @@ class ClusterWorkflowTemplate(BaseModel):
         ),
     ] = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -4688,31 +4641,31 @@ class ClusterWorkflowTemplate(BaseModel):
     spec: WorkflowSpec
 
 
-class CronWorkflowSpec(BaseModel):
+class CronWorkflowSpec(APIBaseModel):
     concurrency_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="concurrencyPolicy",
             description=("ConcurrencyPolicy is the K8s-style concurrency policy that will be used"),
         ),
     ] = None
     failed_jobs_history_limit: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="failedJobsHistoryLimit",
             description=("FailedJobsHistoryLimit is the number of failed jobs to be kept at a time"),
         ),
     ] = None
     schedule: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Schedule is a schedule to run the Workflow in Cron format. Deprecated, use Schedules")),
     ] = None
     schedules: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(description=("v3.6 and after: Schedules is a list of schedules to run the Workflow in Cron format")),
     ] = None
     starting_deadline_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="startingDeadlineSeconds",
             description=(
@@ -4723,7 +4676,7 @@ class CronWorkflowSpec(BaseModel):
         ),
     ] = None
     stop_strategy: Annotated[
-        Optional[StopStrategy],
+        StopStrategy | None,
         Field(
             alias="stopStrategy",
             description=(
@@ -4732,18 +4685,18 @@ class CronWorkflowSpec(BaseModel):
         ),
     ] = None
     successful_jobs_history_limit: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="successfulJobsHistoryLimit",
             description=("SuccessfulJobsHistoryLimit is the number of successful jobs to be kept at a time"),
         ),
     ] = None
     suspend: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("Suspend is a flag that will stop new CronWorkflows from running if set to true")),
     ] = None
     timezone: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Timezone is the timezone against which the cron schedule will be"
@@ -4752,11 +4705,11 @@ class CronWorkflowSpec(BaseModel):
         ),
     ] = None
     when: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("v3.6 and after: When is an expression that determines if a run should be scheduled.")),
     ] = None
     workflow_metadata: Annotated[
-        Optional[v1_1.ObjectMeta],
+        v1_1.ObjectMeta | None,
         Field(
             alias="workflowMetadata",
             description=("WorkflowMetadata contains some metadata of the workflow to be run"),
@@ -4771,16 +4724,16 @@ class CronWorkflowSpec(BaseModel):
     ]
 
 
-class WorkflowStatus(BaseModel):
+class WorkflowStatus(APIBaseModel):
     artifact_gc_status: Annotated[
-        Optional[ArtGCStatus],
+        ArtGCStatus | None,
         Field(
             alias="artifactGCStatus",
             description=("ArtifactGCStatus maintains the status of Artifact Garbage Collection"),
         ),
     ] = None
     artifact_repository_ref: Annotated[
-        Optional[ArtifactRepositoryRefStatus],
+        ArtifactRepositoryRefStatus | None,
         Field(
             alias="artifactRepositoryRef",
             description=(
@@ -4790,36 +4743,36 @@ class WorkflowStatus(BaseModel):
         ),
     ] = None
     compressed_nodes: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="compressedNodes",
             description="Compressed and base64 decoded Nodes map",
         ),
     ] = None
     conditions: Annotated[
-        Optional[List[Condition]],
+        list[Condition] | None,
         Field(description="Conditions is a list of conditions the Workflow may have"),
     ] = None
     estimated_duration: Annotated[
-        Optional[int],
+        int | None,
         Field(alias="estimatedDuration", description="EstimatedDuration in seconds."),
     ] = None
     finished_at: Annotated[
-        Optional[v1_1.Time],
+        v1_1.Time | None,
         Field(alias="finishedAt", description="Time at which this workflow completed"),
     ] = None
     message: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=("A human readable message indicating details about why the workflow is in this condition.")
         ),
     ] = None
     nodes: Annotated[
-        Optional[Dict[str, NodeStatus]],
+        dict[str, NodeStatus] | None,
         Field(description="Nodes is a mapping between a node ID and the node's status."),
     ] = None
     offload_node_status_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="offloadNodeStatusVersion",
             description=(
@@ -4830,7 +4783,7 @@ class WorkflowStatus(BaseModel):
         ),
     ] = None
     outputs: Annotated[
-        Optional[Outputs],
+        Outputs | None,
         Field(
             description=(
                 "Outputs captures output values and artifact locations produced by the workflow via global outputs"
@@ -4838,7 +4791,7 @@ class WorkflowStatus(BaseModel):
         ),
     ] = None
     persistent_volume_claims: Annotated[
-        Optional[List[v1.Volume]],
+        list[v1.Volume] | None,
         Field(
             alias="persistentVolumeClaims",
             description=(
@@ -4849,7 +4802,7 @@ class WorkflowStatus(BaseModel):
         ),
     ] = None
     phase: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Phase a simple, high-level summary of where the workflow is in its"
@@ -4859,38 +4812,38 @@ class WorkflowStatus(BaseModel):
             )
         ),
     ] = None
-    progress: Annotated[Optional[str], Field(description="Progress to completion")] = None
+    progress: Annotated[str | None, Field(description="Progress to completion")] = None
     resources_duration: Annotated[
-        Optional[Dict[str, int]],
+        dict[str, int] | None,
         Field(
             alias="resourcesDuration",
             description="ResourcesDuration is the total for the workflow",
         ),
     ] = None
     started_at: Annotated[
-        Optional[v1_1.Time],
+        v1_1.Time | None,
         Field(alias="startedAt", description="Time at which this workflow started"),
     ] = None
     stored_templates: Annotated[
-        Optional[Dict[str, Template]],
+        dict[str, Template] | None,
         Field(
             alias="storedTemplates",
             description=("StoredTemplates is a mapping between a template ref and the node's status."),
         ),
     ] = None
     stored_workflow_template_spec: Annotated[
-        Optional[WorkflowSpec],
+        WorkflowSpec | None,
         Field(
             alias="storedWorkflowTemplateSpec",
             description=("StoredWorkflowSpec stores the WorkflowTemplate spec for future execution."),
         ),
     ] = None
     synchronization: Annotated[
-        Optional[SynchronizationStatus],
+        SynchronizationStatus | None,
         Field(description="Synchronization stores the status of synchronization locks"),
     ] = None
     task_results_completion_status: Annotated[
-        Optional[Dict[str, bool]],
+        dict[str, bool] | None,
         Field(
             alias="taskResultsCompletionStatus",
             description=(
@@ -4902,9 +4855,9 @@ class WorkflowStatus(BaseModel):
     ] = None
 
 
-class WorkflowTemplate(BaseModel):
+class WorkflowTemplate(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -4916,7 +4869,7 @@ class WorkflowTemplate(BaseModel):
         ),
     ] = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -4930,24 +4883,24 @@ class WorkflowTemplate(BaseModel):
     spec: WorkflowSpec
 
 
-class ClusterWorkflowTemplateCreateRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    template: Optional[ClusterWorkflowTemplate] = None
+class ClusterWorkflowTemplateCreateRequest(APIBaseModel):
+    create_options: Annotated[v1_1.CreateOptions | None, Field(alias="createOptions")] = None
+    template: ClusterWorkflowTemplate | None = None
 
 
-class ClusterWorkflowTemplateLintRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    template: Optional[ClusterWorkflowTemplate] = None
+class ClusterWorkflowTemplateLintRequest(APIBaseModel):
+    create_options: Annotated[v1_1.CreateOptions | None, Field(alias="createOptions")] = None
+    template: ClusterWorkflowTemplate | None = None
 
 
-class ClusterWorkflowTemplateUpdateRequest(BaseModel):
-    name: Annotated[Optional[str], Field(description="DEPRECATED: This field is ignored.")] = None
-    template: Optional[ClusterWorkflowTemplate] = None
+class ClusterWorkflowTemplateUpdateRequest(APIBaseModel):
+    name: Annotated[str | None, Field(description="DEPRECATED: This field is ignored.")] = None
+    template: ClusterWorkflowTemplate | None = None
 
 
-class CronWorkflow(BaseModel):
+class CronWorkflow(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -4959,7 +4912,7 @@ class CronWorkflow(BaseModel):
         ),
     ] = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -4971,12 +4924,12 @@ class CronWorkflow(BaseModel):
     ] = None
     metadata: v1_1.ObjectMeta
     spec: CronWorkflowSpec
-    status: Optional[CronWorkflowStatus] = None
+    status: CronWorkflowStatus | None = None
 
 
-class Workflow(BaseModel):
+class Workflow(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -4988,7 +4941,7 @@ class Workflow(BaseModel):
         ),
     ] = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -5000,68 +4953,72 @@ class Workflow(BaseModel):
     ] = None
     metadata: v1_1.ObjectMeta
     spec: WorkflowSpec
-    status: Optional[WorkflowStatus] = None
+    status: WorkflowStatus | None = None
 
 
-class WorkflowTemplateCreateRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    namespace: Optional[str] = None
-    template: Optional[WorkflowTemplate] = None
+class WorkflowTemplateCreateRequest(APIBaseModel):
+    create_options: Annotated[v1_1.CreateOptions | None, Field(alias="createOptions")] = None
+    namespace: str | None = None
+    template: WorkflowTemplate | None = None
 
 
-class WorkflowTemplateLintRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    namespace: Optional[str] = None
-    template: Optional[WorkflowTemplate] = None
+class WorkflowTemplateLintRequest(APIBaseModel):
+    create_options: Annotated[v1_1.CreateOptions | None, Field(alias="createOptions")] = None
+    namespace: str | None = None
+    template: WorkflowTemplate | None = None
 
 
-class WorkflowTemplateUpdateRequest(BaseModel):
-    name: Annotated[Optional[str], Field(description="DEPRECATED: This field is ignored.")] = None
-    namespace: Optional[str] = None
-    template: Optional[WorkflowTemplate] = None
+class WorkflowTemplateUpdateRequest(APIBaseModel):
+    name: Annotated[str | None, Field(description="DEPRECATED: This field is ignored.")] = None
+    namespace: str | None = None
+    template: WorkflowTemplate | None = None
 
 
-class CreateCronWorkflowRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
-    namespace: Optional[str] = None
+class CreateCronWorkflowRequest(APIBaseModel):
+    create_options: Annotated[v1_1.CreateOptions | None, Field(alias="createOptions")] = None
+    cron_workflow: Annotated[CronWorkflow | None, Field(alias="cronWorkflow")] = None
+    namespace: str | None = None
 
 
-class LintCronWorkflowRequest(BaseModel):
-    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
-    namespace: Optional[str] = None
+class LintCronWorkflowRequest(APIBaseModel):
+    cron_workflow: Annotated[CronWorkflow | None, Field(alias="cronWorkflow")] = None
+    namespace: str | None = None
 
 
-class UpdateCronWorkflowRequest(BaseModel):
-    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
-    name: Annotated[Optional[str], Field(description="DEPRECATED: This field is ignored.")] = None
-    namespace: Optional[str] = None
+class UpdateCronWorkflowRequest(APIBaseModel):
+    cron_workflow: Annotated[CronWorkflow | None, Field(alias="cronWorkflow")] = None
+    name: Annotated[str | None, Field(description="DEPRECATED: This field is ignored.")] = None
+    namespace: str | None = None
 
 
-class WorkflowCreateRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
+class WorkflowCreateRequest(APIBaseModel):
+    create_options: Annotated[v1_1.CreateOptions | None, Field(alias="createOptions")] = None
     instance_id: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="instanceID", description="This field is no longer used."),
     ] = None
-    namespace: Optional[str] = None
-    server_dry_run: Annotated[Optional[bool], Field(alias="serverDryRun")] = None
-    workflow: Optional[Workflow] = None
+    namespace: str | None = None
+    server_dry_run: Annotated[bool | None, Field(alias="serverDryRun")] = None
+    workflow: Workflow | None = None
 
 
-class WorkflowLintRequest(BaseModel):
-    namespace: Optional[str] = None
-    workflow: Optional[Workflow] = None
+class WorkflowLintRequest(APIBaseModel):
+    namespace: str | None = None
+    workflow: Workflow | None = None
 
 
-class WorkflowWatchEvent(BaseModel):
-    object: Annotated[Optional[Workflow], Field(title="the workflow")] = None
-    type: Annotated[Optional[str], Field(title="the type of change")] = None
+class WorkflowWatchEvent(APIBaseModel):
+    object: Annotated[Workflow | None, Field(title="the workflow")] = None
+    type: Annotated[str | None, Field(title="the type of change")] = None
 
 
-DAGTemplate.update_forward_refs()
-ParallelSteps.update_forward_refs()
-ClusterWorkflowTemplateList.update_forward_refs()
-CronWorkflowList.update_forward_refs()
-WorkflowList.update_forward_refs()
-WorkflowTemplateList.update_forward_refs()
+class ParallelSteps(RootModel[list[WorkflowStep]]):
+    root: list[WorkflowStep]
+
+
+DAGTemplate.model_rebuild()
+ClusterWorkflowTemplateList.model_rebuild()
+CronWorkflowList.model_rebuild()
+WorkflowList.model_rebuild()
+WorkflowTemplateList.model_rebuild()
+Template.model_rebuild()

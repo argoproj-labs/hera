@@ -48,7 +48,7 @@ build = "*"
 ruff = "*"
 types-PyYAML = "*"
 jsonpath-ng = "^1.5.3"
-datamodel-code-generator = { extras = ["http"], version = "^0.25" }
+datamodel-code-generator = {extras = ["http"], version = "^0.53.0"}
 types-requests = "^2.32.0.20240914"
 pytest-clarity = "^1.0.1"
 pytest-sugar = ">=0.9.6,<1.2.0"

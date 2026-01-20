@@ -3,23 +3,21 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
-
-from hera.shared._pydantic import BaseModel
+from hera.shared._pydantic import APIBaseModel
 
 from ...google import protobuf
 
 
-class Error(BaseModel):
-    code: Optional[int] = None
-    details: Optional[List[protobuf.Any]] = None
-    error: Optional[str] = None
-    message: Optional[str] = None
+class Error(APIBaseModel):
+    code: int | None = None
+    details: list[protobuf.Any] | None = None
+    error: str | None = None
+    message: str | None = None
 
 
-class StreamError(BaseModel):
-    details: Optional[List[protobuf.Any]] = None
-    grpc_code: Optional[int] = None
-    http_code: Optional[int] = None
-    http_status: Optional[str] = None
-    message: Optional[str] = None
+class StreamError(APIBaseModel):
+    details: list[protobuf.Any] | None = None
+    grpc_code: int | None = None
+    http_code: int | None = None
+    http_status: str | None = None
+    message: str | None = None
