@@ -4,19 +4,19 @@ See <https://argoproj.github.io/argo-workflows/walk-through/steps>
 for more on Steps.
 """
 
+from dataclasses import dataclass, field
 from typing import Any, List, Optional, Set, Union
 
-from hera.shared._pydantic import PrivateAttr
 from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
     IOMixin,
-    ItemMixin,
-    ParameterMixin,
     SubNodeMixin,
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
+    WithItemsMixin,
+    WithParamMixin,
 )
 from hera.workflows.exceptions import InvalidType, NodeNameConflict
 from hera.workflows.models import (
@@ -24,6 +24,7 @@ from hera.workflows.models import (
     Template as _ModelTemplate,
     WorkflowStep as _ModelWorkflowStep,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 from hera.workflows.protocol import Steppable, Templatable
 
 
@@ -46,11 +47,12 @@ def parallel():
     return DummyContext()
 
 
+@dataclass(kw_only=True)
 class Step(
     TemplateInvocatorSubNodeMixin,
     ArgumentsMixin,
-    ParameterMixin,
-    ItemMixin,
+    WithParamMixin,
+    WithItemsMixin,
 ):
     """A step runs a given template.
 
@@ -95,9 +97,10 @@ class Step(
         return [self._build_as_workflow_step()]
 
 
+@dataclass(kw_only=True)
 class Parallel(
-    ContextMixin,
     SubNodeMixin,
+    ContextMixin,
 ):
     """Parallel is a context manager used to create a list of steps to run in parallel.
 
@@ -105,9 +108,9 @@ class Parallel(
     `hera.workflows.steps.Step` objects instantiated will be added to Parallel's list of sub_steps.
     """
 
-    sub_steps: List[Union[Step, _ModelWorkflowStep]] = []
+    sub_steps: List[Union[Step, _ModelWorkflowStep]] = field(default_factory=list)
 
-    _node_names = PrivateAttr(default_factory=set)
+    _node_names: Set[str] = field(default_factory=set)
 
     def _add_sub(self, node: Any):
         if isinstance(node, Templatable):
@@ -137,6 +140,7 @@ class Parallel(
         return steps
 
 
+@dataclass(kw_only=True)
 class Steps(
     IOMixin,
     TemplateMixin,
@@ -153,7 +157,7 @@ class Steps(
     * All Step objects initialised within a Parallel context will run in parallel.
     """
 
-    _node_names: Set[str] = PrivateAttr(default_factory=set)
+    _node_names: Set[str] = field(default_factory=set)
 
     sub_steps: List[
         Union[
@@ -163,7 +167,7 @@ class Steps(
             _ModelWorkflowStep,
             List[_ModelWorkflowStep],
         ]
-    ] = []
+    ] = field(default_factory=list)
 
     def _build_steps(self) -> Optional[List[ParallelSteps]]:
         steps = []
@@ -212,7 +216,9 @@ class Steps(
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

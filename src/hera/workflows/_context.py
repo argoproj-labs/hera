@@ -5,10 +5,10 @@ clauses for workflows and DAGs.
 """
 
 from contextvars import ContextVar
+from dataclasses import dataclass
 from typing import List, Optional
 
-from hera.shared import BaseMixin
-from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
+from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, BaseMixin, _flag_enabled
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.protocol import Subbable
 
@@ -16,15 +16,17 @@ _pieces = ContextVar("_pieces", default=None)
 _declaring = ContextVar("_declaring", default=False)
 
 
+@dataclass
 class SubNodeMixin(BaseMixin):
     """SubNodeMixin ensures that the class gets added to the Hera context on initialization.
 
-    The mixin implements the core Hera `__hera_init__`, which is invoked post Hera object initialization. Anything
-    that inherits from this mixin will add itself to the managed context (e.g. added to a Workflow/DAG).
+    Anything that inherits from this mixin will add itself to the managed context (e.g. added to a Workflow/DAG).
     """
 
-    def __hera_init__(self) -> None:
+    def __post_init__(self) -> None:
         """The Hera init that is invoked post object initialization."""
+        super().__post_init__()
+
         _context.add_sub_node(self)
 
 

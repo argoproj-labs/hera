@@ -1,3 +1,4 @@
+import dataclasses
 from textwrap import dedent
 from typing import Iterator, Tuple
 
@@ -70,8 +71,8 @@ def test_parameter_named_name():
 def step_and_task_parameters() -> Iterator[Tuple[str, str, str]]:
     """Return all parameters on Step, Task or both"""
     # pydantic-v1 syntax:
-    step_fields = {field.name for field in Step.__fields__.values()}
-    task_fields = {field.name for field in Task.__fields__.values()}
+    step_fields = {field.name for field in dataclasses.fields(Step) if not field.name.startswith("_")}
+    task_fields = {field.name for field in dataclasses.fields(Task) if not field.name.startswith("_")}
 
     for field_name in step_fields | task_fields:
         if field_name not in task_fields:

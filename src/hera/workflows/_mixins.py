@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import (
     Any,
     Dict,
@@ -14,7 +15,7 @@ from typing import (
 )
 
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, root_validator, validator
+from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields
 from hera.shared._type_util import construct_io_from_annotation
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
@@ -24,7 +25,6 @@ from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.metrics import Metrics, _BaseMetric
 from hera.workflows.models import (
-    HTTP,
     Affinity,
     Arguments as ModelArguments,
     Artifact as ModelArtifact,
@@ -38,7 +38,6 @@ from hera.workflows.models import (
     HostAlias,
     ImagePullPolicy,
     Inputs as ModelInputs,
-    IntOrString,
     Item,
     LifecycleHook,
     Memoize,
@@ -73,7 +72,7 @@ from hera.workflows.volume import Volume, _BaseVolume
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
 """OneOrMany is provided as a convenience type to allow Hera models to accept single values or lists (sequences) of
-values, and so that our code is more readable. It is used by the 'normalize' validators below."""
+values, and so that our code is more readable."""
 
 
 def normalize_to_list(v: OneOrMany) -> List:
@@ -169,6 +168,7 @@ by Hera at specific mount paths in containers.
 """
 
 
+@dataclass(kw_only=True)
 class ContainerMixin(BaseMixin):
     """`ContainerMixin` provides a subset of the fields of a container such as image, probes, etc."""
 
@@ -184,6 +184,13 @@ class ContainerMixin(BaseMixin):
     termination_message_path: Optional[str] = None
     termination_message_policy: Optional[str] = None
     tty: Optional[bool] = None
+
+    def __post_init__(self):
+        """Validate image field. Set to the global image if None."""
+        super().__post_init__()
+
+        if self.image is None:
+            self.image = global_config.image
 
     def _build_image_pull_policy(self) -> Optional[str]:
         """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum."""
@@ -210,14 +217,8 @@ class ContainerMixin(BaseMixin):
                 "Use one of {ImagePullPolicy.__members__}"
             ) from e
 
-    @validator("image", pre=True, always=True)
-    def _set_image(cls, v):
-        """Validator that sets the image field to the global image unless the image is specified on the container."""
-        if v is None:
-            return global_config.image
-        return v
 
-
+@dataclass(kw_only=True)
 class IOMixin(BaseMixin):
     """`IOMixin` provides the capabilities of performing I/O between steps via fields such as `inputs`/`outputs`."""
 
@@ -347,6 +348,7 @@ class IOMixin(BaseMixin):
         return result
 
 
+@dataclass(kw_only=True)
 class EnvMixin(BaseMixin):
     """`EnvMixin` provides the ability to set simple env variables along with env variables that are derived."""
 
@@ -389,6 +391,7 @@ class EnvMixin(BaseMixin):
         return result if result else None
 
 
+@dataclass(kw_only=True)
 class MetricsMixin(BaseMixin):
     """`MetricsMixin` provides the ability to set metrics on a n object."""
 
@@ -410,13 +413,14 @@ class MetricsMixin(BaseMixin):
         return ModelMetrics(prometheus=metrics) if metrics else None
 
 
+@dataclass(kw_only=True)
 class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     """`TemplateMixin` provides the Argo template fields that are shared between different sub-template fields.
 
     The supported sub-template fields are `Script`, `Data`, `DAG`, `Resource`, `Container`, `ContainerSet`, etc.
     """
 
-    active_deadline_seconds: Optional[IntOrString] = None
+    active_deadline_seconds: Optional[int | str] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
     automount_service_account_token: Optional[bool] = None
@@ -431,14 +435,8 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
-    http: Optional[HTTP] = (
-        None  # TODO: Deprecate and remove. This field is unused and `http` has its own Hera template class in http_template.py
-    )
     plugin: Optional[Plugin] = None
     pod_spec_patch: Optional[str] = None
-    priority: Optional[int] = None
-    """DEPRECATED: priority has been removed from ModelTemplate."""
-
     priority_class_name: Optional[str] = None
     retry_strategy: Optional[Union[RetryStrategy, ModelRetryStrategy]] = None
     scheduler_name: Optional[str] = None
@@ -449,11 +447,8 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
 
-    @validator("active_deadline_seconds")
-    def _convert_active_deadline_seconds(cls, v) -> Optional[IntOrString]:
-        if v is None or isinstance(v, IntOrString):
-            return v
-        return IntOrString(__root__=v)
+    def __post_init__(self) -> None:
+        super().__post_init__()
 
     def _build_init_containers(self) -> Optional[List[ModelUserContainer]]:
         """Builds the `init_containers` field and optionally returns a list of `UserContainer`."""
@@ -492,6 +487,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
         return self.retry_strategy
 
 
+@dataclass(kw_only=True)
 class ResourceMixin(BaseMixin):
     """`ResourceMixin` provides the capability to set resources such as compute requirements like CPU, GPU, etc."""
 
@@ -508,6 +504,7 @@ class ResourceMixin(BaseMixin):
 
 # Workflows can use VolumeMixin to create PVCs or specify volume sources (but never mount volumes).
 # Containers/scripts use VolumeMountMixin to create PVCs, mount volumes to the container, or specify volume sources.
+@dataclass(kw_only=True)
 class VolumeMixin(BaseMixin):
     """`VolumeMixin` provides the ability to set volumes on an inheriting resource.
 
@@ -541,6 +538,7 @@ class VolumeMixin(BaseMixin):
         return [v._build_persistent_volume_claim() for v in volumes_with_pv_claims] or None
 
 
+@dataclass(kw_only=True)
 class VolumeMountMixin(VolumeMixin):
     """`VolumeMountMixin` supports setting `volume_devices` and `volume_mounts` on the inheritor.
 
@@ -560,7 +558,7 @@ class VolumeMountMixin(VolumeMixin):
         if self.volumes is None:
             volumes: list = []
         else:
-            volumes = cast(list, self.volumes)
+            volumes = normalize_to_list(self.volumes)
 
         # Users should only use a Hera Volume (with no volume mount) to take advantage of this auto-generation
         generated_volume_mounts = [v._build_volume_mount() for v in volumes if isinstance(v, _BaseVolume)]
@@ -571,6 +569,7 @@ class VolumeMountMixin(VolumeMixin):
         return (self.volume_mounts or []) + generated_volume_mounts
 
 
+@dataclass(kw_only=True)
 class ArgumentsMixin(BaseMixin):
     """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object (only Tasks, Steps and Workflows use arguments)."""
 
@@ -634,7 +633,8 @@ class ArgumentsMixin(BaseMixin):
         return result
 
 
-class ParameterMixin(BaseMixin):
+@dataclass(kw_only=True)
+class WithParamMixin(BaseMixin):
     """`ParameterMixin` supports the usage of `with_param` on inheritors."""
 
     with_param: Optional[Any] = None  # this must be a serializable object, or `hera.workflows.parameter.Parameter`
@@ -654,7 +654,8 @@ class ParameterMixin(BaseMixin):
         return serialize(self.with_param)
 
 
-class ItemMixin(BaseMixin):
+@dataclass(kw_only=True)
+class WithItemsMixin(BaseMixin):
     """Add `with_items` capability for inheritors, which supports parallelism over supplied items.
 
     Notes:
@@ -693,6 +694,7 @@ class ItemMixin(BaseMixin):
         return [Item(__root__=serialize(self.with_items))]
 
 
+@dataclass(kw_only=True)
 class EnvIOMixin(EnvMixin, IOMixin):
     """`EnvIOMixin` provides the capacity to create environment variables from inputs."""
 
@@ -740,6 +742,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
         return inputs
 
 
+@dataclass(kw_only=True)
 class TemplateInvocatorSubNodeMixin(SubNodeMixin):
     """Used for classes that form sub nodes of Template invocators - `Steps` and `DAG`.
 
@@ -759,6 +762,16 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
     with_sequence: Optional[Sequence] = None
 
     _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+
+        def only_one(xs: List):
+            xs = list(map(bool, xs))
+            return xs.count(True) == 1
+
+        if not only_one([self.template, self.template_ref, self.inline]):
+            raise ValueError("Exactly one of ['template', 'template_ref', 'inline'] must be present")
 
     def __getattribute__(self, name: str) -> Any:
         if _context.declaring:
@@ -839,18 +852,6 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
     def get_result_as(self, name: str) -> Parameter:
         """Returns a `Parameter` specification with the given name containing the `results` of `self`."""
         return Parameter(name=name, value=self.result)
-
-    @root_validator(pre=False)
-    def _check_values(cls, values):
-        """Validates that a single field is set between `template`, `template_ref`, and `inline`."""
-
-        def one(xs: List):
-            xs = list(map(bool, xs))
-            return xs.count(True) == 1
-
-        if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
-            raise ValueError("Exactly one of ['template', 'template_ref', 'inline'] must be present")
-        return values
 
     def _get_parameters_as(self, name: str, subtype: str) -> Parameter:
         """Returns a `Parameter` that represents all the outputs of the specified subtype.

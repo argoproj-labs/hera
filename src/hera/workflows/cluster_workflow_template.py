@@ -1,7 +1,8 @@
 """Module that provides Hera objects for cluster workflow templates."""
 
+from dataclasses import dataclass
+
 from hera.exceptions import NotFound
-from hera.shared._pydantic import validator
 from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.models import (
     ClusterWorkflowTemplate as _ModelClusterWorkflowTemplate,
@@ -14,15 +15,18 @@ from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow_template import WorkflowTemplate
 
 
+@dataclass(kw_only=True)
 class ClusterWorkflowTemplate(WorkflowTemplate):
     """ClusterWorkflowTemplates are cluster scoped templates.
 
     Since cluster workflow templates are scoped at the cluster level, they are available globally in the cluster.
     """
 
-    @validator("namespace", pre=True, always=True)
-    def _set_namespace(cls, v):
-        if v is not None:
+    def __post_init__(self):
+        """Set class defaults via __post_init__, then ensure namespace is not set."""
+        super().__post_init__()
+
+        if self.namespace is not None:
             raise ValueError("namespace is not a valid field on a ClusterWorkflowTemplate")
 
     def create(self) -> TWorkflow:  # type: ignore

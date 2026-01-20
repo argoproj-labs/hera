@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
@@ -23,8 +24,10 @@ from hera.workflows.models import (
     SecurityContext,
     Template as _ModelTemplate,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 
 
+@dataclass(kw_only=True)
 class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, SubNodeMixin):
     """A regular container that can be used as part of a `hera.workflows.ContainerSet`.
 
@@ -129,6 +132,7 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
         )
 
 
+@dataclass(kw_only=True)
 class ContainerSet(
     EnvIOMixin,
     ContainerMixin,
@@ -147,7 +151,7 @@ class ContainerSet(
         >>>     ContainerNode(...)
     """
 
-    containers: List[Union[ContainerNode, _ModelContainerNode]] = []
+    containers: List[Union[ContainerNode, _ModelContainerNode]] = field(default_factory=list)
     container_set_retry_strategy: Optional[ContainerSetRetryStrategy] = None
 
     def _add_sub(self, node: Any):
@@ -168,7 +172,9 @@ class ContainerSet(
     def _build_template(self) -> _ModelTemplate:
         """Builds the generated `Template` representation of the container set."""
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

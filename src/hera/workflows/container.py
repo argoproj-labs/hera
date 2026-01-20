@@ -6,6 +6,7 @@ for more on containers in Argo Workflows.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import List, Optional
 
 from hera.workflows._meta_mixins import CallableTemplateMixin
@@ -22,8 +23,10 @@ from hera.workflows.models import (
     SecurityContext,
     Template as _ModelTemplate,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 
 
+@dataclass(kw_only=True)
 class Container(
     EnvIOMixin,
     ContainerMixin,
@@ -49,6 +52,10 @@ class Container(
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     working_dir: Optional[str] = None
+
+    def __post_init__(self):
+        """Perform post init validation."""
+        super().__post_init__()
 
     def _build_container(self) -> _ModelContainer:
         """Builds the generated `Container` representation."""
@@ -82,7 +89,9 @@ class Container(
     def _build_template(self) -> _ModelTemplate:
         """Builds the generated `Template` representation of the container."""
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

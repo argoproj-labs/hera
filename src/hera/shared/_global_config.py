@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import inspect
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from hera.auth import TokenGenerator
-from hera.shared._pydantic import BaseModel, get_fields, root_validator
 
 TBase = TypeVar("TBase", bound="BaseMixin")
 TypeTBase = Type[TBase]
@@ -153,7 +152,7 @@ class _GlobalConfig:
             cls: The class to set defaults for.
             kwargs: The default values to set.
         """
-        invalid_keys = set(kwargs) - set(get_fields(cls))
+        invalid_keys = set(kwargs) - set(f.name for f in fields(cls))
         if invalid_keys:
             raise ValueError(f"Invalid keys for class {cls}: {invalid_keys}")
         self._defaults[cls].update(kwargs)
@@ -167,33 +166,14 @@ class _GlobalConfig:
         return self._defaults[cls]
 
 
-class BaseMixin(BaseModel):
-    def _init_private_attributes(self):
-        """A pydantic private method called after `__init__`.
-
-        Notes:
-        -----
-        In order to inject `__hera_init__` after `__init__` without destroying the autocomplete, we opted for
-        this method. We also tried other ways including creating a metaclass that invokes hera_init after init,
-        but that always broke auto-complete for IDEs like VSCode.
-        """
-        super()._init_private_attributes()  # type: ignore
-        self.__hera_init__()
-
-    def __hera_init__(self) -> None:
-        """A method that is optionally implemented and invoked by `BaseMixin` subclasses to perform some post init."""
-        ...
-
-    @root_validator(pre=True)
-    def _set_defaults(cls, values):
+@dataclass
+class BaseMixin:
+    def __post_init__(self):
         """Sets the user-provided defaults of Hera objects."""
-        # In a Pydantic validator function, the first parameter (cls) is the class itself, not an instance of it
-        # but mypy/linting sees it as an instance
-        defaults = global_config._get_class_defaults(cls)  # type: ignore
+        defaults = global_config._get_class_defaults(self.__class__)
         for key, value in defaults.items():
-            if values.get(key) is None:
-                values[key] = value
-        return values
+            if getattr(self, key) is None:
+                setattr(self, key, value)
 
 
 GlobalConfig = global_config = _GlobalConfig()

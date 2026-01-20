@@ -4,6 +4,7 @@ See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional, Type, Union, cast
 
@@ -66,6 +67,7 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
         return model
 
 
+@dataclass(kw_only=True)
 class CronWorkflow(Workflow):
     """CronWorkflow allows a user to run a Workflow on a recurring basis.
 

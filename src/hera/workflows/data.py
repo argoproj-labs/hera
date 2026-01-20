@@ -1,5 +1,6 @@
 """The `hera.workflows.data` module provides Argo data functionality, such as sourcing data + applying transformations."""
 
+from dataclasses import dataclass, field
 from typing import List, Union
 
 from hera.expr._node import Node
@@ -7,8 +8,10 @@ from hera.workflows import models as m
 from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import IOMixin, TemplateMixin
 from hera.workflows.artifact import Artifact
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 
 
+@dataclass(kw_only=True)
 class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
     """`Data` implements the Argo data template representation.
 
@@ -18,7 +21,7 @@ class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
     """
 
     source: Union[m.DataSource, m.ArtifactPaths, Artifact]
-    transformations: List[Union[str, Node]] = []
+    transformations: List[Union[str, Node]] = field(default_factory=list)
 
     def _build_source(self) -> m.DataSource:
         """Builds the generated `DataSource`."""
@@ -38,7 +41,9 @@ class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
     def _build_template(self) -> m.Template:
         """Builds the generated `Template` from the fields of `Data`."""
         return m.Template(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

@@ -7,6 +7,7 @@ for more on Workflows.
 import asyncio
 import logging
 import time
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Annotated, Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
@@ -14,7 +15,7 @@ from typing_extensions import ParamSpec
 
 from hera import _yaml
 from hera.shared import global_config
-from hera.shared._pydantic import BaseModel, validator
+from hera.shared._pydantic import BaseModel
 from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -80,6 +81,7 @@ class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
         return _ModelWorkflow
 
 
+@dataclass(kw_only=True)
 class Workflow(
     ArgumentsMixin,
     HookMixin,
@@ -233,7 +235,7 @@ class Workflow(
     template_defaults: Annotated[Optional[_ModelTemplate], _WorkflowModelMapper("spec.template_defaults")] = None
     templates: Annotated[
         List[Union[_ModelTemplate, Templatable]], _WorkflowModelMapper("spec.templates", _build_templates)
-    ] = []
+    ] = field(default_factory=list)
     tolerations: Annotated[Optional[List[Toleration]], _WorkflowModelMapper("spec.tolerations")] = None
     ttl_strategy: Annotated[Optional[TTLStrategy], _WorkflowModelMapper("spec.ttl_strategy")] = None
     volume_claim_gc: Annotated[Optional[VolumeClaimGC], _WorkflowModelMapper("spec.volume_claim_gc")] = None
@@ -260,72 +262,53 @@ class Workflow(
     # Hera-specific fields
     workflows_service: Optional[Union[WorkflowsService, AsyncWorkflowsService]] = None
 
-    pod_priority: Optional[int] = None
-    """DEPRECATED: The spec.podPriority field was removed in 3.7, so does not map to
-       anything. Use pod_priority_class_name instead."""
+    def __post_init__(self):
+        """Set hooks via __post_init__ and perform validation."""
+        super().__post_init__()
 
-    @validator("name", pre=True, always=True)
-    def _set_name(cls, v):
-        if v is not None and len(v) > NAME_LIMIT:
-            raise ValueError(f"name must be no more than {NAME_LIMIT} characters: {v}")
-        return v
+        if self.name is not None and len(self.name) > NAME_LIMIT:
+            raise ValueError(f"name must be no more than {NAME_LIMIT} characters: {self.name}")
 
-    @validator("generate_name", pre=True, always=True)
-    def _set_generate_name(cls, v):
-        if v is not None and len(v) > NAME_LIMIT:
-            raise ValueError(f"generate_name must be no more than {NAME_LIMIT} characters: {v}")
-        return v
+        if self.generate_name is not None and len(self.generate_name) > NAME_LIMIT:
+            raise ValueError(f"generate_name must be no more than {NAME_LIMIT} characters: {self.generate_name}")
 
-    @validator("api_version", pre=True, always=True)
-    def _set_api_version(cls, v):
-        if v is None:
-            return global_config.api_version
-        return v
+        if self.api_version is None:
+            self.api_version = global_config.api_version
 
-    @validator("workflows_service", pre=True, always=True)
-    def _set_workflows_service(cls, v):
-        if v is None:
-            return WorkflowsService()
-        return v
+        if self.kind is None:
+            self.kind = self.__class__.__name__
 
-    @validator("kind", pre=True, always=True)
-    def _set_kind(cls, v):
-        if v is None:
-            return cls.__name__  # type: ignore
-        return v
+        if self.workflows_service is None:
+            self.workflows_service = WorkflowsService()
 
-    @validator("namespace", pre=True, always=True)
-    def _set_namespace(cls, v):
-        if v is None:
-            return global_config.namespace
-        return v
+        if self.namespace is None:
+            self.namespace = global_config.namespace
 
-    @validator("service_account_name", pre=True, always=True)
-    def _set_service_account_name(cls, v):
-        if v is None:
-            return global_config.service_account_name
-        return v
+        if self.service_account_name is None:
+            self.service_account_name = global_config.service_account_name
 
-    @validator("image_pull_secrets", pre=True, always=True)
-    def _set_image_pull_secrets(cls, v):
-        if v is None:
-            return None
+        if self.image_pull_secrets is not None:
+            self.image_pull_secrets = self._validate_image_pull_secrets(self.image_pull_secrets)
 
-        if isinstance(v, str):
-            return [LocalObjectReference(name=v)]
-        elif isinstance(v, LocalObjectReference):
-            return [v]
+    @staticmethod
+    def _validate_image_pull_secrets(image_pull_secrets: ImagePullSecretsT) -> ImagePullSecretsT:
+        if isinstance(image_pull_secrets, str):
+            image_pull_secrets = [LocalObjectReference(name=image_pull_secrets)]
+        elif isinstance(image_pull_secrets, LocalObjectReference):
+            image_pull_secrets = [image_pull_secrets]
 
-        assert isinstance(v, list), (
+        assert isinstance(image_pull_secrets, list), (
             "`image_pull_secrets` expected to be either a `str`, a `LocalObjectReferences`, a list of `str`, "
             "or a list of `LocalObjectReferences`"
         )
+
         result = []
-        for secret in v:
+        for secret in image_pull_secrets:
             if isinstance(secret, str):
                 result.append(LocalObjectReference(name=secret))
             elif isinstance(secret, LocalObjectReference):
                 result.append(secret)
+
         return result
 
     def get_parameter(self, name: str) -> Parameter:

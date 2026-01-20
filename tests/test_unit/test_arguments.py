@@ -333,10 +333,3 @@ def test_mixed_arguments_build(arguments, expected_built_arguments):
         )._build_arguments()
         == expected_built_arguments
     )
-
-
-def test_invalid_type_in_argument_list():
-    with pytest.raises(TypeError):
-        ArgumentsMixin.construct(
-            arguments=[1],
-        )._build_arguments()

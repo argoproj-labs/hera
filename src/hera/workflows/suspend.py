@@ -7,6 +7,7 @@ Note:
     * See <https://argoproj.github.io/argo-workflows/intermediate-inputs> for more on intermediate parameters.
 """
 
+from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
 from hera.workflows._meta_mixins import CallableTemplateMixin
@@ -19,9 +20,11 @@ from hera.workflows.models import (
     Template as _ModelTemplate,
     ValueFrom,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 from hera.workflows.parameter import Parameter
 
 
+@dataclass(kw_only=True)
 class Suspend(
     TemplateMixin,
     CallableTemplateMixin,
@@ -36,7 +39,7 @@ class Suspend(
     """
 
     duration: Optional[Union[int, str]] = None
-    intermediate_parameters: List[Parameter] = []
+    intermediate_parameters: List[Parameter] = field(default_factory=list)
 
     def _build_suspend_template(self) -> _ModelSuspendTemplate:
         return _ModelSuspendTemplate(
@@ -79,7 +82,9 @@ class Suspend(
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

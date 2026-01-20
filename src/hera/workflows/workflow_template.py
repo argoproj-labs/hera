@@ -4,11 +4,12 @@ See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, Dict, Optional, Type, Union, cast
 
 from hera.exceptions import NotFound
-from hera.shared._pydantic import BaseModel, validator
+from hera.shared._pydantic import BaseModel
 from hera.workflows._meta_mixins import ModelMapperMixin
 from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.models import (
@@ -39,6 +40,7 @@ class _WorkflowTemplateModelMapper(_WorkflowModelMapper):
         return _ModelWorkflowTemplate  # type: ignore
 
 
+@dataclass(kw_only=True)
 class WorkflowTemplate(Workflow):
     """WorkflowTemplates are definitions of Workflows that live in your namespace in your cluster.
 
@@ -49,11 +51,13 @@ class WorkflowTemplate(Workflow):
     # Removes status mapping
     status: Annotated[Optional[_ModelWorkflowStatus], _WorkflowTemplateModelMapper("")] = None
 
-    # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
-    # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
-    @validator("status", pre=True, always=True)
-    def _set_status(cls, v):
-        if v is not None:
+    def __post_init__(self):
+        """WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate does not have.
+
+        https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
+        """
+        super().__post_init__()
+        if self.status is not None:
             raise ValueError("status is not a valid field on a WorkflowTemplate")
 
     def create(self) -> TWorkflow:  # type: ignore
