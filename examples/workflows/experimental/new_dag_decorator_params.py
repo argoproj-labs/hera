@@ -89,5 +89,5 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
 
     return WorkerOutput(
         result_value=final_task.result,
-        another_value=setup_task.an_annotated_parameter,
+        another_value=str(setup_task.an_annotated_parameter),
     )

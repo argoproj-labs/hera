@@ -1,6 +1,8 @@
 import json
 import pickle
 
+from pydantic.v1 import BaseModel
+
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, script
 from hera.workflows.io.v1 import Input, Output
@@ -9,10 +11,6 @@ try:
     from typing import Annotated
 except ImportError:
     from typing_extensions import Annotated
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
 
 global_config.experimental_features["script_pydantic_io"] = True
 

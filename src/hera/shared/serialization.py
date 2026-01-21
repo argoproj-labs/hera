@@ -4,10 +4,10 @@ import json
 from json import JSONEncoder
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel as V2BaseModel
 
 # NOTE: Use the original BaseModel in order to support serializing user-defined models,
-# for hera internal models, we still need to support v1 base models.
+# for hera internal models, we only support V2 BaseModels.
 from pydantic.v1 import BaseModel as V1BaseModel
 
 MISSING = object()
@@ -28,8 +28,8 @@ class PydanticEncoder(JSONEncoder):
         # a json compatible format.
         if isinstance(o, V1BaseModel):
             return o.dict(by_alias=True)
-        if isinstance(o, BaseModel):
-            return o.model_dump(by_alias=True, mode="json")  # type: ignore
+        if isinstance(o, V2BaseModel):
+            return o.model_dump(by_alias=True, mode="json")
         return super().default(o)
 
 

@@ -19,7 +19,7 @@ with Workflow(
                 access_modes=["ReadWriteOnce"],
                 resources=m.VolumeResourceRequirements(
                     requests={
-                        "storage": m.Quantity(__root__="1Gi"),
+                        "storage": m.Quantity(root="1Gi"),
                     }
                 ),
             ),

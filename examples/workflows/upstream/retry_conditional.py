@@ -48,7 +48,7 @@ lastRetry.status != "Error" && \
 asInt(lastRetry.duration) < 120 && \
 ({{inputs.parameters.safe-to-retry}} == true || lastRetry.message matches 'imminent node shutdown|pod deleted')""",
             limit=IntOrString(
-                __root__="10",
+                root="10",
             ),
         ),
         command=["python"],

@@ -364,7 +364,7 @@ class TestRunnerScriptEnv:
             ],
             [
                 Env(name="my_env_var", value=42),
-                [ModelEnvVar(name="my_env_var", value=42)],
+                [ModelEnvVar(name="my_env_var", value="42")],
             ],
         ),
     )
@@ -387,7 +387,7 @@ class TestRunnerScriptEnv:
             [
                 Env(name="my_env_var", value=42),
                 [
-                    ModelEnvVar(name="my_env_var", value=42),
+                    ModelEnvVar(name="my_env_var", value="42"),
                     ModelEnvVar(name="hera__outputs_directory", value="/my/tmp/dir"),
                 ],
             ],
@@ -415,7 +415,7 @@ class TestRunnerScriptEnv:
             [
                 Env(name="my_env_var", value=42),
                 [
-                    ModelEnvVar(name="my_env_var", value=42),
+                    ModelEnvVar(name="my_env_var", value="42"),
                     ModelEnvVar(name="hera__pydantic_mode", value="1"),
                 ],
             ],
@@ -443,7 +443,7 @@ class TestRunnerScriptEnv:
             [
                 Env(name="my_env_var", value=42),
                 [
-                    ModelEnvVar(name="my_env_var", value=42),
+                    ModelEnvVar(name="my_env_var", value="42"),
                     ModelEnvVar(name="hera__script_pydantic_io", value=""),
                 ],
             ],

@@ -10,7 +10,7 @@ import yaml
 
 from hera._cli.base import GeneratePython
 from hera._cli.generate.util import YAML_EXTENSIONS, convert_code, expand_paths, write_output
-from hera.shared._pydantic import BaseModel
+from hera.shared._pydantic import APIBaseModel
 from hera.shared._type_util import (
     get_annotated_metadata,
 )
@@ -79,13 +79,13 @@ def load_yaml_workflows(path: Path) -> Generator[ModelWorkflow, None, None]:
     for yaml_workflow in yaml.safe_load_all(path.read_text()):
         if isinstance(yaml_workflow, dict):
             if yaml_workflow["kind"] == "Workflow":
-                yield _ModelWorkflow.parse_obj(yaml_workflow)
+                yield _ModelWorkflow.model_validate(yaml_workflow)
             elif yaml_workflow["kind"] == "WorkflowTemplate":
-                yield _ModelWorkflowTemplate.parse_obj(yaml_workflow)
+                yield _ModelWorkflowTemplate.model_validate(yaml_workflow)
             elif yaml_workflow["kind"] == "ClusterWorkflowTemplate":
-                yield _ModelClusterWorkflowTemplate.parse_obj(yaml_workflow)
+                yield _ModelClusterWorkflowTemplate.model_validate(yaml_workflow)
             elif yaml_workflow["kind"] == "CronWorkflow":
-                yield _ModelCronWorkflow.parse_obj(yaml_workflow)
+                yield _ModelCronWorkflow.model_validate(yaml_workflow)
             else:
                 raise ValueError(f"Unrecognised Workflow kind: {yaml_workflow['kind']}")
         else:
@@ -229,7 +229,7 @@ class WorkflowPythonBuilder:
 
         # Special case for IntOrString
         if isinstance(value, IntOrString):
-            return ast.Constant(value=value.__root__)
+            return ast.Constant(value=value.root)
 
         # Collections
         if isinstance(value, list):
@@ -249,7 +249,7 @@ class WorkflowPythonBuilder:
             )
 
         # Model instances
-        if isinstance(value, BaseModel):
+        if isinstance(value, APIBaseModel):
             model_name = value.__class__.__name__
             self._add_import("hera.workflows.models", model_name)
             keywords: List[ast.keyword] = []
@@ -298,7 +298,7 @@ class WorkflowPythonBuilder:
     def _build_hera_template_statement(
         self,
         template: Template,
-        template_type_field: BaseModel,
+        template_type_field: APIBaseModel,
         hera_template_class: Any,
     ) -> ast.stmt:
         self._add_import("hera.workflows", hera_template_class.__name__)
@@ -374,7 +374,7 @@ class WorkflowPythonBuilder:
         self,
         template: Template,
         hera_template_class: Any,
-        template_type: Optional[BaseModel] = None,
+        template_type: Optional[APIBaseModel] = None,
     ) -> ast.stmt:
         self._add_import("hera.workflows", hera_template_class.__name__)
 
@@ -406,7 +406,7 @@ class WorkflowPythonBuilder:
         if hera_template_class == Steps and template.steps:
             invocator_type = "steps"
             for parallel_steps in template.steps:
-                parallel_steps_list = parallel_steps.__root__
+                parallel_steps_list = parallel_steps.root
 
                 if len(parallel_steps_list) > 1:
                     body.append(
@@ -424,9 +424,7 @@ class WorkflowPythonBuilder:
                                     ),
                                 )
                             ],
-                            body=[
-                                self._build_template_call_expression(step, Step) for step in parallel_steps.__root__
-                            ],
+                            body=[self._build_template_call_expression(step, Step) for step in parallel_steps.root],
                         )
                     )
                 else:
@@ -461,7 +459,7 @@ class WorkflowPythonBuilder:
 
     def _build_template_call_expression(
         self,
-        model_class_obj: BaseModel,
+        model_class_obj: APIBaseModel,
         hera_class: Any,
     ) -> ast.stmt:
         self._add_import("hera.workflows", hera_class.__name__)

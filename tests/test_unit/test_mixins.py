@@ -56,12 +56,12 @@ class TestTemplateMixin:
 
         # Model class
         assert TemplateMixin(
-            retry_strategy=ModelRetryStrategy(limit=IntOrString(__root__=2))
-        )._build_retry_strategy() == ModelRetryStrategy(limit=IntOrString(__root__=2))
+            retry_strategy=ModelRetryStrategy(limit=IntOrString(root=2))
+        )._build_retry_strategy() == ModelRetryStrategy(limit=IntOrString(root=2))
 
         # Hera class
         assert TemplateMixin(retry_strategy=RetryStrategy(limit=2))._build_retry_strategy() == ModelRetryStrategy(
-            limit=IntOrString(__root__=2)
+            limit=IntOrString(root=2)
         )
 
 
@@ -164,7 +164,7 @@ class TestVolumeMixin:
                 metadata=ObjectMeta(name="test-auto-PVC"),
                 spec=PersistentVolumeClaimSpec(
                     access_modes=["ReadWriteOnce"],
-                    resources=VolumeResourceRequirements(requests={"storage": Quantity(__root__="1Mi")}),
+                    resources=VolumeResourceRequirements(requests={"storage": Quantity(root="1Mi")}),
                 ),
             )
         ]
@@ -203,7 +203,7 @@ class TestVolumeMountMixin:
                 metadata=ObjectMeta(name="test-auto-mount"),
                 spec=PersistentVolumeClaimSpec(
                     access_modes=["ReadWriteOnce"],
-                    resources=VolumeResourceRequirements(requests={"storage": Quantity(__root__="1Mi")}),
+                    resources=VolumeResourceRequirements(requests={"storage": Quantity(root="1Mi")}),
                 ),
             )
         ]

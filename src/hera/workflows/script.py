@@ -191,7 +191,7 @@ class Script(
         return self.constructor.transform_template_post_build(
             self,
             _ModelTemplate(
-                active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+                active_deadline_seconds=IntOrString(root=self.active_deadline_seconds)
                 if self.active_deadline_seconds
                 else None,
                 affinity=self.affinity,

@@ -33,7 +33,7 @@ with Workflow(
             template="echo",
             with_sequence=Sequence(
                 count=IntOrString(
-                    __root__="{{steps.get-items.outputs.parameters.count}}",
+                    root="{{steps.get-items.outputs.parameters.count}}",
                 ),
             ),
         )

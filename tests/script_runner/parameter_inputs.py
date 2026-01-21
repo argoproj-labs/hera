@@ -6,12 +6,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from pydantic import BaseModel
-
-try:
-    from pydantic.v1 import BaseModel as V1BaseModel
-except (ImportError, ModuleNotFoundError):
-    from pydantic import BaseModel as V1BaseModel
+from pydantic import BaseModel as V2BaseModel
+from pydantic.v1 import BaseModel as V1BaseModel
 
 from hera.shared import global_config
 from hera.workflows import Parameter, RunnerScriptConstructor, script
@@ -19,12 +15,12 @@ from hera.workflows import Parameter, RunnerScriptConstructor, script
 global_config.experimental_features["script_annotations"] = True
 
 
-class Input(BaseModel):
+class Input(V2BaseModel):
     a: int
     b: str = "foo"
 
 
-class Output(BaseModel):
+class Output(V2BaseModel):
     output: List[Input]
 
 

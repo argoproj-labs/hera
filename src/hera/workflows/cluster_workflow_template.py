@@ -121,7 +121,7 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
         # handled in Workflow._set_kind (by __name__). When using ClusterWorkflowTemplates via templateRef, clients
         # should specify cluster_scope=True, but that is an intrinsic property of ClusterWorkflowTemplates from our
         # perspective.
-        return _ModelClusterWorkflowTemplate(**super().build().dict())
+        return _ModelClusterWorkflowTemplate(**super().build().model_dump())
 
 
 __all__ = ["ClusterWorkflowTemplate"]

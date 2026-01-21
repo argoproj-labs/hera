@@ -28,7 +28,7 @@ from typing import (
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
-from hera.shared._pydantic import BaseModel, get_fields
+from hera.shared._pydantic import APIBaseModel, get_fields
 from hera.shared._type_util import construct_io_from_annotation, get_annotated_metadata, unwrap_annotation
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
@@ -125,25 +125,25 @@ class ExperimentalMixin(BaseMixin):
             raise ValueError(self._experimental_warning_message.format(self, self._flag))
 
 
-def _set_model_attr(model: BaseModel, attrs: List[str], value: Any):
+def _set_model_attr(model: APIBaseModel, attrs: List[str], value: Any):
     # The `attrs` list represents a path to an attribute in `model`, whose attributes
     # are BaseModels themselves. Therefore we use `getattr` to get a reference to the final
-    # BaseModel set to `curr`, then call `setattr` on that BaseModel, using the last attribute
+    # APIBaseModel set to `curr`, then call `setattr` on that APIBaseModel, using the last attribute
     # name in attrs, and the value passed in.
-    curr: BaseModel = model
+    curr: APIBaseModel = model
     for attr in attrs[:-1]:
         curr = getattr(curr, attr)
 
     setattr(curr, attrs[-1], value)
 
 
-def _get_model_attr(model: BaseModel, attrs: List[str]) -> Any:
+def _get_model_attr(model: APIBaseModel, attrs: List[str]) -> Any:
     # This is almost the same as _set_model_attr.
     # The `attrs` list represents a path to an attribute in `model`, whose attributes
     # are BaseModels themselves. Therefore we use `getattr` to get a reference to the final
-    # BaseModel set to `curr`, then `getattr` on that BaseModel, using the last attribute
+    # APIBaseModel set to `curr`, then `getattr` on that APIBaseModel, using the last attribute
     # name in attrs.
-    curr: BaseModel = model
+    curr: APIBaseModel = model
     for attr in attrs[:-1]:
         curr = getattr(curr, attr)
 
@@ -163,15 +163,15 @@ class ModelMapperMixin:
                 return
 
             self.model_path = model_path.split(".")
-            curr_class: Type[BaseModel] = self._get_model_class()
+            curr_class: Type[APIBaseModel] = self._get_model_class()
             for key in self.model_path:
                 fields = get_fields(curr_class)
                 if key not in fields:
                     raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
-                curr_class = fields[key].outer_type_  # type: ignore
+                curr_class = fields[key].annotation  # type: ignore
 
         @classmethod
-        def _get_model_class(cls) -> Type[BaseModel]:
+        def _get_model_class(cls) -> Type[APIBaseModel]:
             raise NotImplementedError
 
         @classmethod
@@ -200,7 +200,7 @@ class ModelMapperMixin:
         return ChainMap(*(get_annotations(c) for c in cls.__mro__))
 
     @classmethod
-    def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
+    def _from_model(cls, model: APIBaseModel) -> ModelMapperMixin:
         """Parse from given model to cls's type."""
         hera_obj = cls()
 
@@ -216,9 +216,9 @@ class ModelMapperMixin:
         return hera_obj
 
     @classmethod
-    def _from_dict(cls, model_dict: Dict, model: Type[BaseModel]) -> ModelMapperMixin:
-        """Parse from given model_dict, using the given model type to call its parse_obj."""
-        model_workflow = model.parse_obj(model_dict)
+    def _from_dict(cls, model_dict: Dict, model: Type[APIBaseModel]) -> ModelMapperMixin:
+        """Parse from given model_dict, using the given model type to call its model_validate."""
+        model_workflow = model.model_validate(model_dict)
         return cls._from_model(model_workflow)
 
     @classmethod
@@ -227,8 +227,8 @@ class ModelMapperMixin:
         raise NotImplementedError
 
     @classmethod
-    def _from_yaml(cls, yaml_str: str, model: Type[BaseModel]) -> ModelMapperMixin:
-        """Parse from given yaml string, using the given model type to call its parse_obj."""
+    def _from_yaml(cls, yaml_str: str, model: Type[APIBaseModel]) -> ModelMapperMixin:
+        """Parse from given yaml string, using the given model type to call its model_validate."""
         if not _yaml:
             raise ImportError("PyYAML is not installed")
         return cls._from_dict(_yaml.safe_load(yaml_str), model)
@@ -239,7 +239,7 @@ class ModelMapperMixin:
         raise NotImplementedError
 
     @classmethod
-    def _from_file(cls, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ModelMapperMixin:
+    def _from_file(cls, yaml_file: Union[Path, str], model: Type[APIBaseModel]) -> ModelMapperMixin:
         yaml_file = Path(yaml_file)
         return cls._from_yaml(yaml_file.read_text(encoding="utf-8"), model)
 

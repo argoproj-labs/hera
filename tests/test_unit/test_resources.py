@@ -40,22 +40,22 @@ class TestResources:
         assert isinstance(requirements, ResourceRequirements)
 
         if cpu_request is not None:
-            assert requirements.requests["cpu"].__root__ == str(cpu_request)
+            assert requirements.requests["cpu"].root == str(cpu_request)
 
         if cpu_limit is not None:
-            assert requirements.limits["cpu"].__root__ == str(cpu_limit)
+            assert requirements.limits["cpu"].root == str(cpu_limit)
 
         if memory_request is not None:
-            assert requirements.requests["memory"].__root__ == memory_request
+            assert requirements.requests["memory"].root == memory_request
 
         if memory_limit is not None:
-            assert requirements.limits["memory"].__root__ == memory_limit
+            assert requirements.limits["memory"].root == memory_limit
 
         if ephemeral_request is not None:
-            assert requirements.requests["ephemeral-storage"].__root__ == ephemeral_request
+            assert requirements.requests["ephemeral-storage"].root == ephemeral_request
 
         if ephemeral_limit is not None:
-            assert requirements.limits["ephemeral-storage"].__root__ == ephemeral_limit
+            assert requirements.limits["ephemeral-storage"].root == ephemeral_limit
 
     @pytest.mark.parametrize(
         "cpu_request, cpu_limit, memory_request, memory_limit, ephemeral_request, ephemeral_limit, error_message",

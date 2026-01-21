@@ -16,12 +16,14 @@ from hera.workflows.steps import Steps
             disable_submodules=True,
             fetch=["refs/meta/*"],
             insecure_ignore_host_key=True,
-            password_secret=m.SecretKeySelector.validate({"name": "github-creds", "key": "password"}),
+            password_secret=m.SecretKeySelector.model_validate({"name": "github-creds", "key": "password"}),
             repo="https://github.com/argoproj/argo-workflows.git",
             revision="v2.1.1",
             single_branch=True,
-            ssh_private_key_secret=m.SecretKeySelector.validate({"name": "github-creds", "key": "ssh-private-key"}),
-            username_secret=m.SecretKeySelector.validate({"name": "github-creds", "key": "username"}),
+            ssh_private_key_secret=m.SecretKeySelector.model_validate(
+                {"name": "github-creds", "key": "ssh-private-key"}
+            ),
+            username_secret=m.SecretKeySelector.model_validate({"name": "github-creds", "key": "username"}),
         )
     ]
 )
