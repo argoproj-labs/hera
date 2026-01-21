@@ -8,8 +8,7 @@
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import Step, Steps, Suspend, Workflow
-    from hera.workflows.models import Parameter
+    from hera.workflows import Parameter, Step, Steps, Suspend, Workflow
 
     with Workflow(
         generate_name="suspend-input-duration-",
@@ -50,8 +49,6 @@
         inputs:
           parameters:
           - name: duration
-            default: 'null'
-            value: 'null'
         outputs:
           parameters:
           - name: duration
