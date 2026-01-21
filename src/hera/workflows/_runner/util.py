@@ -225,7 +225,7 @@ def _runner(entrypoint: str, template_inputs_list: List) -> Any:
     # if the function is wrapped, unwrap it
     # this may happen if the function is decorated with @script
     if hasattr(function, "wrapped_function"):
-        function = function.wrapped_function
+        function = getattr(function, "wrapped_function")
 
     # convert the template inputs list to a dict
     template_inputs: Dict[str, str] = {}

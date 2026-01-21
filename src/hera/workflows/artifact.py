@@ -37,7 +37,6 @@ from hera.workflows.models.io.argoproj.workflow.v1alpha1 import (
     OSSLifecycleRule,
     S3EncryptionOptions,
 )
-from hera.workflows.models.io.k8s.api.core import v1
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.WARNING)
@@ -193,9 +192,9 @@ class Artifact:
 class ArtifactoryArtifact(Artifact):
     """An artifact sourced from Artifactory."""
 
-    password_secret: Optional[v1.SecretKeySelector] = None
+    password_secret: Optional[SecretKeySelector] = None
     url: str
-    username_secret: Optional[v1.SecretKeySelector] = None
+    username_secret: Optional[SecretKeySelector] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -214,7 +213,7 @@ class ArtifactoryArtifact(Artifact):
 class AzureArtifact(Artifact):
     """An artifact sourced from Microsoft Azure."""
 
-    account_key_secret: Optional[v1.SecretKeySelector] = None
+    account_key_secret: Optional[SecretKeySelector] = None
     blob: str
     container: str
     endpoint: str
@@ -249,7 +248,7 @@ class GCSArtifact(Artifact):
 
     bucket: Optional[str] = None
     key: str
-    service_account_key_secret: Optional[v1.SecretKeySelector] = None
+    service_account_key_secret: Optional[SecretKeySelector] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -276,12 +275,12 @@ class GitArtifact(Artifact):
     fetch: Optional[List[str]] = None
     insecure_ignore_host_key: Optional[bool] = None
     insecure_skip_tls: Optional[bool] = None
-    password_secret: Optional[v1.SecretKeySelector] = None
+    password_secret: Optional[SecretKeySelector] = None
     repo: str
     revision: Optional[str] = None
     single_branch: Optional[bool] = None
-    ssh_private_key_secret: Optional[v1.SecretKeySelector] = None
-    username_secret: Optional[v1.SecretKeySelector] = None
+    ssh_private_key_secret: Optional[SecretKeySelector] = None
+    username_secret: Optional[SecretKeySelector] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -397,13 +396,13 @@ class HTTPArtifact(Artifact):
 class OSSArtifact(Artifact):
     """An artifact sourced from OSS."""
 
-    access_key_secret: Optional[v1.SecretKeySelector] = None
+    access_key_secret: Optional[SecretKeySelector] = None
     bucket: Optional[str] = None
     create_bucket_if_not_present: Optional[bool] = None
     endpoint: Optional[str] = None
     key: str
     lifecycle_rule: Optional[OSSLifecycleRule] = None
-    secret_key_secret: Optional[v1.SecretKeySelector] = None
+    secret_key_secret: Optional[SecretKeySelector] = None
     security_token: Optional[str] = None
     use_sdk_creds: Optional[bool] = None
 
@@ -457,9 +456,9 @@ class RawArtifact(Artifact):
 class S3Artifact(Artifact):
     """An artifact sourced from AWS S3."""
 
-    access_key_secret: Optional[v1.SecretKeySelector] = None
+    access_key_secret: Optional[SecretKeySelector] = None
     bucket: Optional[str] = None
-    ca_secret: Optional[v1.SecretKeySelector] = None
+    ca_secret: Optional[SecretKeySelector] = None
     create_bucket_if_not_present: Optional[CreateS3BucketOptions] = None
     encryption_options: Optional[S3EncryptionOptions] = None
     endpoint: Optional[str] = None
@@ -467,8 +466,8 @@ class S3Artifact(Artifact):
     key: Optional[str] = None
     region: Optional[str] = None
     role_arn: Optional[str] = None
-    secret_key_secret: Optional[v1.SecretKeySelector] = None
-    session_token_secret: Optional[v1.SecretKeySelector] = None
+    secret_key_secret: Optional[SecretKeySelector] = None
+    session_token_secret: Optional[SecretKeySelector] = None
     use_sdk_creds: Optional[bool] = None
 
     def _build_artifact(self) -> _ModelArtifact:

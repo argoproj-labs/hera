@@ -280,17 +280,13 @@ class IOMixin(BaseMixin):
         if self.inputs is None:
             return None
         elif isinstance(self.inputs, ModelInputs):
-            # Special case as Parameter is a subclass of ModelParameter
-            # We need to convert Parameters to ModelParameters
-            if self.inputs.parameters:
-                self.inputs.parameters = convert_to_model_parameters(self.inputs.parameters)
             return self.inputs
 
         result = ModelInputs()
         for value in normalize_to_list(self.inputs):
             if isinstance(value, dict):
                 for k, v in value.items():
-                    value = Parameter(name=k, value=v)
+                    value = ModelParameter(name=k, value=v)
                     result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(value, Parameter):
                 result.parameters = (
@@ -442,7 +438,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     scheduler_name: Optional[str] = None
     pod_security_context: Optional[PodSecurityContext] = None
     service_account_name: Optional[str] = None
-    sidecars: Optional[Union[UserContainer, List[UserContainer]]] = None
+    sidecars: Optional[OneOrMany[UserContainer | ModelUserContainer]] = None
     synchronization: Optional[Synchronization] = None
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
@@ -465,7 +461,14 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
         if isinstance(self.sidecars, UserContainer):
             return [self.sidecars.build()]
 
-        return [s.build() for s in self.sidecars]
+        result = []
+        for s in self.sidecars:
+            if isinstance(s, ModelUserContainer):
+                result.append(s)
+            elif isinstance(s, UserContainer):
+                result.append(s.build())
+
+        return result
 
     def _build_metadata(self) -> Optional[Metadata]:
         """Builds the `metadata` field of the template since the `annotations` and `labels` fields are separated."""

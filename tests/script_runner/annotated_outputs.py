@@ -7,6 +7,7 @@ from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, script
+from hera.workflows.models.io.argoproj.workflow.v1alpha1 import ValueFrom
 
 try:
     from pydantic.v1 import BaseModel
@@ -112,7 +113,10 @@ def script_outputs_in_function_signature(
 def script_outputs_in_function_signature_with_path(
     a_number: Annotated[int, Parameter(name="a_number")],
     successor: Annotated[
-        Path, Parameter(name="successor", value_from={"path": ARTIFACT_PATH + "/successor"}, output=True)
+        Path,
+        Parameter(
+            name="successor", value_from=ValueFrom.validate({"path": ARTIFACT_PATH + "/successor"}), output=True
+        ),
     ],
     successor2: Annotated[Path, Artifact(name="successor2", path=ARTIFACT_PATH + "/successor2", output=True)],
 ):
