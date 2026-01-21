@@ -156,7 +156,7 @@ class Artifact:
     def _build_artifact_paths(self) -> _ModelArtifactPaths:
         self._check_name()
         artifact = self._build_artifact()
-        return _ModelArtifactPaths(**artifact.dict())
+        return _ModelArtifactPaths(**artifact.model_dump())
 
     def as_name(self, name: str) -> _ModelArtifact:
         """Returns a 'built' copy of the current artifact, renamed using the specified `name`.

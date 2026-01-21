@@ -19,10 +19,10 @@ with Workflow(
             template="hello-hello",
             with_sequence=Sequence(
                 end=IntOrString(
-                    __root__="{{steps.hello-a.outputs.result}}",
+                    root="{{steps.hello-a.outputs.result}}",
                 ),
                 start=IntOrString(
-                    __root__="1",
+                    root="1",
                 ),
             ),
         )
@@ -38,10 +38,10 @@ with Workflow(
             template="hello",
             with_sequence=Sequence(
                 end=IntOrString(
-                    __root__="{{steps.hello-b.outputs.result}}",
+                    root="{{steps.hello-b.outputs.result}}",
                 ),
                 start=IntOrString(
-                    __root__="1",
+                    root="1",
                 ),
             ),
         )

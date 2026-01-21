@@ -11,7 +11,7 @@ with Workflow(
         name="error-container",
         retry_strategy=RetryStrategy(
             limit=IntOrString(
-                __root__="2",
+                root="2",
             ),
             retry_policy="Always",
         ),

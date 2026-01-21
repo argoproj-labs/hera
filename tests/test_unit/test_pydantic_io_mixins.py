@@ -143,7 +143,7 @@ def test_get_as_arguments_unannotated():
 
     assert parameters == ModelArguments(
         parameters=[
-            ModelParameter(name="foo", value=1),
+            ModelParameter(name="foo", value="1"),
             ModelParameter(name="bar", value="a default"),
         ],
     )
@@ -161,7 +161,7 @@ def test_get_as_arguments_unannotated_v1():
 
     assert parameters == ModelArguments(
         parameters=[
-            ModelParameter(name="foo", value=1),
+            ModelParameter(name="foo", value="1"),
             ModelParameter(name="bar", value="a default"),
         ],
     )
@@ -177,7 +177,7 @@ def test_get_as_arguments_with_pydantic_annotations():
 
     assert parameters == ModelArguments(
         parameters=[
-            ModelParameter(name="foo", value=1),
+            ModelParameter(name="foo", value="1"),
             ModelParameter(name="bar", value="a default"),
         ]
     )
@@ -197,7 +197,7 @@ def test_get_as_arguments_annotated_with_name():
             ModelArtifact(name="b_az", from_="previous step"),
         ],
         parameters=[
-            ModelParameter(name="f_oo", value=1),
+            ModelParameter(name="f_oo", value="1"),
             ModelParameter(name="b_ar", value="a default"),
         ],
     )
@@ -217,7 +217,7 @@ def test_get_as_arguments_annotated_with_description():
             ModelArtifact(name="baz", from_="previous step"),
         ],
         parameters=[
-            ModelParameter(name="foo", value=1),
+            ModelParameter(name="foo", value="1"),
             ModelParameter(name="bar", value="a default"),
         ],
     )
@@ -237,7 +237,7 @@ def test_get_as_arguments_with_multiple_annotations():
             ModelArtifact(name="baz", from_="previous step"),
         ],
         parameters=[
-            ModelParameter(name="f_oo", value=1),
+            ModelParameter(name="f_oo", value="1"),
             ModelParameter(name="bar", value="a default"),
         ],
     )
@@ -250,7 +250,7 @@ def test_get_as_templated_arguments_unannotated():
 
     templated_arguments = Foo._get_as_templated_arguments()
 
-    assert templated_arguments == Foo.construct(
+    assert templated_arguments == Foo.model_construct(
         foo="{{inputs.parameters.foo}}",
         bar="{{inputs.parameters.bar}}",
     )
@@ -263,7 +263,7 @@ def test_get_as_templated_arguments_with_pydantic_annotations():
 
     templated_arguments = Foo._get_as_templated_arguments()
 
-    assert templated_arguments == Foo.construct(
+    assert templated_arguments == Foo.model_construct(
         foo="{{inputs.parameters.foo}}",
         bar="{{inputs.parameters.bar}}",
     )
@@ -277,7 +277,7 @@ def test_get_as_templated_arguments_annotated_with_name():
 
     templated_arguments = Foo._get_as_templated_arguments()
 
-    assert templated_arguments == Foo.construct(
+    assert templated_arguments == Foo.model_construct(
         foo="{{inputs.parameters.f_oo}}",
         bar="{{inputs.parameters.b_ar}}",
         baz="{{inputs.artifacts.b_az}}",
@@ -292,7 +292,7 @@ def test_get_as_templated_arguments_annotated_with_description():
 
     templated_arguments = Foo._get_as_templated_arguments()
 
-    assert templated_arguments == Foo.construct(
+    assert templated_arguments == Foo.model_construct(
         foo="{{inputs.parameters.foo}}",
         bar="{{inputs.parameters.bar}}",
         baz="{{inputs.artifacts.baz}}",
@@ -307,7 +307,7 @@ def test_get_as_templated_arguments_with_multiple_annotations():
 
     templated_arguments = Foo._get_as_templated_arguments()
 
-    assert templated_arguments == Foo.construct(
+    assert templated_arguments == Foo.model_construct(
         foo="{{inputs.parameters.f_oo}}",
         bar="{{inputs.parameters.bar}}",
         baz="{{inputs.artifacts.baz}}",
@@ -530,7 +530,7 @@ def test_get_as_invocator_output_unannotated():
         foo: int
         bar: str = "a default"
 
-    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}")
+    foo = Foo.model_construct(foo="{{...foo}}", bar="{{...bar}}")
     parameters = foo._get_as_invocator_output()
 
     assert parameters == [
@@ -544,7 +544,7 @@ def test_get_as_invocator_output_with_pydantic_annotations():
         foo: Annotated[int, Field(gt=0)]
         bar: Annotated[str, Field(max_length=10)] = "a default"
 
-    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}")
+    foo = Foo.model_construct(foo="{{...foo}}", bar="{{...bar}}")
     parameters = foo._get_as_invocator_output()
 
     assert parameters == [
@@ -559,7 +559,7 @@ def test_get_as_invocator_output_annotated_with_name():
         bar: Annotated[str, Parameter(name="b_ar")] = "a default"
         baz: Annotated[str, Artifact(name="b_az")]
 
-    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
+    foo = Foo.model_construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
     parameters = foo._get_as_invocator_output()
 
     assert parameters == [
@@ -575,7 +575,7 @@ def test_get_as_invocator_output_annotated_with_description():
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
         baz: Annotated[str, Artifact()]
 
-    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
+    foo = Foo.model_construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
     parameters = foo._get_as_invocator_output()
 
     assert parameters == [
@@ -591,7 +591,7 @@ def test_get_as_invocator_output_with_multiple_annotations():
         bar: Annotated[str, Field(max_length=10), Parameter(description="param bar")] = "a default"
         baz: Annotated[str, Field(max_length=15), Artifact()]
 
-    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
+    foo = Foo.model_construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
     parameters = foo._get_as_invocator_output()
 
     assert parameters == [

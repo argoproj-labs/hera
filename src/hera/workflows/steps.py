@@ -173,9 +173,9 @@ class Steps(
         steps = []
         for workflow_step in self.sub_steps:
             if isinstance(workflow_step, Steppable):
-                steps.append(ParallelSteps(__root__=workflow_step._build_step()))
+                steps.append(ParallelSteps(root=workflow_step._build_step()))
             elif isinstance(workflow_step, _ModelWorkflowStep):
-                steps.append(ParallelSteps(__root__=[workflow_step]))
+                steps.append(ParallelSteps(root=[workflow_step]))
             elif isinstance(workflow_step, List):
                 substeps = []
                 for s in workflow_step:
@@ -185,7 +185,7 @@ class Steps(
                         substeps.append(s)
                     else:
                         raise InvalidType(type(s))
-                steps.append(ParallelSteps(__root__=substeps))
+                steps.append(ParallelSteps(root=substeps))
             else:
                 raise InvalidType(type(workflow_step))
 
@@ -216,7 +216,7 @@ class Steps(
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
-            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            active_deadline_seconds=IntOrString(root=self.active_deadline_seconds)
             if self.active_deadline_seconds
             else None,
             affinity=self.affinity,

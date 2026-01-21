@@ -24,10 +24,10 @@ with Workflow(
         resources=ResourceRequirements(
             limits={
                 "memory": Quantity(
-                    __root__="32Mi",
+                    root="32Mi",
                 ),
                 "cpu": Quantity(
-                    __root__="100m",
+                    root="100m",
                 ),
             },
         ),

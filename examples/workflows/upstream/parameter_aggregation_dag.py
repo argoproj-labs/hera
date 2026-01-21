@@ -13,16 +13,16 @@ with Workflow(
         Task(
             with_items=[
                 Item(
-                    __root__=1,
+                    root=1,
                 ),
                 Item(
-                    __root__=2,
+                    root=2,
                 ),
                 Item(
-                    __root__=3,
+                    root=3,
                 ),
                 Item(
-                    __root__=4,
+                    root=4,
                 ),
             ],
             arguments=Arguments(

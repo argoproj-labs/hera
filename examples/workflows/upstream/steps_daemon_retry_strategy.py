@@ -38,7 +38,7 @@ with Workflow(
             template="client",
             with_sequence=Sequence(
                 count=IntOrString(
-                    __root__="10",
+                    root="10",
                 ),
             ),
         )
@@ -47,7 +47,7 @@ with Workflow(
         name="server",
         retry_strategy=RetryStrategy(
             limit=IntOrString(
-                __root__="10",
+                root="10",
             ),
         ),
         args=["-g", "daemon off;"],

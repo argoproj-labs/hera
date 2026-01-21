@@ -32,7 +32,7 @@ with Workflow(
                 template="echo",
                 with_sequence=Sequence(
                     count=IntOrString(
-                        __root__="5",
+                        root="5",
                     ),
                 ),
             )
@@ -49,10 +49,10 @@ with Workflow(
                 template="echo",
                 with_sequence=Sequence(
                     end=IntOrString(
-                        __root__="105",
+                        root="105",
                     ),
                     start=IntOrString(
-                        __root__="100",
+                        root="100",
                     ),
                 ),
             )
@@ -69,10 +69,10 @@ with Workflow(
                 template="echo",
                 with_sequence=Sequence(
                     count=IntOrString(
-                        __root__="{{workflow.parameters.count}}",
+                        root="{{workflow.parameters.count}}",
                     ),
                     start=IntOrString(
-                        __root__="200",
+                        root="200",
                     ),
                 ),
             )
@@ -89,10 +89,10 @@ with Workflow(
                 template="echo",
                 with_sequence=Sequence(
                     end=IntOrString(
-                        __root__="0",
+                        root="0",
                     ),
                     start=IntOrString(
-                        __root__="5",
+                        root="5",
                     ),
                 ),
             )
@@ -109,7 +109,7 @@ with Workflow(
                 template="echo",
                 with_sequence=Sequence(
                     count=IntOrString(
-                        __root__="5",
+                        root="5",
                     ),
                     format="testuser%02X",
                 ),
