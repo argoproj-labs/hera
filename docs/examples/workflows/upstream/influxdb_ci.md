@@ -152,10 +152,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             resources=ResourceRequirements(
                 requests={
                     "memory": Quantity(
-                        __root__="1024Mi",
+                        root="1024Mi",
                     ),
                     "cpu": Quantity(
-                        __root__="200m",
+                        root="200m",
                     ),
                 },
             ),
@@ -254,10 +254,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             resources=ResourceRequirements(
                 requests={
                     "memory": Quantity(
-                        __root__="4096Mi",
+                        root="4096Mi",
                     ),
                     "cpu": Quantity(
-                        __root__="200m",
+                        root="200m",
                     ),
                 },
             ),
@@ -378,10 +378,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             resources=ResourceRequirements(
                 requests={
                     "memory": Quantity(
-                        __root__="512Mi",
+                        root="512Mi",
                     ),
                     "cpu": Quantity(
-                        __root__="250m",
+                        root="250m",
                     ),
                 },
             ),
@@ -401,10 +401,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             resources=ResourceRequirements(
                 requests={
                     "memory": Quantity(
-                        __root__="32Mi",
+                        root="32Mi",
                     ),
                     "cpu": Quantity(
-                        __root__="100m",
+                        root="100m",
                     ),
                 },
             ),

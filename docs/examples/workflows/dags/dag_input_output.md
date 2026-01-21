@@ -11,7 +11,7 @@ It also has the `my-dag-output` parameter, which "hoists" the task output to be 
 === "Hera"
 
     ```python linenums="1"
-    from typing_extensions import Annotated
+    from typing import Annotated
 
     from hera.workflows import DAG, Parameter, Workflow, script
 

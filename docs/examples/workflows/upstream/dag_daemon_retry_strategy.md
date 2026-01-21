@@ -51,7 +51,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 template="client",
                 with_sequence=Sequence(
                     count=IntOrString(
-                        __root__="10",
+                        root="10",
                     ),
                 ),
                 depends="server",
@@ -61,7 +61,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name="server",
             retry_strategy=RetryStrategy(
                 limit=IntOrString(
-                    __root__="10",
+                    root="10",
                 ),
             ),
             args=["-g", "daemon off;"],

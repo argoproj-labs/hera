@@ -8,8 +8,9 @@ This example shows how parameters can be passed into, within and out of a DAG.
 === "Hera"
 
     ```python linenums="1"
+    from typing import Annotated
+
     from pydantic import BaseModel
-    from typing_extensions import Annotated
 
     from hera.shared import global_config
     from hera.workflows import Input, Output, Parameter, Workflow
@@ -97,7 +98,7 @@ This example shows how parameters can be passed into, within and out of a DAG.
 
         return WorkerOutput(
             result_value=final_task.result,
-            another_value=setup_task.an_annotated_parameter,
+            another_value=str(setup_task.an_annotated_parameter),
         )
     ```
 
