@@ -2,17 +2,10 @@ from pathlib import Path
 from typing import Annotated
 
 from hera.workflows import Parameter, Workflow, script
-
-try:
-    from hera.workflows.io.v2 import (  # type: ignore
-        Input,
-        Output,
-    )
-except ImportError:
-    from hera.workflows.io.v1 import (  # type: ignore
-        Input,
-        Output,
-    )
+from hera.workflows.io.v2 import (
+    Input,
+    Output,
+)
 
 
 class ParamOnlyInput(Input):

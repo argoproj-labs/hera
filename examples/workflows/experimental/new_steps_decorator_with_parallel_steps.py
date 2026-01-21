@@ -1,6 +1,6 @@
 """This example shows the use of the new `steps` decorator, including parallel steps."""
 
-from typing_extensions import Annotated
+from typing import Annotated
 
 from hera.shared import global_config
 from hera.workflows import Input, Output, Parameter, Workflow, parallel

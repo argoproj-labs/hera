@@ -4,26 +4,13 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import pytest
+from pydantic import ValidationError as V2ValidationError
+from pydantic.v1 import ValidationError as V1ValidationError
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.workflows._runner.util import _runner
 from hera.workflows.io.v1 import Output as OutputV1
-
-try:
-    from hera.workflows.io.v2 import (  # type: ignore
-        Output as OutputV2,
-    )
-except ImportError:
-    from hera.workflows.io.v1 import (  # type: ignore
-        Output as OutputV2,
-    )
-
-from pydantic import ValidationError as V2ValidationError
-
-try:
-    from pydantic.v1 import ValidationError as V1ValidationError
-except ImportError:
-    from pydantic import ValidationError as V1ValidationError
+from hera.workflows.io.v2 import Output as OutputV2
 
 
 @pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])

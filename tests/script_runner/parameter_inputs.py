@@ -1,10 +1,5 @@
 import json
-from typing import Any, List, Literal, Union
-
-try:
-    from typing import Annotated
-except ImportError:
-    from typing_extensions import Annotated
+from typing import Annotated, Any, List, Literal, Union
 
 from pydantic import BaseModel as V2BaseModel
 from pydantic.v1 import BaseModel as V1BaseModel

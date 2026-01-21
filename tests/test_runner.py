@@ -24,11 +24,7 @@ from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner, create_module_string
 from hera.workflows.io.v1 import Output as OutputV1
-
-try:
-    from hera.workflows.io.v2 import Output as OutputV2
-except ImportError:
-    from hera.workflows.io.v1 import Output as OutputV2
+from hera.workflows.io.v2 import Output as OutputV2
 
 
 @pytest.mark.parametrize(
