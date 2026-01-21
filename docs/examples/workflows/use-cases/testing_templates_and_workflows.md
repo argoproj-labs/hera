@@ -8,13 +8,10 @@
 === "Hera"
 
     ```python linenums="1"
+    from pydantic.v1 import BaseModel
+
     from hera.shared import global_config
     from hera.workflows import DAG, RunnerScriptConstructor, Script, Workflow, WorkflowsService, script
-
-    try:
-        from pydantic.v1 import BaseModel
-    except ImportError:
-        from pydantic import BaseModel
 
     global_config.set_class_defaults(Script, constructor=RunnerScriptConstructor())
 

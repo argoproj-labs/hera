@@ -36,7 +36,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                     access_modes=["ReadWriteOnce"],
                     resources=m.VolumeResourceRequirements(
                         requests={
-                            "storage": m.Quantity(__root__="64Mi"),
+                            "storage": m.Quantity(root="64Mi"),
                         }
                     ),
                 ),

@@ -37,10 +37,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             resources=ResourceRequirements(
                 limits={
                     "memory": Quantity(
-                        __root__="32Mi",
+                        root="32Mi",
                     ),
                     "cpu": Quantity(
-                        __root__="100m",
+                        root="100m",
                     ),
                 },
             ),

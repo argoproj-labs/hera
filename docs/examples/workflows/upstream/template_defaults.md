@@ -26,7 +26,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         template_defaults=Template(
             retry_strategy=RetryStrategy(
                 limit=IntOrString(
-                    __root__="2",
+                    root="2",
                 ),
             ),
             timeout="30s",

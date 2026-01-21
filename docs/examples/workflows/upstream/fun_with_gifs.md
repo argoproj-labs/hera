@@ -38,7 +38,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                     resources=VolumeResourceRequirements(
                         requests={
                             "storage": Quantity(
-                                __root__="1Gi",
+                                root="1Gi",
                             )
                         },
                     ),

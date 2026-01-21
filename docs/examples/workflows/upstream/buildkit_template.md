@@ -64,7 +64,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                     resources=VolumeResourceRequirements(
                         requests={
                             "storage": Quantity(
-                                __root__="64Mi",
+                                root="64Mi",
                             )
                         },
                     ),

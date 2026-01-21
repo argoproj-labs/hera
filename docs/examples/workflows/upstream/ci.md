@@ -50,7 +50,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                     resources=VolumeResourceRequirements(
                         requests={
                             "storage": Quantity(
-                                __root__="1Gi",
+                                root="1Gi",
                             )
                         },
                     ),
@@ -83,13 +83,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             Step(
                 with_items=[
                     Item(
-                        __root__={"image": "debian", "tag": "9.1"},
+                        root={"image": "debian", "tag": "9.1"},
                     ),
                     Item(
-                        __root__={"image": "alpine", "tag": "3.6"},
+                        root={"image": "alpine", "tag": "3.6"},
                     ),
                     Item(
-                        __root__={"image": "ubuntu", "tag": "17.10"},
+                        root={"image": "ubuntu", "tag": "17.10"},
                     ),
                 ],
                 arguments=Arguments(

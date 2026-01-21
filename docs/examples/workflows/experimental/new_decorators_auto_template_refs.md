@@ -10,8 +10,9 @@ Note this example will not run unless you create the WorkflowTemplates first.
 === "Hera"
 
     ```python linenums="1"
+    from typing import Annotated
+
     from pydantic import BaseModel
-    from typing_extensions import Annotated
 
     from hera.shared import global_config
     from hera.workflows import ClusterWorkflowTemplate, Input, Output, Parameter, Workflow, WorkflowTemplate
