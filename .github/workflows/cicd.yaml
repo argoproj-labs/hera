@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -55,46 +55,6 @@ jobs:
         with:
           name: wheel-v${{ matrix.python-version }}-${{ matrix.os }}
           path: dist/*.whl
-
-  # Run tests against pydantic v1 until we drop support.
-  test-pydantic-v1:
-    name: test py${{ matrix.python-version }} (pydantic v1) on ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: checkout
-        uses: actions/checkout@v6
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: |
-          poetry install --all-extras
-          poetry run pip install "pydantic<2"
-
-      - name: run ci checks
-        run: make ci
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v5
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          files: ./coverage.xml
 
   workflow-tests:
     name: run workflow tests

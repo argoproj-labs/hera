@@ -7,6 +7,7 @@ from typing import Any, Dict, Generator, Iterator, List, Optional, Set, Type, Un
 
 import black
 import yaml
+from pydantic import RootModel
 
 from hera._cli.base import GeneratePython
 from hera._cli.generate.util import YAML_EXTENSIONS, convert_code, expand_paths, write_output
@@ -249,11 +250,11 @@ class WorkflowPythonBuilder:
             )
 
         # Model instances
-        if isinstance(value, APIBaseModel):
+        if isinstance(value, (APIBaseModel, RootModel)):
             model_name = value.__class__.__name__
             self._add_import("hera.workflows.models", model_name)
             keywords: List[ast.keyword] = []
-            for attr in value.__fields__:
+            for attr in type(value).model_fields:
                 if attr == "__slots__" or getattr(value, attr) is None:
                     continue
                 attribute_value = getattr(value, attr)
@@ -303,11 +304,12 @@ class WorkflowPythonBuilder:
     ) -> ast.stmt:
         self._add_import("hera.workflows", hera_template_class.__name__)
         hera_class_fields = [f.name for f in fields(hera_template_class)]
-        template_keys = set(hera_class_fields).intersection(template.__fields__.keys())
-        template_type_field_keys = set(hera_class_fields).intersection(template_type_field.__fields__.keys())
+        template_keys = set(hera_class_fields).intersection(type(template).model_fields.keys())
+        template_type_field_keys = set(hera_class_fields).intersection(type(template_type_field).model_fields.keys())
 
         keywords: List[ast.keyword] = []
-        for field in template.__fields__:
+        for field in type(template).model_fields:
+            # Special case for http which shouldn't be a field in template_keys (but is)
             if field in template_keys and getattr(template, field) is not None:
                 val = self._build_expression(getattr(template, field))
                 keywords.append(
@@ -337,7 +339,7 @@ class WorkflowPythonBuilder:
                         )
                     )
 
-        for field in template_type_field.__fields__:
+        for field in type(template_type_field).model_fields:
             if field in template_type_field_keys and getattr(template_type_field, field) is not None:
                 val = self._build_expression(getattr(template_type_field, field))
                 keywords.append(
@@ -379,20 +381,20 @@ class WorkflowPythonBuilder:
         self._add_import("hera.workflows", hera_template_class.__name__)
 
         hera_class_fields = [f.name for f in fields(hera_template_class)]
-        template_keys = set(hera_class_fields).intersection(template.__fields__.keys())
+        template_keys = set(hera_class_fields).intersection(type(template).model_fields.keys())
 
         body: List[ast.stmt] = []
         keywords: List[ast.keyword] = []
 
-        for field in template.__fields__:
+        for field in type(template).model_fields:
             if field in template_keys and getattr(template, field) is not None:
                 val = self._build_expression(getattr(template, field))
                 keywords.append(ast.keyword(arg=field, value=val))
 
         if template_type:
-            template_field_keys = set(hera_class_fields).intersection(template_type.__fields__.keys())
+            template_field_keys = set(hera_class_fields).intersection(type(template_type).model_fields.keys())
 
-            for field in template_type.__fields__:
+            for field in type(template_type).model_fields:
                 if hera_template_class == DAG and field == "tasks":
                     # We create Task objects within the context
                     continue
@@ -465,7 +467,7 @@ class WorkflowPythonBuilder:
         self._add_import("hera.workflows", hera_class.__name__)
 
         hera_class_fields = [f.name for f in fields(hera_class)]
-        template_keys = set(model_class_obj.__fields__.keys()).intersection(hera_class_fields)
+        template_keys = set(type(model_class_obj).model_fields.keys()).intersection(hera_class_fields)
 
         keywords: List[ast.keyword] = []
         for field in hera_class_fields:
