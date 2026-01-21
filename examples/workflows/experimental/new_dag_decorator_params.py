@@ -1,7 +1,8 @@
 """This example shows how parameters can be passed into, within and out of a DAG."""
 
+from typing import Annotated
+
 from pydantic import BaseModel
-from typing_extensions import Annotated
 
 from hera.shared import global_config
 from hera.workflows import Input, Output, Parameter, Workflow

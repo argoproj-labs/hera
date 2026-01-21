@@ -1,4 +1,4 @@
-from typing_extensions import Annotated
+from typing import Annotated
 
 from hera.shared import global_config
 from hera.workflows import Input, Output, Parameter, Workflow, parallel

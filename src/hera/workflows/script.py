@@ -67,18 +67,10 @@ from hera.workflows.io.v1 import (
     Input as InputV1,
     Output as OutputV1,
 )
-from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
-
-try:
-    from hera.workflows.io.v2 import (  # type: ignore
-        Input as InputV2,
-        Output as OutputV2,
-    )
-except ImportError:
-    from hera.workflows.io.v1 import (  # type: ignore
-        Input as InputV2,
-        Output as OutputV2,
-    )
+from hera.workflows.io.v2 import (
+    Input as InputV2,
+    Output as OutputV2,
+)
 from hera.workflows.models import (
     ContinueOn,
     EnvVar,
@@ -93,6 +85,7 @@ from hera.workflows.models import (
     TemplateRef,
     ValueFrom,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable
 from hera.workflows.steps import Step

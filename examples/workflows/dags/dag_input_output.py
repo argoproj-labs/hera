@@ -4,7 +4,7 @@ The example uses an "inner" dag which has a `my-dag-input` parameter, which can 
 It also has the `my-dag-output` parameter, which "hoists" the task output to be a DAG output.
 """
 
-from typing_extensions import Annotated
+from typing import Annotated
 
 from hera.workflows import DAG, Parameter, Workflow, script
 

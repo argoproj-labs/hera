@@ -36,6 +36,10 @@ from hera.workflows.io.v1 import (
     Input as InputV1,
     Output as OutputV1,
 )
+from hera.workflows.io.v2 import (  # type: ignore
+    Input as InputV2,
+    Output as OutputV2,
+)
 from hera.workflows.models import (
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
@@ -43,18 +47,6 @@ from hera.workflows.models import (
 )
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TWorkflow
-
-try:
-    from hera.workflows.io.v2 import (  # type: ignore
-        Input as InputV2,
-        Output as OutputV2,
-    )
-except ImportError:
-    from hera.workflows.io.v1 import (  # type: ignore
-        Input as InputV2,
-        Output as OutputV2,
-    )
-
 
 if TYPE_CHECKING:
     from hera.workflows.dag import DAG
