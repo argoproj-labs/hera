@@ -443,7 +443,7 @@ class CallableTemplateMixin(BaseMixin):
         """Returns the union of parameter names from the given arguments' parameter objects and dictionary keys."""
         parameters = [arg for arg in arguments if isinstance(arg, (ModelParameter, Parameter))]
         keys = [arg for arg in arguments if isinstance(arg, dict)]
-        return {p.name for p in parameters}.union(
+        return {cast(str, p.name) for p in parameters}.union(
             set(functools.reduce(lambda x, y: cast(List[str], x) + list(y.keys()), keys, []))
         )
 
@@ -452,7 +452,7 @@ class CallableTemplateMixin(BaseMixin):
         from hera.workflows.artifact import Artifact
 
         artifacts = [arg for arg in arguments if isinstance(arg, (ModelArtifact, Artifact))]
-        return {a if isinstance(a, str) else a.name for a in artifacts if a.name}
+        return {a.name for a in artifacts if a.name}
 
     def _get_templated_source_args(
         self,
