@@ -23,6 +23,7 @@ SKIP_LINT_EXAMPLES = {
     "template_refs",  # Also uses TemplateRefs - the WorkflowTemplates are in the file though
     "parquet_pandas",
     "reusing_cli_app",
+    "suspend_input_duration",
 }
 SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(
     {
@@ -60,7 +61,6 @@ SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(
         "spacy_inference_pipeline",
         "spark",
         "suspend",
-        "suspend_input_duration",
         "template_sets",
         "testing_templates_and_workflows",
         "typed_script_input_output",
