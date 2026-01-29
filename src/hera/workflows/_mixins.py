@@ -15,7 +15,7 @@ from typing import (
 )
 
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields
+from hera.shared._pydantic import get_field_annotations, get_fields
 from hera.shared._type_util import construct_io_from_annotation
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
@@ -764,7 +764,7 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
-    _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
+    _build_obj: Optional[HeraBuildObj] = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
