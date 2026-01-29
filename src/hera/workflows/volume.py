@@ -209,7 +209,7 @@ class CephFSVolume(_BaseVolume):
 
 
 @dataclass(kw_only=True)
-class CinderVolume(_BaseVolume, _ModelCinderVolumeSource):
+class CinderVolume(_BaseVolume):
     """Representation of a Cinder volume."""
 
     fs_type: Optional[str] = None
