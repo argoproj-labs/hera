@@ -88,14 +88,10 @@ class Container(
 
     def _build_template(self) -> _ModelTemplate:
         """Builds the generated `Template` representation of the container."""
-        active_deadline_seconds = None
-        if isinstance(self.active_deadline_seconds, IntOrString):
-            active_deadline_seconds = self.active_deadline_seconds
-        elif self.active_deadline_seconds is not None:
-            active_deadline_seconds = IntOrString(__root__=self.active_deadline_seconds)
-
         return _ModelTemplate(
-            active_deadline_seconds=active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

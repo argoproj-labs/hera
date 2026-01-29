@@ -391,9 +391,7 @@ def test_get_outputs_no_path_annotated_with_description():
         Parameter(name="foo", description="param foo"),
         Parameter(name="fum", description="param fum", default=5),
         Parameter(name="bar", default="a default", description="param bar"),
-        Artifact(
-            name="baz",
-        ),
+        Artifact(name="baz"),
     ]
 
 
