@@ -1,6 +1,6 @@
 import ast
 from collections import defaultdict
-from dataclasses import fields, is_dataclass
+from dataclasses import fields
 from pathlib import Path
 from types import NoneType
 from typing import Any, Dict, Generator, Iterator, List, Optional, Set, Type, Union, cast
@@ -302,10 +302,6 @@ class WorkflowPythonBuilder:
         hera_template_class: Any,
     ) -> ast.stmt:
         self._add_import("hera.workflows", hera_template_class.__name__)
-
-        assert is_dataclass(hera_template_class), (
-            f"Unexpected template class was given: {type(hera_template_class).__name__}"
-        )
         hera_class_fields = [f.name for f in fields(hera_template_class)]
         template_keys = set(hera_class_fields).intersection(template.__fields__.keys())
         template_type_field_keys = set(hera_class_fields).intersection(template_type_field.__fields__.keys())

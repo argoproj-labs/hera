@@ -300,8 +300,10 @@ class IOMixin(BaseMixin):
                     if result.artifacts is None
                     else result.artifacts + [value._build_artifact()]
                 )
-            else:
+            elif isinstance(value, ModelArtifact):
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
+            else:
+                raise ValueError(f"Unrecognised type {type(value)} for input value {value}")
 
         # returning `None` for `ModelInputs` means the submission to the server will not even have the `inputs` field
         # set, which saves some space
