@@ -1,12 +1,9 @@
 """The `hera.workflows.retry_strategy` module provides retry strategy functionality, along with necessary dependencies such as retry policy."""
 
+from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
-from hera.shared._pydantic import (
-    BaseModel as _BaseModel,
-    validator,
-)
 from hera.workflows.models import (
     Backoff,
     IntOrString,
@@ -38,7 +35,8 @@ class RetryPolicy(Enum):
         return str(self.value)
 
 
-class RetryStrategy(_BaseModel):
+@dataclass(kw_only=True)
+class RetryStrategy:
     """`RetryStrategy` configures how an Argo job should retry."""
 
     affinity: Optional[RetryAffinity] = None
@@ -56,30 +54,14 @@ class RetryStrategy(_BaseModel):
     retry_policy: Optional[Union[str, RetryPolicy]] = None
     """the policy dictates, at a high level, under what conditions should a job retry"""
 
-    @validator("retry_policy", pre=True)
-    def _convert_retry_policy(cls, v):
-        """Converts the `retry_policy` field into a pure `str` from either `str` already or an enum."""
-        if v is None or isinstance(v, str):
-            return v
-
-        v = cast(RetryPolicy, v)
-        return v.value
-
-    @validator("limit", pre=True)
-    def _convert_limit(cls, v) -> Optional[IntOrString]:
-        """Converts the `limit` field from the union specification into a `str`."""
-        if v is None or isinstance(v, IntOrString):
-            return v
-
-        return IntOrString(__root__=v)
-
     def build(self) -> _ModelRetryStrategy:
         """Builds the generated `RetryStrategy` representation of the retry strategy."""
+        limit = IntOrString(__root__=self.limit) if isinstance(self.limit, (str, int)) else self.limit
         return _ModelRetryStrategy(
             affinity=self.affinity,
             backoff=self.backoff,
             expression=self.expression,
-            limit=self.limit,  # type: ignore
+            limit=limit,
             retry_policy=str(self.retry_policy) if self.retry_policy is not None else None,
         )
 

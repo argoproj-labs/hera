@@ -4,9 +4,9 @@
 and you can only prefix the name with something. The `Env` classes can create new independent variables.
 """
 
+from dataclasses import dataclass
 from typing import Optional
 
-from hera.shared._pydantic import BaseModel as _BaseModel
 from hera.workflows.models import (
     ConfigMapEnvSource as _ModelConfigMapEnvSource,
     EnvFromSource as _ModelEnvFromSource,
@@ -14,7 +14,8 @@ from hera.workflows.models import (
 )
 
 
-class _BaseEnvFrom(_BaseModel):
+@dataclass(kw_only=True)
+class _BaseEnvFrom:
     prefix: Optional[str] = None
 
     def build(self) -> _ModelEnvFromSource:
@@ -22,8 +23,12 @@ class _BaseEnvFrom(_BaseModel):
         raise NotImplementedError()
 
 
-class SecretEnvFrom(_BaseEnvFrom, _ModelSecretEnvSource):
+@dataclass(kw_only=True)
+class SecretEnvFrom(_BaseEnvFrom):
     """Exposes a K8s secret as an environment variable."""
+
+    name: Optional[str] = None
+    optional: Optional[bool] = None
 
     def build(self) -> _ModelEnvFromSource:
         """Constructs and returns the Argo EnvFrom specification."""
@@ -36,8 +41,12 @@ class SecretEnvFrom(_BaseEnvFrom, _ModelSecretEnvSource):
         )
 
 
-class ConfigMapEnvFrom(_BaseEnvFrom, _ModelConfigMapEnvSource):
+@dataclass(kw_only=True)
+class ConfigMapEnvFrom(_BaseEnvFrom):
     """Exposes a K8s config map's value as an environment variable."""
+
+    name: Optional[str] = None
+    optional: Optional[bool] = None
 
     def build(self) -> _ModelEnvFromSource:
         """Constructs and returns the Argo EnvFrom specification."""

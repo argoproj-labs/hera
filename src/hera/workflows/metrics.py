@@ -1,5 +1,6 @@
 """The `hera.workflows.metrics` module implements independent and Prometheus metrics that can be used in Argo."""
 
+from dataclasses import dataclass
 from typing import List, Optional, Union
 
 from hera.shared import BaseMixin
@@ -15,7 +16,8 @@ from hera.workflows.models import (
 Label = _ModelMetricLabel
 
 
-class _BaseMetric(BaseMixin):
+@dataclass(kw_only=True)
+class _BaseMetric:
     """Base metric wrapper around `hera.workflows.models.Prometheus`."""
 
     name: str
@@ -34,6 +36,7 @@ class _BaseMetric(BaseMixin):
         raise NotImplementedError
 
 
+@dataclass(kw_only=True)
 class Counter(_BaseMetric):
     """Counter metric component used to count specific events based on the given value.
 
@@ -55,7 +58,8 @@ class Counter(_BaseMetric):
         )
 
 
-class Gauge(_BaseMetric, _ModelGauge):
+@dataclass(kw_only=True)
+class Gauge(_BaseMetric):
     """Gauge metric component used to record intervals based on the given value.
 
     Notes:
@@ -64,11 +68,12 @@ class Gauge(_BaseMetric, _ModelGauge):
 
     realtime: bool
     value: str
+    operation: Optional[str] = None
 
     def _build_metric(self) -> _ModelPrometheus:
         return _ModelPrometheus(
             counter=None,
-            gauge=_ModelGauge(realtime=self.realtime, value=self.value),
+            gauge=_ModelGauge(realtime=self.realtime, value=self.value, operation=self.operation),
             help=self.help,
             histogram=None,
             labels=self._build_labels(),
@@ -77,6 +82,7 @@ class Gauge(_BaseMetric, _ModelGauge):
         )
 
 
+@dataclass(kw_only=True)
 class Histogram(_BaseMetric):
     """Histogram metric that records the value at the specified bucket intervals.
 
@@ -84,11 +90,13 @@ class Histogram(_BaseMetric):
         See <https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics>
     """
 
-    buckets: List[Union[float, _ModelAmount]]  # type: ignore
+    buckets: List[float | _ModelAmount]
     value: str
 
     def _build_buckets(self) -> List[_ModelAmount]:
-        return [_ModelAmount(__root__=bucket) if isinstance(bucket, float) else bucket for bucket in self.buckets]
+        return [
+            bucket if isinstance(bucket, _ModelAmount) else _ModelAmount(__root__=bucket) for bucket in self.buckets
+        ]
 
     def _build_metric(self) -> _ModelPrometheus:
         return _ModelPrometheus(
@@ -105,6 +113,7 @@ class Histogram(_BaseMetric):
         )
 
 
+@dataclass(kw_only=True)
 class Metric(_BaseMetric):
     """Prometheus metric that can be used at the workflow or task/template level.
 
@@ -133,6 +142,7 @@ class Metric(_BaseMetric):
         )
 
 
+@dataclass(kw_only=True)
 class Metrics(BaseMixin):
     """A collection of Prometheus metrics.
 
