@@ -322,7 +322,7 @@ class IOMixin(BaseMixin):
                     else result.artifacts + [value._build_artifact()]
                 )
             else:
-                result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]  # type: ignore
+                result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
 
         # returning `None` for `ModelInputs` means the submission to the server will not even have the `inputs` field
         # set, which saves some space
