@@ -81,16 +81,16 @@ class InputMixin:
             object_dict[field] = "{{" + f"inputs.{input_type}.{annotation.name}" + "}}"
 
         if issubclass(cls, V1BaseModel):
-            return cast("Self", cls.construct(None, **object_dict))
+            return cast(Self, cls.construct(None, **object_dict))
 
         assert issubclass(cls, V2BaseModel)
-        return cast("Self", cls.model_construct(None, **object_dict))
+        return cast(Self, cls.model_construct(None, **object_dict))
 
     def _get_as_arguments(self) -> ModelArguments:
         params = []
         artifacts = []
 
-        self_dict = model_dump(cast("V2BaseModel", self))
+        self_dict = model_dump(cast(V2BaseModel, self))
 
         for field, _, annotation in _construct_io_from_fields(cast(Type[V1BaseModel] | Type[V2BaseModel], type(self))):
             # The value may be a static value (of any time) if it has a default value, so we need to serialize it
@@ -153,7 +153,7 @@ class OutputMixin:
         """
         outputs: List[Union[Artifact, Parameter]] = []
 
-        self_dict = model_dump(cast("V2BaseModel", self))
+        self_dict = model_dump(cast(V2BaseModel, self))
 
         for field, _, annotation in _construct_io_from_fields(cast(Type[V1BaseModel] | Type[V2BaseModel], type(self))):
             if field in {"exit_code", "result"}:

@@ -36,7 +36,7 @@ from hera.workflows.io.v1 import (
     Input as InputV1,
     Output as OutputV1,
 )
-from hera.workflows.io.v2 import (  # type: ignore
+from hera.workflows.io.v2 import (
     Input as InputV2,
     Output as OutputV2,
 )
