@@ -7,10 +7,11 @@ Tip:
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, List, Optional, Union, cast
 
-from hera.shared._pydantic import BaseModel
 from hera.workflows.archive import ArchiveStrategy
 from hera.workflows.models import (
     ArchiveStrategy as _ModelArchiveStrategy,
@@ -29,6 +30,13 @@ from hera.workflows.models import (
     S3Artifact as _ModelS3Artifact,
     SecretKeySelector,
 )
+from hera.workflows.models.io.argoproj.workflow.v1alpha1 import (
+    CreateS3BucketOptions,
+    Header,
+    HTTPAuth,
+    OSSLifecycleRule,
+    S3EncryptionOptions,
+)
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.WARNING)
@@ -46,7 +54,8 @@ class ArtifactLoader(Enum):
     """Read the contents of the Artifact file directly as a string (the target variable must be a `str` type)."""
 
 
-class Artifact(BaseModel):
+@dataclass(kw_only=True)
+class Artifact:
     """Base artifact representation."""
 
     name: Optional[str] = None
@@ -162,7 +171,7 @@ class Artifact(BaseModel):
 
     def with_name(self, name: str) -> Artifact:
         """Returns a copy of the current artifact, renamed using the specified `name`."""
-        artifact = self.copy(deep=True)
+        artifact = deepcopy(self)
         artifact.name = name
         return artifact
 
@@ -179,8 +188,13 @@ class Artifact(BaseModel):
         ]
 
 
-class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
+@dataclass(kw_only=True)
+class ArtifactoryArtifact(Artifact):
     """An artifact sourced from Artifactory."""
+
+    password_secret: Optional[SecretKeySelector] = None
+    url: str
+    username_secret: Optional[SecretKeySelector] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -195,8 +209,15 @@ class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
         return super()._get_input_attributes() + ["url", "password_secret", "username_secret"]
 
 
-class AzureArtifact(_ModelAzureArtifact, Artifact):
+@dataclass(kw_only=True)
+class AzureArtifact(Artifact):
     """An artifact sourced from Microsoft Azure."""
+
+    account_key_secret: Optional[SecretKeySelector] = None
+    blob: str
+    container: str
+    endpoint: str
+    use_sdk_creds: Optional[bool] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -221,8 +242,13 @@ class AzureArtifact(_ModelAzureArtifact, Artifact):
         ]
 
 
-class GCSArtifact(_ModelGCSArtifact, Artifact):
+@dataclass(kw_only=True)
+class GCSArtifact(Artifact):
     """An artifact sourced from Google Cloud Storage."""
+
+    bucket: Optional[str] = None
+    key: str
+    service_account_key_secret: Optional[SecretKeySelector] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -239,8 +265,22 @@ class GCSArtifact(_ModelGCSArtifact, Artifact):
         return super()._get_input_attributes() + ["bucket", "key", "service_account_key_secret"]
 
 
-class GitArtifact(_ModelGitArtifact, Artifact):
+@dataclass(kw_only=True)
+class GitArtifact(Artifact):
     """An artifact sourced from GitHub."""
+
+    branch: Optional[str] = None
+    depth: Optional[int] = None
+    disable_submodules: Optional[bool] = None
+    fetch: Optional[List[str]] = None
+    insecure_ignore_host_key: Optional[bool] = None
+    insecure_skip_tls: Optional[bool] = None
+    password_secret: Optional[SecretKeySelector] = None
+    repo: str
+    revision: Optional[str] = None
+    single_branch: Optional[bool] = None
+    ssh_private_key_secret: Optional[SecretKeySelector] = None
+    username_secret: Optional[SecretKeySelector] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -277,12 +317,12 @@ class GitArtifact(_ModelGitArtifact, Artifact):
         ]
 
 
+@dataclass(kw_only=True)
 class HDFSArtifact(Artifact):
     """A Hadoop File System artifact.
 
-    Note that `HDFSArtifact` does not inherit from the auto-generated `HDFSArtifact` because there's a
-    conflict in `path` with the base class `Artifact`. Here, we redefine the HDFS `path` to `hdfs_path` to
-    differentiate between the parent class and the child class `path`.
+    Note that we redefine the HDFS `path` to `hdfs_path` to differentiate between the
+    parent Artifact class `path` and the child class `path`.
     """
 
     hdfs_path: str
@@ -329,8 +369,13 @@ class HDFSArtifact(Artifact):
         ]
 
 
-class HTTPArtifact(_ModelHTTPArtifact, Artifact):
+@dataclass(kw_only=True)
+class HTTPArtifact(Artifact):
     """An artifact sourced from an HTTP URL."""
+
+    auth: Optional[HTTPAuth] = None
+    headers: Optional[List[Header]] = None
+    url: str
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -347,8 +392,19 @@ class HTTPArtifact(_ModelHTTPArtifact, Artifact):
         return super()._get_input_attributes() + ["auth", "headers", "url"]
 
 
-class OSSArtifact(_ModelOSSArtifact, Artifact):
+@dataclass(kw_only=True)
+class OSSArtifact(Artifact):
     """An artifact sourced from OSS."""
+
+    access_key_secret: Optional[SecretKeySelector] = None
+    bucket: Optional[str] = None
+    create_bucket_if_not_present: Optional[bool] = None
+    endpoint: Optional[str] = None
+    key: str
+    lifecycle_rule: Optional[OSSLifecycleRule] = None
+    secret_key_secret: Optional[SecretKeySelector] = None
+    security_token: Optional[str] = None
+    use_sdk_creds: Optional[bool] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -379,8 +435,11 @@ class OSSArtifact(_ModelOSSArtifact, Artifact):
         ]
 
 
-class RawArtifact(_ModelRawArtifact, Artifact):
+@dataclass(kw_only=True)
+class RawArtifact(Artifact):
     """A raw bytes artifact representation."""
+
+    data: str
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
@@ -393,8 +452,23 @@ class RawArtifact(_ModelRawArtifact, Artifact):
         return super()._get_input_attributes() + ["data"]
 
 
-class S3Artifact(_ModelS3Artifact, Artifact):
+@dataclass(kw_only=True)
+class S3Artifact(Artifact):
     """An artifact sourced from AWS S3."""
+
+    access_key_secret: Optional[SecretKeySelector] = None
+    bucket: Optional[str] = None
+    ca_secret: Optional[SecretKeySelector] = None
+    create_bucket_if_not_present: Optional[CreateS3BucketOptions] = None
+    encryption_options: Optional[S3EncryptionOptions] = None
+    endpoint: Optional[str] = None
+    insecure: Optional[bool] = None
+    key: Optional[str] = None
+    region: Optional[str] = None
+    role_arn: Optional[str] = None
+    secret_key_secret: Optional[SecretKeySelector] = None
+    session_token_secret: Optional[SecretKeySelector] = None
+    use_sdk_creds: Optional[bool] = None
 
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()

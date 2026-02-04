@@ -6,6 +6,7 @@ import functools
 import inspect
 import warnings
 from collections import ChainMap
+from dataclasses import dataclass
 from inspect import get_annotations
 from pathlib import Path
 from types import ModuleType
@@ -27,7 +28,7 @@ from typing import (
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
-from hera.shared._pydantic import BaseModel, get_fields, root_validator
+from hera.shared._pydantic import BaseModel, get_fields
 from hera.shared._type_util import construct_io_from_annotation, get_annotated_metadata, unwrap_annotation
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
@@ -118,11 +119,10 @@ class ExperimentalMixin(BaseMixin):
 
     _flag: str
 
-    @root_validator(allow_reuse=True)
-    def _check_enabled(cls, values):
-        if not global_config.experimental_features[cls._flag]:
-            raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
-        return values
+    def __post_init__(self):
+        super().__post_init__()
+        if not global_config.experimental_features[self._flag]:
+            raise ValueError(self._experimental_warning_message.format(self, self._flag))
 
 
 def _set_model_attr(model: BaseModel, attrs: List[str], value: Any):
@@ -150,7 +150,7 @@ def _get_model_attr(model: BaseModel, attrs: List[str]) -> Any:
     return getattr(curr, attrs[-1])
 
 
-class ModelMapperMixin(BaseMixin):
+class ModelMapperMixin:
     """`ModelMapperMixin` allows Hera classes to be mapped to auto-generated Argo classes."""
 
     class ModelMapper:
@@ -358,6 +358,7 @@ def _get_parameters_used_in_with_items(with_items: Any) -> Optional[List[Paramet
     return None
 
 
+@dataclass
 class CallableTemplateMixin(BaseMixin):
     """`CallableTemplateMixin` provides the ability to 'call' the template like a regular Python function.
 
@@ -380,22 +381,17 @@ class CallableTemplateMixin(BaseMixin):
         parameter_argument_names = self._get_parameter_names(arguments)
         artifact_argument_names = self._get_artifact_names(arguments)
 
-        # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
-        # set it here in order for the following logic to capture it
-        if "source" not in kwargs and hasattr(self, "source"):
-            kwargs["source"] = self.source  # type: ignore
-
-        if "source" in kwargs and "with_param" in kwargs:
+        if "with_param" in kwargs and hasattr(self, "source"):
             arguments += self._get_templated_source_args(
                 parameter_argument_names,
                 artifact_argument_names,
-                kwargs["source"],
+                self.source,  # type: ignore
             )
-        elif "source" in kwargs and "with_items" in kwargs:
+        elif "with_items" in kwargs and hasattr(self, "source"):
             arguments += self._get_templated_arguments_from_items(
                 parameter_argument_names,
                 kwargs["with_items"],
-                kwargs["source"],
+                self.source,  # type: ignore
             )
 
         # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
@@ -447,7 +443,7 @@ class CallableTemplateMixin(BaseMixin):
         """Returns the union of parameter names from the given arguments' parameter objects and dictionary keys."""
         parameters = [arg for arg in arguments if isinstance(arg, (ModelParameter, Parameter))]
         keys = [arg for arg in arguments if isinstance(arg, dict)]
-        return {p.name for p in parameters}.union(
+        return {cast(str, p.name) for p in parameters}.union(
             set(functools.reduce(lambda x, y: cast(List[str], x) + list(y.keys()), keys, []))
         )
 
@@ -456,7 +452,7 @@ class CallableTemplateMixin(BaseMixin):
         from hera.workflows.artifact import Artifact
 
         artifacts = [arg for arg in arguments if isinstance(arg, (ModelArtifact, Artifact))]
-        return {a if isinstance(a, str) else a.name for a in artifacts if a.name}
+        return {a.name for a in artifacts if a.name}
 
     def _get_templated_source_args(
         self,

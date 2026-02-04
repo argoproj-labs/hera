@@ -8,15 +8,16 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from contextvars import ContextVar
+from dataclasses import dataclass
 from enum import Enum
 from typing import Iterable, Iterator, List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
-    ItemMixin,
-    ParameterMixin,
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
+    WithItemsMixin,
+    WithParamMixin,
 )
 from hera.workflows.models import (
     DAGTask as _ModelDAGTask,
@@ -93,11 +94,12 @@ _default_next_operator: ContextVar[Operator] = ContextVar("_default_next_operato
 _default_next_on: ContextVar[Optional[List[TaskResult]]] = ContextVar("_default_on_operator", default=None)
 
 
+@dataclass(kw_only=True)
 class Task(
     TemplateInvocatorSubNodeMixin,
     ArgumentsMixin,
-    ParameterMixin,
-    ItemMixin,
+    WithParamMixin,
+    WithItemsMixin,
 ):
     """Task is used to run a given template within a DAG. Must be instantiated under a DAG context."""
 

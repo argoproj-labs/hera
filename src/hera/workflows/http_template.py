@@ -1,5 +1,6 @@
 """The `hera.workflows.http_template` module provides functionality and objects required for executing HTTP calls in workflows."""
 
+from dataclasses import dataclass
 from typing import List, Optional
 
 from hera.workflows._meta_mixins import CallableTemplateMixin
@@ -10,8 +11,10 @@ from hera.workflows.models import (
     Template as _ModelTemplate,
     V1alpha1HTTPHeader as HTTPHeader,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 
 
+@dataclass(kw_only=True)
 class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
     """`HTTP` is an implementation of the HTTP template that supports executing HTTP actions in a step/task."""
 
@@ -40,7 +43,9 @@ class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
     def _build_template(self) -> _ModelTemplate:
         """Builds the HTTP generated `Template`."""
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

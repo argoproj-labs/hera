@@ -1,5 +1,6 @@
 import ast
 from collections import defaultdict
+from dataclasses import fields
 from pathlib import Path
 from types import NoneType
 from typing import Any, Dict, Generator, Iterator, List, Optional, Set, Type, Union, cast
@@ -29,6 +30,7 @@ from hera.workflows.models import (
     Workflow as _ModelWorkflow,
     WorkflowTemplate as _ModelWorkflowTemplate,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 from hera.workflows.resource import Resource
 from hera.workflows.script import Script
 from hera.workflows.steps import Step, Steps
@@ -225,6 +227,10 @@ class WorkflowPythonBuilder:
         if isinstance(value, (str, bool, int, float, NoneType)):
             return ast.Constant(value=value)
 
+        # Special case for IntOrString
+        if isinstance(value, IntOrString):
+            return ast.Constant(value=value.__root__)
+
         # Collections
         if isinstance(value, list):
             return ast.List(
@@ -293,19 +299,16 @@ class WorkflowPythonBuilder:
         self,
         template: Template,
         template_type_field: BaseModel,
-        hera_template_class: Type[BaseModel],
+        hera_template_class: Any,
     ) -> ast.stmt:
         self._add_import("hera.workflows", hera_template_class.__name__)
-
-        template_keys = set(hera_template_class.__fields__.keys()).intersection(template.__fields__.keys())
-        template_type_field_keys = set(hera_template_class.__fields__.keys()).intersection(
-            template_type_field.__fields__.keys()
-        )
+        hera_class_fields = [f.name for f in fields(hera_template_class)]
+        template_keys = set(hera_class_fields).intersection(template.__fields__.keys())
+        template_type_field_keys = set(hera_class_fields).intersection(template_type_field.__fields__.keys())
 
         keywords: List[ast.keyword] = []
         for field in template.__fields__:
-            # Special case for http which shouldn't be a field in template_keys (but is)
-            if field in template_keys and getattr(template, field) is not None and field != "http":
+            if field in template_keys and getattr(template, field) is not None:
                 val = self._build_expression(getattr(template, field))
                 keywords.append(
                     ast.keyword(
@@ -370,11 +373,13 @@ class WorkflowPythonBuilder:
     def _build_hera_invocator_template_statement(
         self,
         template: Template,
-        hera_template_class: Type[BaseModel],
+        hera_template_class: Any,
         template_type: Optional[BaseModel] = None,
     ) -> ast.stmt:
         self._add_import("hera.workflows", hera_template_class.__name__)
-        template_keys = set(hera_template_class.__fields__.keys()).intersection(template.__fields__.keys())
+
+        hera_class_fields = [f.name for f in fields(hera_template_class)]
+        template_keys = set(hera_class_fields).intersection(template.__fields__.keys())
 
         body: List[ast.stmt] = []
         keywords: List[ast.keyword] = []
@@ -385,9 +390,7 @@ class WorkflowPythonBuilder:
                 keywords.append(ast.keyword(arg=field, value=val))
 
         if template_type:
-            template_field_keys = set(hera_template_class.__fields__.keys()).intersection(
-                template_type.__fields__.keys()
-            )
+            template_field_keys = set(hera_class_fields).intersection(template_type.__fields__.keys())
 
             for field in template_type.__fields__:
                 if hera_template_class == DAG and field == "tasks":
@@ -459,14 +462,15 @@ class WorkflowPythonBuilder:
     def _build_template_call_expression(
         self,
         model_class_obj: BaseModel,
-        hera_class: Type[BaseModel],
+        hera_class: Any,
     ) -> ast.stmt:
         self._add_import("hera.workflows", hera_class.__name__)
 
-        template_keys = set(model_class_obj.__fields__.keys()).intersection(hera_class.__fields__.keys())
+        hera_class_fields = [f.name for f in fields(hera_class)]
+        template_keys = set(model_class_obj.__fields__.keys()).intersection(hera_class_fields)
 
         keywords: List[ast.keyword] = []
-        for field in hera_class.__fields__:
+        for field in hera_class_fields:
             if field in template_keys and getattr(model_class_obj, field) is not None:
                 val = self._build_expression(getattr(model_class_obj, field))
                 keywords.append(

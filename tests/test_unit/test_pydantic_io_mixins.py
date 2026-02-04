@@ -49,7 +49,7 @@ def test_get_parameters_annotated_with_description():
     class Foo(Input):
         foo: Annotated[int, Parameter(description="param foo")]
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
-        baz: Annotated[str, Artifact(description="artifact baz")]
+        baz: Annotated[str, Artifact()]
 
     assert Foo._get_parameters() == [
         Parameter(name="foo", description="param foo"),
@@ -98,10 +98,13 @@ def test_get_artifacts_annotated_with_description():
     class Foo(Input):
         foo: Annotated[int, Parameter(description="param foo")]
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
-        baz: Annotated[str, Artifact(description="artifact baz")]
+        baz: Annotated[str, Artifact()]
 
     assert Foo._get_artifacts(add_missing_path=True) == [
-        Artifact(name="baz", path="/tmp/hera-inputs/artifacts/baz", description="artifact baz")
+        Artifact(
+            name="baz",
+            path="/tmp/hera-inputs/artifacts/baz",
+        )
     ]
 
 
@@ -204,7 +207,7 @@ def test_get_as_arguments_annotated_with_description():
     class Foo(Input):
         foo: Annotated[int, Parameter(description="param foo")]
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
-        baz: Annotated[str, Artifact(description="artifact baz")]
+        baz: Annotated[str, Artifact()]
 
     foo = Foo(foo=1, baz="previous step")
     parameters = foo._get_as_arguments()
@@ -285,7 +288,7 @@ def test_get_as_templated_arguments_annotated_with_description():
     class Foo(Input):
         foo: Annotated[int, Parameter(description="param foo")]
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
-        baz: Annotated[str, Artifact(description="artifact baz")]
+        baz: Annotated[str, Artifact()]
 
     templated_arguments = Foo._get_as_templated_arguments()
 
@@ -380,7 +383,7 @@ def test_get_outputs_no_path_annotated_with_description():
         foo: Annotated[int, Parameter(description="param foo")]
         fum: Annotated[int, Parameter(description="param fum")] = 5
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
-        baz: Annotated[str, Artifact(description="artifact baz")]
+        baz: Annotated[str, Artifact()]
 
     parameters = Foo._get_outputs()
 
@@ -388,7 +391,7 @@ def test_get_outputs_no_path_annotated_with_description():
         Parameter(name="foo", description="param foo"),
         Parameter(name="fum", description="param fum", default=5),
         Parameter(name="bar", default="a default", description="param bar"),
-        Artifact(name="baz", description="artifact baz"),
+        Artifact(name="baz"),
     ]
 
 
@@ -478,7 +481,7 @@ def test_get_outputs_add_path_annotated_with_description():
         foo: Annotated[int, Parameter(description="param foo")]
         fum: Annotated[int, Parameter(description="param fum")] = 5
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
-        baz: Annotated[str, Artifact(description="artifact baz")]
+        baz: Annotated[str, Artifact()]
 
     parameters = Foo._get_outputs(add_missing_path=True)
 
@@ -496,7 +499,7 @@ def test_get_outputs_add_path_annotated_with_description():
             description="param bar",
             value_from=ValueFrom(path="/tmp/hera-outputs/parameters/bar"),
         ),
-        Artifact(name="baz", description="artifact baz", path="/tmp/hera-outputs/artifacts/baz"),
+        Artifact(name="baz", path="/tmp/hera-outputs/artifacts/baz"),
     ]
 
 
@@ -570,7 +573,7 @@ def test_get_as_invocator_output_annotated_with_description():
     class Foo(Output):
         foo: Annotated[int, Parameter(description="param foo")]
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
-        baz: Annotated[str, Artifact(description="artifact baz")]
+        baz: Annotated[str, Artifact()]
 
     foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
     parameters = foo._get_as_invocator_output()
@@ -578,7 +581,7 @@ def test_get_as_invocator_output_annotated_with_description():
     assert parameters == [
         Parameter(name="foo", description="param foo", value_from=ValueFrom(parameter="{{...foo}}")),
         Parameter(name="bar", description="param bar", value_from=ValueFrom(parameter="{{...bar}}")),
-        Artifact(name="baz", description="artifact baz", from_="{{...baz}}"),
+        Artifact(name="baz", from_="{{...baz}}"),
     ]
 
 

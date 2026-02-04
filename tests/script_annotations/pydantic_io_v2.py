@@ -43,9 +43,7 @@ def pydantic_io_params_unrelated_annotation(
 
 class ArtifactOnlyInput(Input):
     my_file_artifact: Annotated[Path, Artifact(name="file-artifact")]
-    my_int_artifact: Annotated[
-        int, Artifact(name="an-int-artifact", description="my desc", loader=ArtifactLoader.json)
-    ]
+    my_int_artifact: Annotated[int, Artifact(name="an-int-artifact", loader=ArtifactLoader.json)]
 
 
 class ArtifactOnlyOutput(Output):

@@ -2,11 +2,9 @@ import re
 
 import pytest
 
-from hera.workflows import Env, Parameter, Workflow
+from hera.workflows import Parameter, Workflow
 from hera.workflows._mixins import (
-    ArgumentsMixin,
     ContainerMixin,
-    EnvMixin,
     IOMixin,
     TemplateMixin,
     VolumeMixin,
@@ -34,6 +32,7 @@ from hera.workflows.models import (
     Volume as ModelVolume,
     VolumeMount,
     VolumeResourceRequirements,
+    Workflow as ModelWorkflow,
 )
 from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.task import Task
@@ -121,8 +120,7 @@ class TestIOMixin:
         assert self.io_mixin._build_inputs() is None
 
     def test_build_inputs_from_model_inputs_with_hera_parameter(self):
-        # We must rebuild Parameter otherwise it will extra fields (output) that are not in ModelParameter
-        self.io_mixin.inputs = ModelInputs(parameters=[Parameter(name="test", value="value")])
+        self.io_mixin.inputs = ModelInputs(parameters=[ModelParameter(name="test", value="value")])
         assert self.io_mixin._build_inputs() == ModelInputs(parameters=[ModelParameter(name="test", value="value")])
 
     def test_build_outputs_none(self):
@@ -133,78 +131,22 @@ class TestIOMixin:
         built_outputs = self.io_mixin._build_outputs()
         assert built_outputs and built_outputs.artifacts == [ModelArtifact(name="test")]
 
-    def test_build_outputs_of_parameter_converted(self):
-        self.io_mixin.outputs = ModelOutputs(parameters=[Parameter(name="my-param-1")])
-        built_outputs = self.io_mixin._build_outputs()
-        assert built_outputs and built_outputs.parameters == [ModelParameter(name="my-param-1")]
-
 
 class TestArgumentsMixin:
-    def test_list_normalized_to_list(self):
-        args_mixin = ArgumentsMixin(
-            arguments=[
-                Parameter(name="my-param-1"),
-                Parameter(name="my-param-2"),
-            ]
-        )
-
-        assert isinstance(args_mixin.arguments, list)
-        assert len(args_mixin.arguments) == 2
-
-    def test_single_value_normalized_to_list(self):
-        args_mixin = ArgumentsMixin(arguments=Parameter(name="my-param"))
-
-        assert isinstance(args_mixin.arguments, list)
-        assert len(args_mixin.arguments) == 1
-
-    def test_none_value_is_not_normalized_to_list(self):
-        args_mixin = ArgumentsMixin(arguments=None)
-
-        assert args_mixin.arguments is None
-
-    def test_model_arguments_value_is_not_normalized_to_list(self):
-        args_mixin = ArgumentsMixin(arguments=ModelArguments())
-
-        assert args_mixin.arguments == ModelArguments()
-
-    def test_build_arguments_of_parameter_converted(self):
-        args_mixin = ArgumentsMixin(arguments=[Parameter(name="my-param-1")])
-        built_args = args_mixin._build_arguments()
-        assert built_args and built_args.parameters == [ModelParameter(name="my-param-1")]
-
     def test_build_workflow(self):
         with Workflow(
             name="test",
-            arguments=ModelArguments(parameters=[Parameter(name="test", value="value")]),
+            arguments=ModelArguments(parameters=[ModelParameter(name="test", value="value")]),
         ) as w:
             pass
 
         workflow = w.build()
-        assert workflow.spec.arguments.parameters == [ModelParameter(name="test", value="value")]
-
-
-class TestEnvMixin:
-    def test_list_normalized_to_list(self):
-        env_mixin = EnvMixin(
-            env=[
-                Env(name="test-1", value="test"),
-                Env(name="test-2", value="test"),
-            ]
+        assert isinstance(workflow, ModelWorkflow)
+        assert (
+            workflow.spec
+            and workflow.spec.arguments
+            and workflow.spec.arguments.parameters == [ModelParameter(name="test", value="value")]
         )
-
-        assert isinstance(env_mixin.env, list)
-        assert len(env_mixin.env) == 2
-
-    def test_single_value_normalized_to_list(self):
-        env_mixin = EnvMixin(env=Env(name="test", value="test"))
-
-        assert isinstance(env_mixin.env, list)
-        assert len(env_mixin.env) == 1
-
-    def test_none_value_is_not_normalized_to_list(self):
-        env_mixin = EnvMixin(env=None)
-
-        assert env_mixin.env is None
 
 
 class TestVolumeMixin:

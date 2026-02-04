@@ -6,9 +6,9 @@ for more on DAGs (Directed Acyclic Graphs) in Argo Workflows.
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from typing import Any, List, Optional, Set, Union
 
-from hera.shared._pydantic import PrivateAttr
 from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
 from hera.workflows._mixins import IOMixin, TemplateMixin
@@ -18,10 +18,12 @@ from hera.workflows.models import (
     DAGTemplate as _ModelDAGTemplate,
     Template as _ModelTemplate,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 from hera.workflows.protocol import Templatable
 from hera.workflows.task import Task
 
 
+@dataclass(kw_only=True)
 class DAG(
     IOMixin,
     TemplateMixin,
@@ -38,10 +40,10 @@ class DAG(
 
     fail_fast: Optional[bool] = None
     target: Optional[str] = None
-    tasks: List[Union[Task, DAGTask]] = []
+    tasks: List[Union[Task, DAGTask]] = field(default_factory=list)
 
-    _node_names = PrivateAttr(default_factory=set)
-    _current_task_depends: Set[str] = PrivateAttr(set())
+    _node_names: Set[str] = field(default_factory=set)
+    _current_task_depends: Set[str] = field(default_factory=set)
 
     def _add_sub(self, node: Any):
         if isinstance(node, Templatable):
@@ -68,7 +70,9 @@ class DAG(
             else:
                 tasks.append(task)
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

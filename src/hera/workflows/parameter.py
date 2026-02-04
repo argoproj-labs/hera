@@ -6,23 +6,33 @@ Tip:
 
 from __future__ import annotations
 
-from typing import Any, Callable, Optional
+from copy import deepcopy
+from dataclasses import dataclass
+from typing import Any, Callable, List, Optional, cast
 
-from hera.shared._pydantic import root_validator
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.models import Parameter as _ModelParameter
+from hera.workflows.models.io.argoproj.workflow.v1alpha1 import ValueFrom
 
 
-class Parameter(_ModelParameter):
+@dataclass(kw_only=True)
+class Parameter:
     """A `Parameter` is used to pass values in and out of templates.
 
     They are to declare input and output parameters in the case of templates, and are used
     for Steps and Tasks to assign values.
     """
 
-    name: Optional[str] = None  # type: ignore
+    # fields matching ModelParameter
+    name: Optional[str] = None
     """the name of the Parameter in the template"""
 
+    description: Optional[str] = None
+    enum: Optional[List[str]] = None
+    global_name: Optional[str] = None
+    value_from: Optional[ValueFrom] = None
+
+    # Special Hera fields
     output: Optional[bool] = False
     """used to specify parameter as an output in function signature annotations"""
 
@@ -44,19 +54,18 @@ class Parameter(_ModelParameter):
     value: Optional[Any] = MISSING
     default: Optional[Any] = MISSING
 
-    @root_validator(pre=True, allow_reuse=True)
-    def _check_values(cls, values):
-        if values.get("value") is not None and values.get("value_from") is not None:
+    def __post_init__(self):
+        """Perform post init validation and serialise values."""
+        if self.value != MISSING and self.value_from is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
 
-        values["value"] = serialize(values.get("value", MISSING))
-        values["default"] = serialize(values.get("default", MISSING))
-        if values.get("enum", []):
+        self.value = serialize(self.value)
+        self.default = serialize(self.default)
+        if self.enum:
             # We don't need to set "enum" in values to "MISSING" if there are no values
-            # as it's a list of values. The values themselves should be serialized.
-            values["enum"] = [serialize(v) for v in values.get("enum")]
-
-        return values
+            # as it's a list of values. The values themselves should be serialized (and can be
+            # assumed to be str).
+            self.enum = [cast(str, serialize(v)) for v in self.enum]
 
     @classmethod
     def _get_input_attributes(cls):
@@ -75,12 +84,20 @@ class Parameter(_ModelParameter):
 
     @classmethod
     def from_model(cls, model: _ModelParameter) -> Parameter:
-        """Creates a `Parameter` from a `Parameter` model without running validation."""
-        return cls.construct(**model.dict())
+        """Creates a `Parameter` from a `Parameter` model."""
+        return cls(
+            name=model.name,
+            description=model.description,
+            enum=model.enum,
+            global_name=model.global_name,
+            value_from=model.value_from,
+            value=MISSING if model.value is None else model.value,
+            default=MISSING if model.default is None else model.default,
+        )
 
     def with_name(self, name: str) -> Parameter:
         """Returns a copy of the parameter with the name set to the value."""
-        p = self.copy(deep=True)
+        p = deepcopy(self)
         p.name = name
         return p
 

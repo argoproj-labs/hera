@@ -3,8 +3,10 @@
 UserContainers are used as side containers, so they can run background processes required for the main container.
 """
 
+from dataclasses import dataclass
 from typing import List, Optional, Union, cast
 
+from hera.shared._global_config import BaseMixin
 from hera.workflows.env import _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.models import (
@@ -15,19 +17,43 @@ from hera.workflows.models import (
     UserContainer as _ModelUserContainer,
     VolumeMount as _ModelVolumeMount,
 )
+from hera.workflows.models.io.k8s.api.core import v1
 from hera.workflows.resources import Resources
 from hera.workflows.volume import _BaseVolume
 
 
-class UserContainer(_ModelUserContainer):
+@dataclass(kw_only=True)
+class UserContainer(BaseMixin):
     """`UserContainer` is a container type that is specifically used as a side container."""
 
     # TODO: Use EnvMixin (currently a circular import)
-    env: Optional[List[Union[_BaseEnv, EnvVar]]] = None  # type: ignore[assignment]
-    env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None  # type: ignore[assignment]
-    image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None  # type: ignore[assignment]
-    resources: Optional[Union[Resources, ResourceRequirements]] = None  # type: ignore[assignment]
+    env: Optional[List[Union[_BaseEnv, EnvVar]]] = None
+    env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None
+    image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
+    resources: Optional[Union[Resources, ResourceRequirements]] = None
     volumes: Optional[List[_BaseVolume]] = None
+
+    args: Optional[List[str]] = None
+    command: Optional[List[str]] = None
+    image: Optional[str] = None
+    lifecycle: Optional[v1.Lifecycle] = None
+    liveness_probe: Optional[v1.Probe] = None
+    mirror_volume_mounts: Optional[bool] = None
+    name: str
+    ports: Optional[List[v1.ContainerPort]] = None
+    readiness_probe: Optional[v1.Probe] = None
+    resize_policy: Optional[List[v1.ContainerResizePolicy]] = None
+    restart_policy: Optional[str] = None
+    security_context: Optional[v1.SecurityContext] = None
+    startup_probe: Optional[v1.Probe] = None
+    stdin: Optional[bool] = None
+    stdin_once: Optional[bool] = None
+    termination_message_path: Optional[str] = None
+    termination_message_policy: Optional[str] = None
+    tty: Optional[bool] = None
+    volume_devices: Optional[List[v1.VolumeDevice]] = None
+    volume_mounts: Optional[List[v1.VolumeMount]] = None
+    working_dir: Optional[str] = None
 
     def _build_image_pull_policy(self) -> Optional[str]:
         """Processes the image pull policy field and optionally returns a string value from `ImagePullPolicy` enum."""

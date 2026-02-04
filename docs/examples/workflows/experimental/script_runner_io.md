@@ -10,10 +10,7 @@ This example shows the use of Pydantic Input/Output to create the input and outp
     ```python linenums="1"
     from typing import Annotated
 
-    try:
-        from pydantic.v1 import BaseModel
-    except ImportError:
-        from pydantic import BaseModel
+    from pydantic.v1 import BaseModel
 
     from hera.shared import global_config
     from hera.workflows import Artifact, ArtifactLoader, Parameter, Script, Steps, Workflow, script

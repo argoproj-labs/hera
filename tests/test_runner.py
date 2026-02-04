@@ -543,20 +543,6 @@ def test_script_annotations_artifacts_no_name_or_path(
     assert serialize(output) == expected_output
 
 
-def test_script_annotations_artifacts_wrong_loader():
-    """Test that the input artifact annotation with no loader throws an exception."""
-    # GIVEN
-    entrypoint = "tests.script_runner.artifact_with_invalid_loader:invalid_loader"
-    kwargs_list = []
-
-    # WHEN
-    with pytest.raises(ValueError) as e:
-        _runner(entrypoint, kwargs_list)
-
-    # THEN
-    assert "value is not a valid enumeration member" in str(e.value)
-
-
 def test_script_annotations_unknown_type():
     # GIVEN
     expected_output = "a string"

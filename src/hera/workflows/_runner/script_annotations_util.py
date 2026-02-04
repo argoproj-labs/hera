@@ -124,11 +124,11 @@ def get_annotated_artifact_value(param_name: str, artifact_annotation: Artifact)
     if artifact_annotation.loadb is not None:
         return artifact_annotation.loadb(path.read_bytes())
 
-    if artifact_annotation.loader == ArtifactLoader.json.value:
+    if artifact_annotation.loader == ArtifactLoader.json:
         with path.open() as f:
             return json.load(f)
 
-    if artifact_annotation.loader == ArtifactLoader.file.value:
+    if artifact_annotation.loader == ArtifactLoader.file:
         return path.read_text()
 
     if artifact_annotation.loader is None:

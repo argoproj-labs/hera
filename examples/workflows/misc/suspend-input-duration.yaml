@@ -9,8 +9,6 @@ spec:
     inputs:
       parameters:
       - name: duration
-        default: 'null'
-        value: 'null'
     outputs:
       parameters:
       - name: duration

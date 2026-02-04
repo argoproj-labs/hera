@@ -1,5 +1,6 @@
 """Regression test: compare the new Annotated style inputs declaration with the old version."""
 
+import hera.workflows.models as m
 from hera.workflows import Workflow, script
 from hera.workflows.artifact import Artifact, GitArtifact
 from hera.workflows.steps import Steps
@@ -15,12 +16,12 @@ from hera.workflows.steps import Steps
             disable_submodules=True,
             fetch=["refs/meta/*"],
             insecure_ignore_host_key=True,
-            password_secret={"name": "github-creds", "key": "password"},
+            password_secret=m.SecretKeySelector.validate({"name": "github-creds", "key": "password"}),
             repo="https://github.com/argoproj/argo-workflows.git",
             revision="v2.1.1",
-            singleBranch=True,
-            ssh_private_key_secret={"name": "github-creds", "key": "ssh-private-key"},
-            username_secret={"name": "github-creds", "key": "username"},
+            single_branch=True,
+            ssh_private_key_secret=m.SecretKeySelector.validate({"name": "github-creds", "key": "ssh-private-key"}),
+            username_secret=m.SecretKeySelector.validate({"name": "github-creds", "key": "username"}),
         )
     ]
 )

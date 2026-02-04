@@ -9,6 +9,7 @@ import copy
 import inspect
 import textwrap
 from abc import abstractmethod
+from dataclasses import dataclass
 from functools import wraps
 from pathlib import Path
 from types import NoneType
@@ -38,7 +39,7 @@ from hera.shared._global_config import (
     _SCRIPT_PYDANTIC_IO_FLAG,
     _flag_enabled,
 )
-from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
+from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared._type_util import (
     construct_io_from_annotation,
     get_workflow_annotation,
@@ -66,6 +67,7 @@ from hera.workflows.io.v1 import (
     Input as InputV1,
     Output as OutputV1,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 
 try:
     from hera.workflows.io.v2 import (  # type: ignore
@@ -112,9 +114,9 @@ class ScriptConstructor(BaseMixin):
         """A function that can inspect the Script instance and generate the source field."""
         raise NotImplementedError
 
-    def transform_values(self, cls: Type["Script"], values: Any) -> Any:
-        """A function that will be invoked by the root validator of the Script class."""
-        return values
+    def transform_values(self, script: "Script") -> None:
+        """A function that will be invoked by the __post_init__ of the Script class."""
+        return None
 
     def transform_script_template_post_build(
         self, instance: "Script", script: _ModelScriptTemplate
@@ -127,6 +129,7 @@ class ScriptConstructor(BaseMixin):
         return template
 
 
+@dataclass(kw_only=True)
 class Script(
     EnvIOMixin,
     CallableTemplateMixin,
@@ -149,42 +152,38 @@ class Script(
     source: Optional[Union[Callable, str]] = None
     working_dir: Optional[str] = None
     add_cwd_to_sys_path: Optional[bool] = None
-    constructor: Optional[Union[str, ScriptConstructor]] = None
+    constructor: str | ScriptConstructor | None = None
 
-    @validator("constructor", always=True)
-    @classmethod
-    def _set_constructor(cls, v):
-        if v is None:
+    def __post_init__(self):
+        """Perform post init validation."""
+        super().__post_init__()
+
+        self.constructor = self._set_constructor(self.constructor)
+
+        self.command = self.command or global_config.script_command
+
+        if self.add_cwd_to_sys_path is None:
+            self.add_cwd_to_sys_path = True
+
+        assert isinstance(self.constructor, ScriptConstructor)
+
+        self.constructor.transform_values(self)
+
+    @staticmethod
+    def _set_constructor(constructor: str | ScriptConstructor | None):
+        if constructor is None:
             # TODO: In the future we can insert
             # detection code here to determine
             # the best constructor to use.
-            v = InlineScriptConstructor()
-        if isinstance(v, ScriptConstructor):
-            return v
-        assert isinstance(v, str)
-        if v.lower() == "inline":
+            constructor = InlineScriptConstructor()
+        if isinstance(constructor, ScriptConstructor):
+            return constructor
+        assert isinstance(constructor, str)
+        if constructor.lower() == "inline":
             return InlineScriptConstructor()
-        elif v.lower() == "runner":
+        elif constructor.lower() == "runner":
             return RunnerScriptConstructor()
-        raise ValueError(f"Unknown constructor {v}")
-
-    @validator("command", always=True)
-    @classmethod
-    def _set_command(cls, v):
-        return v or global_config.script_command
-
-    @validator("add_cwd_to_sys_path", always=True)
-    @classmethod
-    def _set_add_cwd_to_sys_path(cls, v):
-        if v is None:
-            return True
-
-    @root_validator
-    @classmethod
-    def _constructor_validate(cls, values):
-        constructor = values.get("constructor")
-        assert isinstance(constructor, ScriptConstructor)
-        return constructor.transform_values(cls, values)
+        raise ValueError(f"Unknown constructor {constructor}")
 
     def _build_template(self) -> _ModelTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
@@ -192,7 +191,9 @@ class Script(
         return self.constructor.transform_template_post_build(
             self,
             _ModelTemplate(
-                active_deadline_seconds=self.active_deadline_seconds,
+                active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+                if self.active_deadline_seconds
+                else None,
                 affinity=self.affinity,
                 archive_location=self.archive_location,
                 automount_service_account_token=self.automount_service_account_token,
@@ -731,6 +732,7 @@ def script(**script_kwargs) -> Callable:
     return script_wrapper
 
 
+@dataclass(kw_only=True)
 class InlineScriptConstructor(ScriptConstructor):
     """`InlineScriptConstructor` is a script constructor that submits a script as a `source` to Argo.
 
@@ -820,6 +822,7 @@ class InlineScriptConstructor(ScriptConstructor):
         return textwrap.dedent(script)
 
 
+@dataclass(kw_only=True)
 class RunnerScriptConstructor(ScriptConstructor):
     """`RunnerScriptConstructor` is a script constructor that runs a script in a container.
 
@@ -845,35 +848,33 @@ class RunnerScriptConstructor(ScriptConstructor):
     Allows for using pydantic.v1 BaseModels with pydantic v2.
     Defaults to the installed version of Pydantic."""
 
-    @validator("pydantic_mode", always=True)
-    def _pydantic_mode(cls, value: Optional[Literal[1, 2]]) -> Optional[Literal[1, 2]]:
-        if value and value > _PYDANTIC_VERSION:
+    def __post_init__(self):
+        """Perform post init validation."""
+        super().__post_init__()
+        if self.pydantic_mode and self.pydantic_mode > _PYDANTIC_VERSION:
             raise ValueError("v2 pydantic mode only available for pydantic>=2")
-        return value
 
-    def transform_values(self, cls: Type[Script], values: Any) -> Any:
+    def transform_values(self, script: Script) -> None:
         """A function that can inspect the Script instance and generate the source field."""
-        if not callable(values.get("source")):
-            return values
+        if not callable(script.source):
+            return
 
-        if values.get("args") is not None:
+        if script.args is not None:
             raise ValueError("Cannot specify args when callable is True")
 
-        module = values["source"].__module__
+        module = script.source.__module__
 
         if module == "__main__":
             from hera.workflows._runner.util import create_module_string
 
-            module = create_module_string(Path(values["source"].__globals__["__file__"]))
+            module = create_module_string(Path(script.source.__globals__["__file__"]))
 
-        values["args"] = [
+        script.args = [
             "-m",
             "hera.workflows.runner",
             "-e",
-            f"{module}:{values['source'].__name__}",
+            f"{module}:{script.source.__name__}",
         ]
-
-        return values
 
     def generate_source(self, instance: Script) -> str:
         """A function that can inspect the Script instance and generate the source field."""

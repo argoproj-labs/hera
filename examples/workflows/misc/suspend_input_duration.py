@@ -1,5 +1,4 @@
-from hera.workflows import Step, Steps, Suspend, Workflow
-from hera.workflows.models import Parameter
+from hera.workflows import Parameter, Step, Steps, Suspend, Workflow
 
 with Workflow(
     generate_name="suspend-input-duration-",

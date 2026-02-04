@@ -2,21 +2,20 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import (
     Any,
-    Callable,
     Dict,
     List,
     Optional,
     Sequence as SequenceType,
-    Type,
     TypeVar,
     Union,
     cast,
 )
 
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, root_validator, validator
+from hera.shared._pydantic import get_field_annotations, get_fields
 from hera.shared._type_util import construct_io_from_annotation
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
@@ -26,7 +25,6 @@ from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.metrics import Metrics, _BaseMetric
 from hera.workflows.models import (
-    HTTP,
     Affinity,
     Arguments as ModelArguments,
     Artifact as ModelArtifact,
@@ -40,7 +38,6 @@ from hera.workflows.models import (
     HostAlias,
     ImagePullPolicy,
     Inputs as ModelInputs,
-    IntOrString,
     Item,
     LifecycleHook,
     Memoize,
@@ -75,26 +72,14 @@ from hera.workflows.volume import Volume, _BaseVolume
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
 """OneOrMany is provided as a convenience type to allow Hera models to accept single values or lists (sequences) of
-values, and so that our code is more readable. It is used by the 'normalize' validators below."""
+values, and so that our code is more readable."""
 
 
-def normalize_to_list(v: Optional[OneOrMany]) -> Optional[List]:
+def normalize_to_list(v: OneOrMany) -> List:
     """Normalize given value to a list if not None."""
-    if v is None or isinstance(v, list):
+    if isinstance(v, list):
         return v
     return [v]
-
-
-def normalize_to_list_or(*valid_types: Type) -> Callable[[Optional[OneOrMany]], Optional[List]]:
-    """Normalize given value to a list if not None."""
-
-    def normalize_to_list_if_not_valid_type(v: Optional[OneOrMany]) -> Union[List, Any]:
-        """Normalize given value to a list if not None or already a valid type."""
-        if v is None or isinstance(v, (list, *valid_types)):
-            return v
-        return [v]
-
-    return normalize_to_list_if_not_valid_type
 
 
 def convert_to_model_parameters(parameters: List[ModelParameter]) -> List[ModelParameter]:
@@ -183,6 +168,7 @@ by Hera at specific mount paths in containers.
 """
 
 
+@dataclass(kw_only=True)
 class ContainerMixin(BaseMixin):
     """`ContainerMixin` provides a subset of the fields of a container such as image, probes, etc."""
 
@@ -198,6 +184,13 @@ class ContainerMixin(BaseMixin):
     termination_message_path: Optional[str] = None
     termination_message_policy: Optional[str] = None
     tty: Optional[bool] = None
+
+    def __post_init__(self):
+        """Validate image field. Set to the global image if None."""
+        super().__post_init__()
+
+        if self.image is None:
+            self.image = global_config.image
 
     def _build_image_pull_policy(self) -> Optional[str]:
         """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum."""
@@ -224,22 +217,13 @@ class ContainerMixin(BaseMixin):
                 "Use one of {ImagePullPolicy.__members__}"
             ) from e
 
-    @validator("image", pre=True, always=True)
-    def _set_image(cls, v):
-        """Validator that sets the image field to the global image unless the image is specified on the container."""
-        if v is None:
-            return global_config.image
-        return v
 
-
+@dataclass(kw_only=True)
 class IOMixin(BaseMixin):
     """`IOMixin` provides the capabilities of performing I/O between steps via fields such as `inputs`/`outputs`."""
 
     inputs: InputsT = None
     outputs: OutputsT = None
-    _normalize_fields = validator("inputs", "outputs", allow_reuse=True)(
-        normalize_to_list_or(ModelInputs, ModelOutputs)
-    )
 
     def get_parameter(self, name: str) -> Parameter:
         """Finds and returns the parameter with the supplied name.
@@ -296,18 +280,13 @@ class IOMixin(BaseMixin):
         if self.inputs is None:
             return None
         elif isinstance(self.inputs, ModelInputs):
-            # Special case as Parameter is a subclass of ModelParameter
-            # We need to convert Parameters to ModelParameters
-            if self.inputs.parameters:
-                self.inputs.parameters = convert_to_model_parameters(self.inputs.parameters)
             return self.inputs
 
         result = ModelInputs()
-        inputs = self.inputs if isinstance(self.inputs, list) else [self.inputs]
-        for value in inputs:
+        for value in normalize_to_list(self.inputs):
             if isinstance(value, dict):
                 for k, v in value.items():
-                    value = Parameter(name=k, value=v)
+                    value = ModelParameter(name=k, value=v)
                     result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(value, Parameter):
                 result.parameters = (
@@ -321,8 +300,10 @@ class IOMixin(BaseMixin):
                     if result.artifacts is None
                     else result.artifacts + [value._build_artifact()]
                 )
-            else:
+            elif isinstance(value, ModelArtifact):
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
+            else:
+                raise ValueError(f"Unrecognised type {type(value)} for input value {value}")
 
         # returning `None` for `ModelInputs` means the submission to the server will not even have the `inputs` field
         # set, which saves some space
@@ -342,7 +323,7 @@ class IOMixin(BaseMixin):
             return self.outputs
 
         result = ModelOutputs()
-        for value in self.outputs:
+        for value in normalize_to_list(self.outputs):
             if isinstance(value, Parameter):
                 result.parameters = (
                     [value.as_output()] if result.parameters is None else result.parameters + [value.as_output()]
@@ -365,12 +346,12 @@ class IOMixin(BaseMixin):
         return result
 
 
+@dataclass(kw_only=True)
 class EnvMixin(BaseMixin):
     """`EnvMixin` provides the ability to set simple env variables along with env variables that are derived."""
 
     env: EnvT = None
     env_from: EnvFromT = None
-    _normalize_fields = validator("env", "env_from", allow_reuse=True)(normalize_to_list)
 
     def _build_env(self) -> Optional[List[EnvVar]]:
         """Processes the `env` field and returns a list of generated `EnvVar` or `None`."""
@@ -378,7 +359,7 @@ class EnvMixin(BaseMixin):
             return None
 
         result: List[EnvVar] = []
-        for e in self.env:  # type: ignore
+        for e in normalize_to_list(self.env):
             if isinstance(e, EnvVar):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnv):
@@ -397,7 +378,7 @@ class EnvMixin(BaseMixin):
             return None
 
         result: List[EnvFromSource] = []
-        for e in self.env_from:  # type: ignore
+        for e in normalize_to_list(self.env_from):
             if isinstance(e, EnvFromSource):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnvFrom):
@@ -408,11 +389,11 @@ class EnvMixin(BaseMixin):
         return result if result else None
 
 
+@dataclass(kw_only=True)
 class MetricsMixin(BaseMixin):
     """`MetricsMixin` provides the ability to set metrics on a n object."""
 
     metrics: Optional[MetricsT] = None
-    _normalize_metrics = validator("metrics", allow_reuse=True)(normalize_to_list_or(Metrics, ModelMetrics))
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
         """Processes the `metrics` field and returns the generated `ModelMetrics` or `None`."""
@@ -422,7 +403,7 @@ class MetricsMixin(BaseMixin):
             return ModelMetrics(prometheus=self.metrics._build_metrics())
 
         metrics = []
-        for m in self.metrics:  # type: ignore
+        for m in normalize_to_list(self.metrics):
             if isinstance(m, _BaseMetric):
                 metrics.append(m._build_metric())
             elif isinstance(m, ModelPrometheus):
@@ -430,13 +411,14 @@ class MetricsMixin(BaseMixin):
         return ModelMetrics(prometheus=metrics) if metrics else None
 
 
+@dataclass(kw_only=True)
 class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     """`TemplateMixin` provides the Argo template fields that are shared between different sub-template fields.
 
     The supported sub-template fields are `Script`, `Data`, `DAG`, `Resource`, `Container`, `ContainerSet`, etc.
     """
 
-    active_deadline_seconds: Optional[IntOrString] = None
+    active_deadline_seconds: Optional[int | str] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
     automount_service_account_token: Optional[bool] = None
@@ -451,29 +433,20 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
-    http: Optional[HTTP] = (
-        None  # TODO: Deprecate and remove. This field is unused and `http` has its own Hera template class in http_template.py
-    )
     plugin: Optional[Plugin] = None
     pod_spec_patch: Optional[str] = None
-    priority: Optional[int] = None
-    """DEPRECATED: priority has been removed from ModelTemplate."""
-
     priority_class_name: Optional[str] = None
     retry_strategy: Optional[Union[RetryStrategy, ModelRetryStrategy]] = None
     scheduler_name: Optional[str] = None
     pod_security_context: Optional[PodSecurityContext] = None
     service_account_name: Optional[str] = None
-    sidecars: Optional[Union[UserContainer, List[UserContainer]]] = None
+    sidecars: Optional[OneOrMany[UserContainer | ModelUserContainer]] = None
     synchronization: Optional[Synchronization] = None
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
 
-    @validator("active_deadline_seconds")
-    def _convert_active_deadline_seconds(cls, v) -> Optional[IntOrString]:
-        if v is None or isinstance(v, IntOrString):
-            return v
-        return IntOrString(__root__=v)
+    def __post_init__(self) -> None:
+        super().__post_init__()
 
     def _build_init_containers(self) -> Optional[List[ModelUserContainer]]:
         """Builds the `init_containers` field and optionally returns a list of `UserContainer`."""
@@ -490,7 +463,14 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
         if isinstance(self.sidecars, UserContainer):
             return [self.sidecars.build()]
 
-        return [s.build() for s in self.sidecars]
+        result = []
+        for s in self.sidecars:
+            if isinstance(s, ModelUserContainer):
+                result.append(s)
+            elif isinstance(s, UserContainer):
+                result.append(s.build())
+
+        return result
 
     def _build_metadata(self) -> Optional[Metadata]:
         """Builds the `metadata` field of the template since the `annotations` and `labels` fields are separated."""
@@ -512,6 +492,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
         return self.retry_strategy
 
 
+@dataclass(kw_only=True)
 class ResourceMixin(BaseMixin):
     """`ResourceMixin` provides the capability to set resources such as compute requirements like CPU, GPU, etc."""
 
@@ -528,6 +509,7 @@ class ResourceMixin(BaseMixin):
 
 # Workflows can use VolumeMixin to create PVCs or specify volume sources (but never mount volumes).
 # Containers/scripts use VolumeMountMixin to create PVCs, mount volumes to the container, or specify volume sources.
+@dataclass(kw_only=True)
 class VolumeMixin(BaseMixin):
     """`VolumeMixin` provides the ability to set volumes on an inheriting resource.
 
@@ -537,17 +519,14 @@ class VolumeMixin(BaseMixin):
     """
 
     volumes: Optional[VolumesT] = None
-    _normalize_fields = validator("volumes", allow_reuse=True)(normalize_to_list)
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
         """Processes the `volumes` and creates an optional list of generated model `Volume`s."""
         if self.volumes is None:
             return None
 
-        # filter volumes for otherwise we're building extra Argo volumes
-        filtered_volumes = [cast(_BaseVolume, v) for v in self.volumes if not isinstance(v, Volume)]  # type: ignore
-        # only build volumes if there are any of type `_BaseVolume`, otherwise it must be an autogenerated model
-        # already, so kept it as it is
+        # filter volumes to _BaseVolumes or ModelVolumes, otherwise we're building extra Argo volumes from Hera volumes
+        filtered_volumes = [v for v in normalize_to_list(self.volumes) if not isinstance(v, Volume)]
         result = [v._build_volume() if isinstance(v, _BaseVolume) else v for v in filtered_volumes]
         return result or None
 
@@ -556,12 +535,13 @@ class VolumeMixin(BaseMixin):
         if self.volumes is None:
             return None
 
-        volumes_with_pv_claims = [v for v in self.volumes if isinstance(v, Volume)]  # type: ignore
+        volumes_with_pv_claims = [v for v in normalize_to_list(self.volumes) if isinstance(v, Volume)]
         if not volumes_with_pv_claims:
             return None
         return [v._build_persistent_volume_claim() for v in volumes_with_pv_claims] or None
 
 
+@dataclass(kw_only=True)
 class VolumeMountMixin(VolumeMixin):
     """`VolumeMountMixin` supports setting `volume_devices` and `volume_mounts` on the inheritor.
 
@@ -581,7 +561,7 @@ class VolumeMountMixin(VolumeMixin):
         if self.volumes is None:
             volumes: list = []
         else:
-            volumes = cast(list, self.volumes)
+            volumes = normalize_to_list(self.volumes)
 
         # Users should only use a Hera Volume (with no volume mount) to take advantage of this auto-generation
         generated_volume_mounts = [v._build_volume_mount() for v in volumes if isinstance(v, _BaseVolume)]
@@ -592,25 +572,23 @@ class VolumeMountMixin(VolumeMixin):
         return (self.volume_mounts or []) + generated_volume_mounts
 
 
+@dataclass(kw_only=True)
 class ArgumentsMixin(BaseMixin):
     """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object (only Tasks, Steps and Workflows use arguments)."""
 
     arguments: ArgumentsT = None
-    _normalize_arguments = validator("arguments", allow_reuse=True)(normalize_to_list_or(ModelArguments))
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
-        # Reapply the validator in case arguments was assigned to as a dictionary
-        normalized_arguments = normalize_to_list_or(ModelArguments)(self.arguments)
-
-        if normalized_arguments is None:
+        if self.arguments is None:
             return None
-        elif isinstance(normalized_arguments, ModelArguments):
+
+        if isinstance(self.arguments, ModelArguments):
             # Special case as Parameter is a subclass of ModelParameter
             # We need to convert Parameters to ModelParameters
-            if normalized_arguments.parameters:
-                normalized_arguments.parameters = convert_to_model_parameters(normalized_arguments.parameters)
-            return normalized_arguments
+            if self.arguments.parameters:
+                self.arguments.parameters = convert_to_model_parameters(self.arguments.parameters)
+            return self.arguments
 
         from hera.workflows.workflow_template import WorkflowTemplate
 
@@ -639,7 +617,7 @@ class ArgumentsMixin(BaseMixin):
                 result.parameters = (result.parameters or []) + [param_as_argument]
 
         result = ModelArguments()
-        for arg in normalized_arguments:
+        for arg in normalize_to_list(self.arguments):
             if isinstance(arg, dict):
                 for k, v in arg.items():
                     add_argument(k, v, result)
@@ -658,7 +636,8 @@ class ArgumentsMixin(BaseMixin):
         return result
 
 
-class ParameterMixin(BaseMixin):
+@dataclass(kw_only=True)
+class WithParamMixin(BaseMixin):
     """`ParameterMixin` supports the usage of `with_param` on inheritors."""
 
     with_param: Optional[Any] = None  # this must be a serializable object, or `hera.workflows.parameter.Parameter`
@@ -678,7 +657,8 @@ class ParameterMixin(BaseMixin):
         return serialize(self.with_param)
 
 
-class ItemMixin(BaseMixin):
+@dataclass(kw_only=True)
+class WithItemsMixin(BaseMixin):
     """Add `with_items` capability for inheritors, which supports parallelism over supplied items.
 
     Notes:
@@ -717,6 +697,7 @@ class ItemMixin(BaseMixin):
         return [Item(__root__=serialize(self.with_items))]
 
 
+@dataclass(kw_only=True)
 class EnvIOMixin(EnvMixin, IOMixin):
     """`EnvIOMixin` provides the capacity to create environment variables from inputs."""
 
@@ -726,7 +707,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
             return None
 
         params: Optional[List[ModelParameter]] = None
-        for spec in self.env:  # type: ignore
+        for spec in normalize_to_list(self.env):
             if isinstance(spec, Env) and spec.value_from_input is not None:
                 value = (
                     spec.value_from_input.value
@@ -764,6 +745,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
         return inputs
 
 
+@dataclass(kw_only=True)
 class TemplateInvocatorSubNodeMixin(SubNodeMixin):
     """Used for classes that form sub nodes of Template invocators - `Steps` and `DAG`.
 
@@ -782,7 +764,17 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
-    _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
+    _build_obj: Optional[HeraBuildObj] = None
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+
+        def only_one(xs: List):
+            xs = list(map(bool, xs))
+            return xs.count(True) == 1
+
+        if not only_one([self.template, self.template_ref, self.inline]):
+            raise ValueError("Exactly one of ['template', 'template_ref', 'inline'] must be present")
 
     def __getattribute__(self, name: str) -> Any:
         if _context.declaring:
@@ -863,18 +855,6 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
     def get_result_as(self, name: str) -> Parameter:
         """Returns a `Parameter` specification with the given name containing the `results` of `self`."""
         return Parameter(name=name, value=self.result)
-
-    @root_validator(pre=False)
-    def _check_values(cls, values):
-        """Validates that a single field is set between `template`, `template_ref`, and `inline`."""
-
-        def one(xs: List):
-            xs = list(map(bool, xs))
-            return xs.count(True) == 1
-
-        if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
-            raise ValueError("Exactly one of ['template', 'template_ref', 'inline'] must be present")
-        return values
 
     def _get_parameters_as(self, name: str, subtype: str) -> Parameter:
         """Returns a `Parameter` that represents all the outputs of the specified subtype.

@@ -1,5 +1,6 @@
 """The `hera.workflows.resource` module provides functionality for creating K8s resources via workflows inside task/steps."""
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from hera.workflows._meta_mixins import CallableTemplateMixin
@@ -9,6 +10,7 @@ from hera.workflows.models import (
     ResourceTemplate as _ModelResourceTemplate,
     Template as _ModelTemplate,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 
 if TYPE_CHECKING:
     from hera.workflows.cron_workflow import CronWorkflow
@@ -16,6 +18,7 @@ if TYPE_CHECKING:
     from hera.workflows.workflow_template import WorkflowTemplate
 
 
+@dataclass(kw_only=True)
 class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
     """`Resource` is a representation of a K8s resource that can be created by Argo.
 
@@ -34,17 +37,6 @@ class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
     merge_strategy: Optional[str] = None
     set_owner_reference: Optional[bool] = None
     success_condition: Optional[str] = None
-
-    def __new__(cls, *args, **kwargs) -> "Resource":
-        """Importing here to avoid circular imports."""
-        from hera.workflows.cron_workflow import CronWorkflow
-        from hera.workflows.workflow import Workflow
-        from hera.workflows.workflow_template import WorkflowTemplate
-
-        cls.update_forward_refs(Workflow=Workflow, CronWorkflow=CronWorkflow, WorkflowTemplate=WorkflowTemplate)
-
-        instance = super().__new__(cls)
-        return instance
 
     def _build_manifest(self) -> Optional[str]:
         from hera.workflows.cron_workflow import CronWorkflow
@@ -70,7 +62,9 @@ class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            if self.active_deadline_seconds
+            else None,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,
