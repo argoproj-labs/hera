@@ -1,8 +1,14 @@
+import sys
 from typing import Annotated
 
 from hera.shared import global_config
 from hera.workflows import Parameter, Workflow, script
-from hera.workflows.io.v1 import Input
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import Input
+else:
+    from hera.workflows.io.v1 import Input
+
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True

@@ -1,18 +1,29 @@
 import importlib
 import logging
 import re
+import sys
 from typing import cast
 
 import pytest
 
 import hera.workflows.models as m
 from hera.workflows import DAG, Workflow
-from hera.workflows.io.v1 import Input, Output
 from hera.workflows.models import (
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
     Workflow as ModelWorkflow,
 )
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input,
+        Output,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input,
+        Output,
+    )
 
 
 def test_set_entrypoint():

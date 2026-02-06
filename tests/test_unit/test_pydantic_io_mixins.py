@@ -1,3 +1,4 @@
+import sys
 from typing import Annotated
 
 from pydantic import Field
@@ -150,7 +151,14 @@ def test_get_as_arguments_unannotated():
 
 
 def test_get_as_arguments_unannotated_v1():
-    from hera.workflows.io.v1 import Input as InputV1
+    if sys.version_info >= (3, 14):
+        from hera.workflows.io.v2 import (
+            Input as InputV1,
+        )
+    else:
+        from hera.workflows.io.v1 import (
+            Input as InputV1,
+        )
 
     class Foo(InputV1):
         foo: int

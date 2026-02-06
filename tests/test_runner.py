@@ -23,8 +23,12 @@ import tests.helper as test_module
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner, create_module_string
-from hera.workflows.io.v1 import Output as OutputV1
 from hera.workflows.io.v2 import Output as OutputV2
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import Output as OutputV1
+else:
+    from hera.workflows.io.v1 import Output as OutputV1
 
 
 @pytest.mark.parametrize(
