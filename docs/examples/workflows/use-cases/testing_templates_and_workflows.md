@@ -8,13 +8,10 @@
 === "Hera"
 
     ```python linenums="1"
+    from pydantic import BaseModel
+
     from hera.shared import global_config
     from hera.workflows import DAG, RunnerScriptConstructor, Script, Workflow, WorkflowsService, script
-
-    try:
-        from pydantic.v1 import BaseModel
-    except ImportError:
-        from pydantic import BaseModel
 
     global_config.set_class_defaults(Script, constructor=RunnerScriptConstructor())
 
@@ -85,14 +82,14 @@
             arguments:
               parameters:
               - name: rectangle
-                value: '{"length": 1.2, "width": 3.4}'
+                value: '{"length":1.2,"width":3.4}'
           - name: rectangle-2
             depends: rectangle-1
             template: calculate-area-of-rectangle
             arguments:
               parameters:
               - name: rectangle
-                value: '{"length": 4.3, "width": 2.1}'
+                value: '{"length":4.3,"width":2.1}'
       - name: calculate-area-of-rectangle
         inputs:
           parameters:

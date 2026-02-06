@@ -56,7 +56,7 @@ class RetryStrategy:
 
     def build(self) -> _ModelRetryStrategy:
         """Builds the generated `RetryStrategy` representation of the retry strategy."""
-        limit = IntOrString(__root__=self.limit) if isinstance(self.limit, (str, int)) else self.limit
+        limit = IntOrString(root=self.limit) if isinstance(self.limit, (str, int)) else self.limit
         return _ModelRetryStrategy(
             affinity=self.affinity,
             backoff=self.backoff,

@@ -25,7 +25,7 @@ with Workflow(
                 resources=VolumeResourceRequirements(
                     requests={
                         "storage": Quantity(
-                            __root__="1Gi",
+                            root="1Gi",
                         )
                     },
                 ),

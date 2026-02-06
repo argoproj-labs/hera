@@ -24,7 +24,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name="error-container",
             retry_strategy=RetryStrategy(
                 limit=IntOrString(
-                    __root__="2",
+                    root="2",
                 ),
                 retry_policy="Always",
             ),

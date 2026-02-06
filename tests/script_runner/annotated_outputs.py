@@ -3,16 +3,12 @@
 from pathlib import Path
 from typing import Annotated, Dict, List, Tuple
 
+from pydantic.v1 import BaseModel
 from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, script
 from hera.workflows.models.io.argoproj.workflow.v1alpha1 import ValueFrom
-
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
 
 global_config.experimental_features["script_annotations"] = True
 
@@ -115,7 +111,7 @@ def script_outputs_in_function_signature_with_path(
     successor: Annotated[
         Path,
         Parameter(
-            name="successor", value_from=ValueFrom.validate({"path": ARTIFACT_PATH + "/successor"}), output=True
+            name="successor", value_from=ValueFrom.model_validate({"path": ARTIFACT_PATH + "/successor"}), output=True
         ),
     ],
     successor2: Annotated[Path, Artifact(name="successor2", path=ARTIFACT_PATH + "/successor2", output=True)],

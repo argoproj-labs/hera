@@ -1,4 +1,4 @@
-"""Tests for third-party volume classes, including deprecated aliases."""
+"""Tests for third-party volume classes."""
 
 from hera.workflows.models import (
     AWSElasticBlockStoreVolumeSource,

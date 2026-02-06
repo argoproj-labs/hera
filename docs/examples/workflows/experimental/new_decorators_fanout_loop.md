@@ -50,9 +50,9 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
             with_items=["hello world", "goodbye world"],
         )
         # For general use of loops in decorator functions, you will need to
-        # use `.construct` to pass the `"{{item}}"` string.
+        # use `.model_construct` to pass the `"{{item}}"` string.
         print_int(
-            PrintMessageInput.construct(an_int="{{item}}"),
+            PrintMessageInput.model_construct(an_int="{{item}}"),
             name="print-int-loop-with-items",
             with_items=[42, 123, 321],
         )

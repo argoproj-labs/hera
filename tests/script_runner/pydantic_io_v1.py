@@ -1,16 +1,23 @@
+import sys
 from pathlib import Path
 from typing import Annotated, List
 
+from pydantic.v1 import BaseModel as V1BaseModel
 from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, script
-from hera.workflows.io.v1 import Input, Output
 
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input,
+        Output,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input,
+        Output,
+    )
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
@@ -77,7 +84,7 @@ def pydantic_output_using_result() -> ParamOnlyOutput:
     return outputs
 
 
-class MyArtifact(BaseModel):
+class MyArtifact(V1BaseModel):
     a: int = 42
     b: str = "b"
 

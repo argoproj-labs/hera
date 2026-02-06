@@ -26,16 +26,16 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             Task(
                 with_items=[
                     Item(
-                        __root__=1,
+                        root=1,
                     ),
                     Item(
-                        __root__=2,
+                        root=2,
                     ),
                     Item(
-                        __root__=3,
+                        root=3,
                     ),
                     Item(
-                        __root__=4,
+                        root=4,
                     ),
                 ],
                 arguments=Arguments(

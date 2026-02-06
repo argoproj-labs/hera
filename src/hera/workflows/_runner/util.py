@@ -11,6 +11,9 @@ from pathlib import Path
 from types import NoneType
 from typing import Any, Callable, Dict, List, Optional, cast
 
+from pydantic.type_adapter import TypeAdapter
+from pydantic.v1 import parse_obj_as
+
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared._type_util import (
     get_workflow_annotation,
@@ -31,26 +34,21 @@ from hera.workflows._runner.script_annotations_util import (
     map_runner_input,
 )
 from hera.workflows.artifact import ArtifactLoader
-from hera.workflows.io.v1 import (
-    Input as InputV1,
-    Output as OutputV1,
+from hera.workflows.io.v2 import (
+    Input as InputV2,
+    Output as OutputV2,
 )
 from hera.workflows.script import _extract_return_annotation_output
 
-if _PYDANTIC_VERSION == 2:
-    from pydantic.type_adapter import TypeAdapter  # type: ignore
-    from pydantic.v1 import parse_obj_as  # type: ignore
-
-    from hera.workflows.io.v2 import (  # type: ignore
-        Input as InputV2,
-        Output as OutputV2,
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input as InputV1,
+        Output as OutputV1,
     )
 else:
-    from pydantic import parse_obj_as
-
-    from hera.workflows.io.v1 import (  # type: ignore
-        Input as InputV2,
-        Output as OutputV2,
+    from hera.workflows.io.v1 import (
+        Input as InputV1,
+        Output as OutputV1,
     )
 
 

@@ -4,7 +4,7 @@ The DAG decorator function can easily lift out an output artifact from a task as
 DAG itself by referencing it in an `Output` class.
 """
 
-from typing_extensions import Annotated
+from typing import Annotated
 
 from hera.shared import global_config
 from hera.workflows import (

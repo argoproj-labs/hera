@@ -40,7 +40,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name="random-fail",
             retry_strategy=RetryStrategy(
                 limit=IntOrString(
-                    __root__="10",
+                    root="10",
                 ),
             ),
             args=[

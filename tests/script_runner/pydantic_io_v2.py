@@ -6,11 +6,7 @@ from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, script
-
-try:
-    from hera.workflows.io.v2 import Input, Output
-except ImportError:
-    from hera.workflows.io.v1 import Input, Output
+from hera.workflows.io.v2 import Input, Output
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True

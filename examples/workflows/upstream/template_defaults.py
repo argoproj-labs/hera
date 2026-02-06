@@ -13,7 +13,7 @@ with Workflow(
     template_defaults=Template(
         retry_strategy=RetryStrategy(
             limit=IntOrString(
-                __root__="2",
+                root="2",
             ),
         ),
         timeout="30s",

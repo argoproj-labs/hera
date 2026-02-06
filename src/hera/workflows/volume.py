@@ -745,11 +745,11 @@ class Volume(_BaseVolume):
 
         if self.size and self.resources:
             if self.resources.requests is not None and "storage" not in self.resources.requests:
-                self.resources.requests["storage"] = resource.Quantity(__root__=self.size)
+                self.resources.requests["storage"] = resource.Quantity(root=self.size)
         elif self.resources is None:
             assert self.size, "at least one of `size` or `resources` must be specified"
             validate_storage_units(self.size)
-            self.resources = VolumeResourceRequirements(requests={"storage": resource.Quantity(__root__=self.size)})
+            self.resources = VolumeResourceRequirements(requests={"storage": resource.Quantity(root=self.size)})
         else:  # self.resources is not None
             assert self.resources.requests is not None, "Resource requests are required"
             storage = self.resources.requests.get("storage")
