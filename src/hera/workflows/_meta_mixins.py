@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import inspect
+import sys
 import warnings
 from collections import ChainMap
 from dataclasses import dataclass
@@ -32,10 +33,6 @@ from hera.shared._pydantic import APIBaseModel, get_fields
 from hera.shared._type_util import construct_io_from_annotation, get_annotated_metadata, unwrap_annotation
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
-from hera.workflows.io.v1 import (
-    Input as InputV1,
-    Output as OutputV1,
-)
 from hera.workflows.io.v2 import (
     Input as InputV2,
     Output as OutputV2,
@@ -47,6 +44,17 @@ from hera.workflows.models import (
 )
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TWorkflow
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input as InputV1,
+        Output as OutputV1,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input as InputV1,
+        Output as OutputV1,
+    )
 
 if TYPE_CHECKING:
     from hera.workflows.dag import DAG

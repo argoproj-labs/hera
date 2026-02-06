@@ -1,5 +1,6 @@
 import json
 import pickle
+import sys
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -9,8 +10,12 @@ from pydantic.v1 import ValidationError as V1ValidationError
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.workflows._runner.util import _runner
-from hera.workflows.io.v1 import Output as OutputV1
 from hera.workflows.io.v2 import Output as OutputV2
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import Output as OutputV1
+else:
+    from hera.workflows.io.v1 import Output as OutputV1
 
 
 @pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])

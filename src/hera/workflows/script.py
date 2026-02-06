@@ -7,6 +7,7 @@ for more on scripts in Argo Workflows.
 import ast
 import copy
 import inspect
+import sys
 import textwrap
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -63,10 +64,6 @@ from hera.workflows._mixins import (
 from hera.workflows.artifact import (
     Artifact,
 )
-from hera.workflows.io.v1 import (
-    Input as InputV1,
-    Output as OutputV1,
-)
 from hera.workflows.io.v2 import (
     Input as InputV2,
     Output as OutputV2,
@@ -91,6 +88,17 @@ from hera.workflows.protocol import Templatable
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 from hera.workflows.volume import _BaseVolume
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input as InputV1,
+        Output as OutputV1,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input as InputV1,
+        Output as OutputV1,
+    )
 
 
 class ScriptConstructor(BaseMixin):

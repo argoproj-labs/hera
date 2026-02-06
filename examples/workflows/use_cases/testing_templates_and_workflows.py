@@ -1,4 +1,4 @@
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 
 from hera.shared import global_config
 from hera.workflows import DAG, RunnerScriptConstructor, Script, Workflow, WorkflowsService, script

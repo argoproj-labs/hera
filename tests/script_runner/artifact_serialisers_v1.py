@@ -1,12 +1,24 @@
 import json
 import pickle
+import sys
 from typing import Annotated
 
 from pydantic.v1 import BaseModel
 
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, script
-from hera.workflows.io.v1 import Input, Output
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input,
+        Output,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input,
+        Output,
+    )
+
 
 global_config.experimental_features["script_pydantic_io"] = True
 

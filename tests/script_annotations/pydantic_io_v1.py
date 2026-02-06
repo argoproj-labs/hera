@@ -1,8 +1,19 @@
+import sys
 from pathlib import Path
 from typing import Annotated, List
 
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
-from hera.workflows.io.v1 import Input, Output
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input,
+        Output,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input,
+        Output,
+    )
 
 
 class ParamOnlyInput(Input):

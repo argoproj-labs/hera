@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 from pathlib import Path
 from types import NoneType
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
@@ -19,8 +20,12 @@ from hera.shared._type_util import (
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
-from hera.workflows.io.v1 import Output as OutputV1
 from hera.workflows.io.v2 import Output as OutputV2
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import Output as OutputV1
+else:
+    from hera.workflows.io.v1 import Output as OutputV1
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:

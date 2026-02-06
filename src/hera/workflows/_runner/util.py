@@ -34,15 +34,22 @@ from hera.workflows._runner.script_annotations_util import (
     map_runner_input,
 )
 from hera.workflows.artifact import ArtifactLoader
-from hera.workflows.io.v1 import (
-    Input as InputV1,
-    Output as OutputV1,
-)
 from hera.workflows.io.v2 import (
     Input as InputV2,
     Output as OutputV2,
 )
 from hera.workflows.script import _extract_return_annotation_output
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input as InputV1,
+        Output as OutputV1,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input as InputV1,
+        Output as OutputV1,
+    )
 
 
 def _ignore_unmatched_kwargs(f: Callable) -> Callable:
