@@ -1,29 +1,21 @@
 import importlib
 import logging
 import re
-import sys
 from typing import cast
 
 import pytest
 
 import hera.workflows.models as m
 from hera.workflows import DAG, Workflow
+from hera.workflows.io.v2 import (
+    Input,
+    Output,
+)
 from hera.workflows.models import (
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
     Workflow as ModelWorkflow,
 )
-
-if sys.version_info >= (3, 14):
-    from hera.workflows.io.v2 import (
-        Input,
-        Output,
-    )
-else:
-    from hera.workflows.io.v1 import (
-        Input,
-        Output,
-    )
 
 
 def test_set_entrypoint():
@@ -444,7 +436,7 @@ def test_dag_set_outputs_subclass_errors(global_config_fixture):
     with pytest.raises(
         SyntaxError,
         match="Function return does not match annotation, "
-        "expected: <class 'hera.workflows.io.v1.Output'>; got: <class 'tests.test_unit.test_decorators.test_dag_set_outputs_subclass_errors.<locals>.SubOfOutput'>.",
+        "expected: <class 'hera.workflows.io.v2.Output'>; got: <class 'tests.test_unit.test_decorators.test_dag_set_outputs_subclass_errors.<locals>.SubOfOutput'>.",
     ):
 
         class SubOfOutput(Output):

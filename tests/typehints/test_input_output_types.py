@@ -1,3 +1,4 @@
+import sys
 from textwrap import dedent
 
 import pytest
@@ -6,6 +7,9 @@ from hera.shared._pydantic import _PYDANTIC_VERSION
 
 from .mypy_utils import run_mypy
 
+DISABLE_FOR_3_14 = (
+    pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+)
 ENABLE_FOR_V2 = pytest.mark.skipif(_PYDANTIC_VERSION < 2, reason="Pydantic v2 compatibility test")
 
 
@@ -16,8 +20,8 @@ def extract_notes(mypy_output: str) -> list[str]:
 @pytest.mark.parametrize(
     "pydantic_version",
     [
-        pytest.param(1, id="pydantic_v1"),
-        pytest.param(2, marks=[ENABLE_FOR_V2], id="pydantic_v2"),
+        pytest.param(1, id="pydantic_v1", marks=DISABLE_FOR_3_14),
+        pytest.param(2, id="pydantic_v2", marks=ENABLE_FOR_V2),
     ],
 )
 def test_custom_input_type(pydantic_version: int):
@@ -43,8 +47,8 @@ def test_custom_input_type(pydantic_version: int):
 @pytest.mark.parametrize(
     "pydantic_version",
     [
-        pytest.param(1, id="pydantic_v1"),
-        pytest.param(2, marks=[ENABLE_FOR_V2], id="pydantic_v2"),
+        pytest.param(1, id="pydantic_v1", marks=DISABLE_FOR_3_14),
+        pytest.param(2, id="pydantic_v2", marks=ENABLE_FOR_V2),
     ],
 )
 def test_custom_output_type(pydantic_version: int):

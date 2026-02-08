@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Annotated, Dict, List, Tuple
 
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
