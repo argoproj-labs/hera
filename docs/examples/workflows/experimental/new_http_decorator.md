@@ -8,7 +8,7 @@ This example shows the use of the http decorator and special Input/Output classe
 === "Hera"
 
     ```python linenums="1"
-    from typing_extensions import Annotated
+    from typing import Annotated
 
     from hera.expr import g
     from hera.shared import global_config

@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Union
+from typing import Annotated, List, Union
 
 from cappa import Arg, Subcommands, command
-from typing_extensions import Annotated
 
 
 @dataclass

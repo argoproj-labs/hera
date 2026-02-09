@@ -1,15 +1,16 @@
+import sys
 from pathlib import Path
 from typing import Annotated
 
 from hera.workflows import Parameter, Workflow, script
 
-try:
-    from hera.workflows.io.v2 import (  # type: ignore
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
         Input,
         Output,
     )
-except ImportError:
-    from hera.workflows.io.v1 import (  # type: ignore
+else:
+    from hera.workflows.io.v1 import (
         Input,
         Output,
     )

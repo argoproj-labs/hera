@@ -41,7 +41,7 @@ class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
     def _build_template(self) -> m.Template:
         """Builds the generated `Template` from the fields of `Data`."""
         return m.Template(
-            active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+            active_deadline_seconds=IntOrString(root=self.active_deadline_seconds)
             if self.active_deadline_seconds
             else None,
             affinity=self.affinity,

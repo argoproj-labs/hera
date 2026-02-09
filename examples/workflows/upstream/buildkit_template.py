@@ -51,7 +51,7 @@ with WorkflowTemplate(
                 resources=VolumeResourceRequirements(
                     requests={
                         "storage": Quantity(
-                            __root__="64Mi",
+                            root="64Mi",
                         )
                     },
                 ),

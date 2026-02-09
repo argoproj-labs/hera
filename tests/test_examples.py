@@ -5,7 +5,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, cast
 
 import examples.workflows as hera_examples
 import examples.workflows.upstream as hera_upstream_examples
@@ -50,40 +50,41 @@ def _generate_yaml(path: Path) -> bool:
 
 
 def _transform_workflow(obj):
-    w = ModelWorkflow.parse_obj(obj)
+    w = ModelWorkflow.model_validate(obj)
     w.metadata.annotations = {}
     w.metadata.labels = {}
 
     if w.spec.templates is not None:
-        w.spec.templates.sort(key=lambda t: t.name)
+        w.spec.templates.sort(key=lambda t: cast(str, t.name))
         for t in w.spec.templates:
             if t.script:
                 t.script.source = InlineScriptConstructor._roundtrip(t.script.source)
-    return w.dict()
+    return w.model_dump()
 
 
 def _transform_workflow_template(obj):
-    w = ModelWorkflowTemplate.parse_obj(obj)
+    w = ModelWorkflowTemplate.model_validate(obj)
     w.metadata.annotations = {}
     w.metadata.labels = {}
 
     if w.spec.templates is not None:
-        w.spec.templates.sort(key=lambda t: t.name)
+        w.spec.templates.sort(key=lambda t: cast(str, t.name))
         for t in w.spec.templates:
             if t.script:
                 t.script.source = InlineScriptConstructor._roundtrip(t.script.source)
-    return w.dict()
+    return w.model_dump()
 
 
 def _transform_cron_workflow(obj):
-    wt = ModelCronWorkflow.parse_obj(obj)
-    wt.spec.workflow_spec.templates.sort(key=lambda t: t.name)
-    wt.metadata.annotations = {}
-    wt.metadata.labels = {}
-    for t in wt.spec.workflow_spec.templates:
-        if t.script:
-            t.script.source = InlineScriptConstructor._roundtrip(t.script.source)
-    return wt.dict()
+    cwf = ModelCronWorkflow.model_validate(obj)
+    if cwf.spec.workflow_spec.templates is not None:
+        cwf.spec.workflow_spec.templates.sort(key=lambda t: cast(str, t.name))
+        cwf.metadata.annotations = {}
+        cwf.metadata.labels = {}
+        for t in cwf.spec.workflow_spec.templates:
+            if t.script:
+                t.script.source = InlineScriptConstructor._roundtrip(t.script.source)
+    return cwf.model_dump()
 
 
 def _compare_workflows(hera_workflow, w1: Dict, w2: Dict):

@@ -94,9 +94,7 @@ class Histogram(_BaseMetric):
     value: str
 
     def _build_buckets(self) -> List[_ModelAmount]:
-        return [
-            bucket if isinstance(bucket, _ModelAmount) else _ModelAmount(__root__=bucket) for bucket in self.buckets
-        ]
+        return [bucket if isinstance(bucket, _ModelAmount) else _ModelAmount(root=bucket) for bucket in self.buckets]
 
     def _build_metric(self) -> _ModelPrometheus:
         return _ModelPrometheus(

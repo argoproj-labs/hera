@@ -1,26 +1,34 @@
 import json
+import sys
+from typing import Annotated
 
+from pydantic.v1 import BaseModel as V1BaseModel
 from typing_extensions import TypedDict
 
 from hera.shared import global_config
 from hera.workflows import Parameter, script
-from hera.workflows.io.v1 import Input, Output
 
-try:
-    from typing import Annotated
-except ImportError:
-    from typing_extensions import Annotated
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input,
+        Output,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input,
+        Output,
+    )
+
 
 global_config.experimental_features["script_pydantic_io"] = True
 
 
-class MyBaseModel(BaseModel):
+class MyBaseModel(V1BaseModel):
     a: str = "a"
     b: str = "b"
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 @script(constructor="runner")

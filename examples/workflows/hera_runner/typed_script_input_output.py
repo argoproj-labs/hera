@@ -34,9 +34,6 @@ class MyInput(BaseModel):
     b: str = "foo"
     c: Union[str, int, float]
 
-    class Config:
-        smart_union = True
-
 
 # Create a BaseModel sub-class to use a JSON output with any shape.
 # It will be validated by Pydantic at runtime.
@@ -60,10 +57,10 @@ def another_function(inputs: List[MyInput]) -> MyOutput:
 @script()
 def str_function(input: str) -> MyOutput:
     # Example function to ensure string type is not auto-parsed by Hera
-    return MyOutput(output=[MyInput.parse_raw(input)])
+    return MyOutput(output=[MyInput.model_validate_json(input)])
 
 
-# Use Script Annotations to seamlessly aliase names for your template interface,
+# Use Script Annotations to seamlessly alias names for your template interface,
 # in particular, you can use "snake_case" code with a "kebab-case" interface:
 @script()
 def function_kebab(

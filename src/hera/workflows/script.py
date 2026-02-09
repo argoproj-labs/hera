@@ -7,6 +7,7 @@ for more on scripts in Argo Workflows.
 import ast
 import copy
 import inspect
+import sys
 import textwrap
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -63,22 +64,10 @@ from hera.workflows._mixins import (
 from hera.workflows.artifact import (
     Artifact,
 )
-from hera.workflows.io.v1 import (
-    Input as InputV1,
-    Output as OutputV1,
+from hera.workflows.io.v2 import (
+    Input as InputV2,
+    Output as OutputV2,
 )
-from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
-
-try:
-    from hera.workflows.io.v2 import (  # type: ignore
-        Input as InputV2,
-        Output as OutputV2,
-    )
-except ImportError:
-    from hera.workflows.io.v1 import (  # type: ignore
-        Input as InputV2,
-        Output as OutputV2,
-    )
 from hera.workflows.models import (
     ContinueOn,
     EnvVar,
@@ -93,11 +82,23 @@ from hera.workflows.models import (
     TemplateRef,
     ValueFrom,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.util.intstr import IntOrString
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 from hera.workflows.volume import _BaseVolume
+
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import (
+        Input as InputV1,
+        Output as OutputV1,
+    )
+else:
+    from hera.workflows.io.v1 import (
+        Input as InputV1,
+        Output as OutputV1,
+    )
 
 
 class ScriptConstructor(BaseMixin):
@@ -191,7 +192,7 @@ class Script(
         return self.constructor.transform_template_post_build(
             self,
             _ModelTemplate(
-                active_deadline_seconds=IntOrString(__root__=self.active_deadline_seconds)
+                active_deadline_seconds=IntOrString(root=self.active_deadline_seconds)
                 if self.active_deadline_seconds
                 else None,
                 affinity=self.affinity,

@@ -15,7 +15,7 @@ from typing_extensions import ParamSpec
 
 from hera import _yaml
 from hera.shared import global_config
-from hera.shared._pydantic import BaseModel
+from hera.shared._pydantic import APIBaseModel
 from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -77,7 +77,7 @@ P = ParamSpec("P")
 
 class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
     @classmethod
-    def _get_model_class(cls) -> Type[BaseModel]:
+    def _get_model_class(cls) -> Type[APIBaseModel]:
         return _ModelWorkflow
 
 
@@ -336,7 +336,7 @@ class Workflow(
 
     def to_dict(self) -> Any:
         """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
-        return self.build().dict(exclude_none=True, by_alias=True)
+        return self.build().model_dump(exclude_none=True, by_alias=True)
 
     def __eq__(self, other) -> bool:
         """Verifies equality of `self` with the specified `other`."""

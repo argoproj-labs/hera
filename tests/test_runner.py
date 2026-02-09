@@ -20,15 +20,14 @@ import pytest
 
 import hera.workflows.artifact as artifact_module
 import tests.helper as test_module
-from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner, create_module_string
-from hera.workflows.io.v1 import Output as OutputV1
+from hera.workflows.io.v2 import Output as OutputV2
 
-try:
-    from hera.workflows.io.v2 import Output as OutputV2
-except ImportError:
-    from hera.workflows.io.v1 import Output as OutputV2
+if sys.version_info >= (3, 14):
+    from hera.workflows.io.v2 import Output as OutputV1
+else:
+    from hera.workflows.io.v1 import Output as OutputV1
 
 
 @pytest.mark.parametrize(
@@ -184,28 +183,28 @@ def test_runner_parameter_inputs(
             "tests.script_runner.parameter_inputs:annotated_basic_types",
             [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
             '{"output": [{"a": 3, "b": "bar"}]}',
-            _PYDANTIC_VERSION,
+            2,
             id="basic-test",
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_basic_types",
             [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "1"}],
             '{"output": [{"a": 3, "b": "1"}]}',
-            _PYDANTIC_VERSION,
+            2,
             id="str-param-given-int",
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_basic_types_with_other_metadata",
             [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "1"}],
             '{"output": [{"a": 3, "b": "1"}]}',
-            _PYDANTIC_VERSION,
+            2,
             id="str-param-given-int",
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_object",
             [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
-            _PYDANTIC_VERSION,
+            2,
             id="annotated-object",
         ),
         pytest.param(
@@ -214,12 +213,13 @@ def test_runner_parameter_inputs(
             '{"output": [{"a": 3, "b": "bar"}]}',
             1,
             id="annotated-object-v1",
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_parameter_no_name",
             [{"name": "annotated_input_value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
-            _PYDANTIC_VERSION,
+            2,
             id="annotated-param-no-name",
         ),
     ],
@@ -620,7 +620,16 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
     mock_runner.assert_called_once_with("my_entrypoint", [])
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+        ),
+        2,
+    ],
+)
 @pytest.mark.parametrize(
     "entrypoint,kwargs_list,expected_output",
     [
@@ -675,7 +684,16 @@ def test_runner_pydantic_inputs_params(
     assert serialize(output) == expected_output
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+        ),
+        2,
+    ],
+)
 @pytest.mark.parametrize(
     "entrypoint,expected_files",
     [
@@ -715,7 +733,16 @@ def test_runner_pydantic_output_params(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+        ),
+        2,
+    ],
+)
 @pytest.mark.parametrize(
     "entrypoint,input_files,expected_output",
     [
@@ -763,7 +790,16 @@ def test_runner_pydantic_input_artifacts(
     assert serialize(output) == expected_output
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+        ),
+        2,
+    ],
+)
 @pytest.mark.parametrize(
     "entrypoint,input_files,expected_files",
     [
@@ -816,7 +852,16 @@ def test_runner_pydantic_output_artifacts(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+        ),
+        2,
+    ],
+)
 @pytest.mark.parametrize(
     "entrypoint,expected_files",
     [
@@ -856,7 +901,16 @@ def test_runner_pydantic_output_with_exit_code(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+        ),
+        2,
+    ],
+)
 @pytest.mark.parametrize(
     "entrypoint,expected_files",
     [
@@ -907,7 +961,16 @@ def test_run_pydantic_output_with_exit_code(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+        ),
+        2,
+    ],
+)
 @pytest.mark.parametrize(
     "entrypoint,expected_files,expected_result",
     [
@@ -947,7 +1010,16 @@ def test_runner_pydantic_output_with_result(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        pytest.param(
+            1,
+            marks=pytest.mark.skipif(sys.version_info >= (3, 14), reason="Pydantic V1 not supported on Python 3.14"),
+        ),
+        2,
+    ],
+)
 @pytest.mark.parametrize(
     "entrypoint,error_type,error_match",
     [

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Annotated, Dict, Optional, Type, Union, cast
 
 from hera.exceptions import NotFound
-from hera.shared._pydantic import BaseModel
+from hera.shared._pydantic import APIBaseModel
 from hera.workflows._meta_mixins import ModelMapperMixin
 from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.models import (
@@ -36,7 +36,7 @@ _TRUNCATE_LENGTH = NAME_LIMIT - _SUFFIX_LEN
 
 class _WorkflowTemplateModelMapper(_WorkflowModelMapper):
     @classmethod
-    def _get_model_class(cls) -> Type[BaseModel]:
+    def _get_model_class(cls) -> Type[APIBaseModel]:
         return _ModelWorkflowTemplate  # type: ignore
 
 

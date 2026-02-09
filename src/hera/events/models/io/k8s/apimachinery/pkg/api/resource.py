@@ -5,11 +5,11 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from hera.shared._pydantic import BaseModel, Field
+from pydantic import Field, RootModel
 
 
-class Quantity(BaseModel):
-    __root__: Annotated[
+class Quantity(RootModel[str]):
+    root: Annotated[
         str,
         Field(
             description=(

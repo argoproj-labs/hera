@@ -182,10 +182,10 @@ finetune = Container(
         # the number of K8s nodes to use for training. For the talk this was tested on 1 node with 4 GPUs and
         # also tested on 4 nodes with 4 GPUs = 16 GPU training
         "--nnodes",
-        NUM_NODES,
+        str(NUM_NODES),
         # the number of processes per node / number of GPUs
         "--nproc-per-node",
-        NUM_NODES,
+        str(NUM_NODES),
         # randezvous backend is the mechanism used to coordinate the training job. etcd-v2 is the recommended one for
         # `nnodes` > 1 while c10d is recommended for single node training. Note, the use of the v2 etcd API must be
         # enabled by the etcd resource

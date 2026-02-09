@@ -27,7 +27,7 @@ with Workflow(
         name="random-fail",
         retry_strategy=RetryStrategy(
             limit=IntOrString(
-                __root__="10",
+                root="10",
             ),
         ),
         args=[

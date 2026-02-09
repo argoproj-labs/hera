@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Annotated, Dict, List, Optional, Type, Union, cast
 
 from hera.exceptions import NotFound
-from hera.shared._pydantic import BaseModel
+from hera.shared._pydantic import APIBaseModel
 from hera.shared._type_util import get_annotated_metadata
 from hera.workflows._meta_mixins import (
     ModelMapperMixin,
@@ -34,7 +34,7 @@ from hera.workflows.workflow import Workflow, _WorkflowModelMapper
 
 class _CronWorkflowModelMapper(_WorkflowModelMapper):
     @classmethod
-    def _get_model_class(cls) -> Type[BaseModel]:
+    def _get_model_class(cls) -> Type[APIBaseModel]:
         return _ModelCronWorkflow
 
     @classmethod
@@ -218,7 +218,7 @@ class CronWorkflow(Workflow):
         return _CronWorkflowModelMapper.build_model(CronWorkflow, self, model_cron_workflow)
 
     @classmethod
-    def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
+    def _from_model(cls, model: APIBaseModel) -> ModelMapperMixin:
         """Parse from given model to cls's type."""
         assert isinstance(model, _ModelCronWorkflow)
         hera_cron_workflow = cls()

@@ -82,15 +82,6 @@ def normalize_to_list(v: OneOrMany) -> List:
     return [v]
 
 
-def convert_to_model_parameters(parameters: List[ModelParameter]) -> List[ModelParameter]:
-    """Convert a list of `ModelParameter` (or subclass) objects to a list of `ModelParameter` objects.
-
-    This is needed as `Parameter` is a subclass of `ModelParameter`, so we must convert
-    `Parameter` objects to `ModelParameter` when building a Workflow.
-    """
-    return [ModelParameter.parse_obj(p.dict()) if isinstance(p, Parameter) else p for p in parameters]
-
-
 InputsT = Optional[
     Union[
         ModelInputs,
@@ -318,8 +309,6 @@ class IOMixin(BaseMixin):
         elif isinstance(self.outputs, ModelOutputs):
             # Special case as Parameter is a subclass of ModelParameter
             # We need to convert Parameters to ModelParameters
-            if self.outputs.parameters:
-                self.outputs.parameters = convert_to_model_parameters(self.outputs.parameters)
             return self.outputs
 
         result = ModelOutputs()
@@ -366,7 +355,7 @@ class EnvMixin(BaseMixin):
                 result.append(e.build())  # type: ignore
             elif isinstance(e, dict):
                 for k, v in e.items():
-                    result.append(EnvVar(name=k, value=v))
+                    result.append(EnvVar(name=k, value=str(v)))
 
         # returning `None` for `envs` means the submission to the server will not even have the `envs` field
         # set, which saves some space
@@ -584,10 +573,6 @@ class ArgumentsMixin(BaseMixin):
             return None
 
         if isinstance(self.arguments, ModelArguments):
-            # Special case as Parameter is a subclass of ModelParameter
-            # We need to convert Parameters to ModelParameters
-            if self.arguments.parameters:
-                self.arguments.parameters = convert_to_model_parameters(self.arguments.parameters)
             return self.arguments
 
         from hera.workflows.workflow_template import WorkflowTemplate
@@ -604,7 +589,7 @@ class ArgumentsMixin(BaseMixin):
                 param_as_argument = param_copy.as_input() if is_workflow_template else param_copy.as_argument()
                 result.parameters = (result.parameters or []) + [param_as_argument]
             elif isinstance(v, ModelArtifact):
-                artifact = v.copy(deep=True)
+                artifact = v.model_copy(deep=True)
                 artifact.name = k
                 result.artifacts = (result.artifacts or []) + [artifact]
             elif isinstance(v, Artifact):
@@ -680,21 +665,21 @@ class WithItemsMixin(BaseMixin):
             items = []
             for item in self.with_items:
                 if isinstance(item, Parameter):
-                    items.append(Item(__root__=item.value))
+                    items.append(Item(root=item.value))
                 elif (
                     isinstance(item, str) or isinstance(item, dict) or isinstance(item, float) or isinstance(item, int)
                 ):
-                    items.append(Item(__root__=item))
+                    items.append(Item(root=item))
                 elif isinstance(item, Item):
                     items.append(item)
                 else:
-                    items.append(Item(__root__=serialize(item)))
+                    items.append(Item(root=serialize(item)))
             return items
         elif isinstance(self.with_items, Parameter):
-            return [Item(__root__=self.with_items.value)]
+            return [Item(root=self.with_items.value)]
         elif isinstance(self.with_items, str):
-            return [Item(__root__=self.with_items)]
-        return [Item(__root__=serialize(self.with_items))]
+            return [Item(root=self.with_items)]
+        return [Item(root=serialize(self.with_items))]
 
 
 @dataclass(kw_only=True)

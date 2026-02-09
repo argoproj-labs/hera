@@ -8,7 +8,7 @@ This example shows the use of the resource decorator and special Input/Output cl
 === "Hera"
 
     ```python linenums="1"
-    from typing_extensions import Annotated
+    from typing import Annotated
 
     from hera.shared import global_config
     from hera.workflows import Input, Output, Parameter, Workflow

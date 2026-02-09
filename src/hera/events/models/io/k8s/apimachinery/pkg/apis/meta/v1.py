@@ -3,15 +3,16 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Annotated, Dict, List, Optional
+from typing import Annotated
 
-from hera.shared._pydantic import BaseModel, Field
+from pydantic import AwareDatetime, Field, RootModel
+
+from hera.shared._pydantic import APIBaseModel
 
 
-class Time(BaseModel):
-    __root__: Annotated[
-        datetime,
+class Time(RootModel[AwareDatetime]):
+    root: Annotated[
+        AwareDatetime,
         Field(
             description=(
                 "Time is a wrapper around time.Time which supports correct marshaling"
@@ -22,9 +23,9 @@ class Time(BaseModel):
     ]
 
 
-class ListMeta(BaseModel):
+class ListMeta(APIBaseModel):
     continue_: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="continue",
             description=(
@@ -41,7 +42,7 @@ class ListMeta(BaseModel):
         ),
     ] = None
     remaining_item_count: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="remainingItemCount",
             description=(
@@ -60,7 +61,7 @@ class ListMeta(BaseModel):
         ),
     ] = None
     resource_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="resourceVersion",
             description=(
@@ -73,7 +74,7 @@ class ListMeta(BaseModel):
         ),
     ] = None
     self_link: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="selfLink",
             description=(
@@ -83,15 +84,15 @@ class ListMeta(BaseModel):
     ] = None
 
 
-class GroupVersionResource(BaseModel):
-    group: Optional[str] = None
-    resource: Optional[str] = None
-    version: Optional[str] = None
+class GroupVersionResource(APIBaseModel):
+    group: str | None = None
+    resource: str | None = None
+    version: str | None = None
 
 
-class CreateOptions(BaseModel):
+class CreateOptions(APIBaseModel):
     dry_run: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="dryRun",
             title=(
@@ -104,7 +105,7 @@ class CreateOptions(BaseModel):
         ),
     ] = None
     field_manager: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fieldManager",
             title=(
@@ -116,7 +117,7 @@ class CreateOptions(BaseModel):
         ),
     ] = None
     field_validation: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fieldValidation",
             title=(
@@ -140,10 +141,10 @@ class CreateOptions(BaseModel):
     ] = None
 
 
-class OwnerReference(BaseModel):
+class OwnerReference(APIBaseModel):
     api_version: Annotated[str, Field(alias="apiVersion", description="API version of the referent.")]
     block_owner_deletion: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="blockOwnerDeletion",
             description=(
@@ -159,7 +160,7 @@ class OwnerReference(BaseModel):
         ),
     ] = None
     controller: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description="If true, this reference points to the managing controller."),
     ] = None
     kind: Annotated[
@@ -191,18 +192,18 @@ class OwnerReference(BaseModel):
     ]
 
 
-class MicroTime(BaseModel):
-    __root__: Annotated[
-        datetime,
+class MicroTime(RootModel[AwareDatetime]):
+    root: Annotated[
+        AwareDatetime,
         Field(description="MicroTime is version of Time with microsecond level precision."),
     ]
 
 
-class FieldsV1(BaseModel):
+class FieldsV1(APIBaseModel):
     pass
 
 
-class LabelSelectorRequirement(BaseModel):
+class LabelSelectorRequirement(APIBaseModel):
     key: Annotated[str, Field(description="key is the label key that the selector applies to.")]
     operator: Annotated[
         str,
@@ -214,7 +215,7 @@ class LabelSelectorRequirement(BaseModel):
         ),
     ]
     values: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "values is an array of string values. If the operator is In or NotIn,"
@@ -226,9 +227,9 @@ class LabelSelectorRequirement(BaseModel):
     ] = None
 
 
-class ManagedFieldsEntry(BaseModel):
+class ManagedFieldsEntry(APIBaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -240,7 +241,7 @@ class ManagedFieldsEntry(BaseModel):
         ),
     ] = None
     fields_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fieldsType",
             description=(
@@ -250,18 +251,18 @@ class ManagedFieldsEntry(BaseModel):
         ),
     ] = None
     fields_v1: Annotated[
-        Optional[FieldsV1],
+        FieldsV1 | None,
         Field(
             alias="fieldsV1",
             description=('FieldsV1 holds the first JSON version format as described in the "FieldsV1" type.'),
         ),
     ] = None
     manager: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Manager is an identifier of the workflow managing these fields.")),
     ] = None
     operation: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Operation is the type of operation which lead to this"
@@ -271,7 +272,7 @@ class ManagedFieldsEntry(BaseModel):
         ),
     ] = None
     subresource: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Subresource is the name of the subresource used to update that object,"
@@ -285,7 +286,7 @@ class ManagedFieldsEntry(BaseModel):
         ),
     ] = None
     time: Annotated[
-        Optional[Time],
+        Time | None,
         Field(
             description=(
                 "Time is the timestamp of when the ManagedFields entry was added. The"
@@ -298,16 +299,16 @@ class ManagedFieldsEntry(BaseModel):
     ] = None
 
 
-class LabelSelector(BaseModel):
+class LabelSelector(APIBaseModel):
     match_expressions: Annotated[
-        Optional[List[LabelSelectorRequirement]],
+        list[LabelSelectorRequirement] | None,
         Field(
             alias="matchExpressions",
             description=("matchExpressions is a list of label selector requirements. The requirements are ANDed."),
         ),
     ] = None
     match_labels: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="matchLabels",
             description=(
@@ -320,9 +321,9 @@ class LabelSelector(BaseModel):
     ] = None
 
 
-class ObjectMeta(BaseModel):
+class ObjectMeta(APIBaseModel):
     annotations: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             description=(
                 "Annotations is an unstructured key value map stored with a resource"
@@ -334,7 +335,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     creation_timestamp: Annotated[
-        Optional[Time],
+        Time | None,
         Field(
             alias="creationTimestamp",
             description=(
@@ -349,7 +350,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     deletion_grace_period_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="deletionGracePeriodSeconds",
             description=(
@@ -360,7 +361,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     deletion_timestamp: Annotated[
-        Optional[Time],
+        Time | None,
         Field(
             alias="deletionTimestamp",
             description=(
@@ -389,7 +390,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     finalizers: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Must be empty before the object is deleted from the registry. Each"
@@ -410,7 +411,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     generate_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="generateName",
             description=(
@@ -428,7 +429,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     generation: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "A sequence number representing a specific generation of the desired"
@@ -437,7 +438,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     labels: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             description=(
                 "Map of string keys and values that can be used to organize and"
@@ -448,7 +449,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     managed_fields: Annotated[
-        Optional[List[ManagedFieldsEntry]],
+        list[ManagedFieldsEntry] | None,
         Field(
             alias="managedFields",
             description=(
@@ -463,7 +464,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name must be unique within a namespace. Is required when creating"
@@ -476,7 +477,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Namespace defines the space within which each name must be unique. An"
@@ -490,7 +491,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     owner_references: Annotated[
-        Optional[List[OwnerReference]],
+        list[OwnerReference] | None,
         Field(
             alias="ownerReferences",
             description=(
@@ -503,7 +504,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     resource_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="resourceVersion",
             description=(
@@ -520,7 +521,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     self_link: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="selfLink",
             description=(
@@ -529,7 +530,7 @@ class ObjectMeta(BaseModel):
         ),
     ] = None
     uid: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "UID is the unique in time and space value for this object. It is"
