@@ -16,22 +16,6 @@ usually announce changes in [the Hera slack channel](https://cloud-native.slack.
 
 ## Currently supported experimental features:
 
-### Script IO Models
-
-Hera provides Pydantic models for you to create subclasses from, which allow you to more easily declare script template
-inputs. Any fields that you declare in your subclass of `Input` will become input parameters or artifacts, while
-`Output` fields will become output parameters artifacts. The fields that you declare can be `Annotated` as a `Parameter`
-or `Artifact`, as any fields with a basic type will become `Parameters`. Turning on the `script_pydantic_io` flag will
-automatically enable the `script_annotations` experimental feature.
-
-To enable Hera input/output models, you must set the `experimental_feature` flag `script_pydantic_io`
-
-```py
-global_config.experimental_features["script_pydantic_io"] = True
-```
-
-Read the full guide on script pydantic IO in [the script user guide](../user-guides/script-runner-io.md).
-
 ### Decorators for main template types
 
 Decorators for dags, steps and containers are provided alongside a new script decorator, letting your declare Workflows via Python functions alone.
@@ -74,3 +58,12 @@ writing scripts with parameters and artifacts that require additional fields suc
 `name`.
 
 Read the full guide on script annotations in [the script user guide](../user-guides/script-annotations.md).
+
+### Script IO Models (since x.xx)
+
+Hera provides Pydantic models for you to create subclasses from, which allow you to more easily declare script template
+inputs. Any fields that you declare in your subclass of `Input` will become input parameters or artifacts, while
+`Output` fields will become output parameters artifacts. The fields that you declare can be `Annotated` as a `Parameter`
+or `Artifact`, as any fields with a basic type will become `Parameters`.
+
+Read the full guide on script pydantic IO in [the script user guide](../user-guides/script-runner-io.md).
