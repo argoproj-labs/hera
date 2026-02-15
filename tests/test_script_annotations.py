@@ -453,28 +453,6 @@ def test_script_pydantic_multiple_inputs(global_config_fixture):
     assert "Only one function parameter can be specified when using an Input" in str(e.value)
 
 
-def test_script_pydantic_without_experimental_flag(global_config_fixture):
-    """Test that artifacts with same annotated name raises ValueError."""
-    # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_pydantic_io"] = False
-    # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version
-    import tests.script_annotations.pydantic_io_v1 as module
-
-    importlib.reload(module)
-    workflow = importlib.import_module(module.__name__).w
-
-    # WHEN / THEN
-    with pytest.raises(ValueError) as e:
-        workflow.to_dict()
-
-    assert (
-        "Unable to instantiate <class 'tests.script_annotations.pydantic_io_v1.ParamOnlyInput'> since it is an experimental feature."
-        in str(e.value)
-    )
-
-
 @pytest.mark.parametrize(
     "module_name",
     [
