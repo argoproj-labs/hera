@@ -47,8 +47,7 @@ class Input(InputMixin, _DeclaringEnabledModel):
 
     Input is a Pydantic model which users can create a subclass of. When a subclass
     of Input is used as a function parameter type, the Hera Runner will take the fields
-    of the user's subclass to create template input parameters and artifacts. See the example
-    for the script_pydantic_io experimental feature.
+    of the user's subclass to create template input parameters and artifacts.
     """
 
 
@@ -57,8 +56,7 @@ class Output(OutputMixin, _DeclaringEnabledModel):
 
     Output is a Pydantic model which users can create a subclass of. When a subclass
     of Output is used as a function return type, the Hera Runner will take the fields
-    of the user's subclass to create template output parameters and artifacts. See the example
-    for the script_pydantic_io experimental feature.
+    of the user's subclass to create template output parameters and artifacts.
     """
 
     exit_code: int = 0
