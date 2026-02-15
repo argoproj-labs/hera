@@ -102,8 +102,6 @@ This example shows the use of the new `steps` decorator, including parallel step
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       - name: concat
         inputs:
           parameters:
@@ -123,8 +121,6 @@ This example shows the use of the new `steps` decorator, including parallel step
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       - name: worker
         steps:
         - - name: setup-step

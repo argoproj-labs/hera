@@ -9,7 +9,6 @@ from hera.workflows import Artifact, ArtifactLoader, Parameter, Script, Steps, W
 from hera.workflows.archive import NoneArchiveStrategy
 from hera.workflows.io import Input, Output
 
-global_config.experimental_features["script_pydantic_io"] = True
 global_config.set_class_defaults(Script, constructor="runner")
 global_config.set_class_defaults(Script, image="my-image-with-deps")
 

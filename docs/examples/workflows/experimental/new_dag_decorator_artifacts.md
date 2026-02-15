@@ -105,8 +105,6 @@ DAG itself by referencing it in an `Output` class.
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       - name: concat
         inputs:
           artifacts:
@@ -133,8 +131,6 @@ DAG itself by referencing it in an `Output` class.
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       - name: worker
         dag:
           tasks:
