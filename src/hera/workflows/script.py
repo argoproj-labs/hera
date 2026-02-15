@@ -418,8 +418,8 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     """Return all inputs from the function.
 
     This includes all basic Python function parameters, and all parameters with a Parameter or Artifact annotation.
-    For the Pydantic IO experimental feature, any input parameter which is a subclass of Input, the fields of the
-    class will be used as inputs, rather than the class itself.
+    For the Pydantic IO feature, any input parameter which is a subclass of Input, the fields of the class will be used
+    as inputs, rather than the class itself.
 
     Note, the given Parameter/Artifact names in annotations of different inputs could clash, which will raise a ValueError.
     """
