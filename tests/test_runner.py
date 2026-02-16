@@ -675,7 +675,6 @@ def test_runner_pydantic_inputs_params(
     # GIVEN
     entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -718,7 +717,6 @@ def test_runner_pydantic_output_params(
     # GIVEN
     entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
@@ -781,7 +779,6 @@ def test_runner_pydantic_input_artifacts(
     importlib.reload(module)
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     # WHEN
     output = _runner(entrypoint, [])
@@ -837,7 +834,6 @@ def test_runner_pydantic_output_artifacts(
     monkeypatch.setattr(artifact_module, "_DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
@@ -886,7 +882,6 @@ def test_runner_pydantic_output_with_exit_code(
     entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
@@ -941,7 +936,6 @@ def test_run_pydantic_output_with_exit_code(
     mock_parse_args.return_value = args
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     module = importlib.import_module(entrypoint.split(":")[0])
     importlib.reload(module)
@@ -995,7 +989,6 @@ def test_runner_pydantic_output_with_result(
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
@@ -1047,7 +1040,6 @@ def test_runner_pydantic_with_invalid_annotations(
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)

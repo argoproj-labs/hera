@@ -59,8 +59,6 @@ and be available to subsequent tasks (if it were in a DAG).
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       arguments:
         parameters:
         - name: user

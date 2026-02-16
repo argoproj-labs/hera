@@ -62,7 +62,6 @@ def test_parameter_loading(
     monkeypatch: pytest.MonkeyPatch,
 ):
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
     entrypoint = entrypoint.replace("parameter_serialisers_vX", f"parameter_serialisers_v{pydantic_mode}")
 
     # WHEN
@@ -84,7 +83,6 @@ def test_loading_wrong_type(
         error = V2ValidationError
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
     entrypoint = "tests.script_runner.parameter_serialisers_vX:load_wrong_type"
     entrypoint = entrypoint.replace("parameter_serialisers_vX", f"parameter_serialisers_v{pydantic_mode}")
     kwargs_list = [{"name": "my-parameter", "value": json.dumps({"a": "hello ", "b": "world"})}]
@@ -139,7 +137,6 @@ def test_parameter_dumping(
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
     entrypoint = entrypoint.replace("parameter_serialisers_vX", f"parameter_serialisers_v{pydantic_mode}")
 
     # WHEN
@@ -205,7 +202,6 @@ def test_artifact_loading(
     monkeypatch.setattr("hera.workflows.artifact._DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
     entrypoint = entrypoint.replace("artifact_serialisers_vX", f"artifact_serialisers_v{pydantic_mode}")
 
     # WHEN
@@ -245,7 +241,6 @@ def test_artifact_byte_loading(
     monkeypatch.setattr("hera.workflows.artifact._DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
     entrypoint = entrypoint.replace("artifact_serialisers_vX", f"artifact_serialisers_v{pydantic_mode}")
 
     # WHEN
@@ -315,7 +310,6 @@ def test_artifact_dumping(
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
     entrypoint = entrypoint.replace("artifact_serialisers_vX", f"artifact_serialisers_v{pydantic_mode}")
 
     # WHEN
@@ -362,7 +356,6 @@ def test_artifact_byte_dumping(
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_pydantic_io", "")
     entrypoint = entrypoint.replace("artifact_serialisers_vX", f"artifact_serialisers_v{pydantic_mode}")
 
     # WHEN

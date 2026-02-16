@@ -138,8 +138,6 @@ This example shows how parameters can be passed into, within and out of a DAG.
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       - name: concat
         inputs:
           parameters:
@@ -161,8 +159,6 @@ This example shows how parameters can be passed into, within and out of a DAG.
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       - name: worker
         dag:
           tasks:

@@ -36,10 +36,6 @@ from typing_extensions import ParamSpec, get_args, get_origin
 
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
-from hera.shared._global_config import (
-    _SCRIPT_PYDANTIC_IO_FLAG,
-    _flag_enabled,
-)
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared._type_util import (
     construct_io_from_annotation,
@@ -385,16 +381,6 @@ def _get_outputs_from_return_annotation(
             if param_or_artifact := get_workflow_annotation(annotation):
                 append_annotation(param_or_artifact)
     elif isinstance(return_annotation, type) and issubclass(return_annotation, (OutputV1, OutputV2)):
-        if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
-            raise ValueError(
-                (
-                    "Unable to instantiate {} since it is an experimental feature."
-                    " Please turn on experimental features by setting "
-                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                    " Note that experimental features are unstable and subject to breaking changes."
-                ).format(return_annotation, _SCRIPT_PYDANTIC_IO_FLAG)
-            )
-
         output_class = return_annotation
         for output in output_class._get_outputs():
             append_annotation(output)
@@ -432,8 +418,8 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     """Return all inputs from the function.
 
     This includes all basic Python function parameters, and all parameters with a Parameter or Artifact annotation.
-    For the Pydantic IO experimental feature, any input parameter which is a subclass of Input, the fields of the
-    class will be used as inputs, rather than the class itself.
+    For the Pydantic IO feature, any input parameter which is a subclass of Input, the fields of the class will be used
+    as inputs, rather than the class itself.
 
     Note, the given Parameter/Artifact names in annotations of different inputs could clash, which will raise a ValueError.
     """
@@ -452,16 +438,6 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             and inspect.isclass(unwrap_annotation(func_param.annotation))
             and issubclass(unwrap_annotation(func_param.annotation), (InputV1, InputV2))
         ):
-            if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
-                raise ValueError(
-                    (
-                        "Unable to instantiate {} since it is an experimental feature."
-                        " Please turn on experimental features by setting "
-                        '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                        " Note that experimental features are unstable and subject to breaking changes."
-                    ).format(func_param.annotation, _SCRIPT_PYDANTIC_IO_FLAG)
-                )
-
             if len(inspect.signature(source).parameters) != 1:
                 raise SyntaxError("Only one function parameter can be specified when using an Input.")
 
@@ -891,8 +867,6 @@ class RunnerScriptConstructor(ScriptConstructor):
             script_env.append(EnvVar(name="hera__outputs_directory", value=self.outputs_directory))
         if self.pydantic_mode:
             script_env.append(EnvVar(name="hera__pydantic_mode", value=str(self.pydantic_mode)))
-        if _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
-            script_env.append(EnvVar(name="hera__script_pydantic_io", value=""))
 
         if script_env:
             if not script.env:

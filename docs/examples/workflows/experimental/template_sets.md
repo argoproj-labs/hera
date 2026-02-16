@@ -60,8 +60,6 @@ to a Workflow at submission time. This can be useful if you just want to distrib
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       - name: my-dag
         dag:
           tasks:

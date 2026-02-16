@@ -85,9 +85,6 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
           - examples.workflows.experimental.new_decorators_fanout_loop:print_message
           command:
           - python
-          env:
-          - name: hera__script_pydantic_io
-            value: ''
       - name: print-int
         inputs:
           parameters:
@@ -105,9 +102,6 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
           - examples.workflows.experimental.new_decorators_fanout_loop:print_int
           command:
           - python
-          env:
-          - name: hera__script_pydantic_io
-            value: ''
       - name: loop-example
         steps:
         - - name: print-str-message-loop-with-items
