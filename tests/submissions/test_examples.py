@@ -19,7 +19,6 @@ from tests.test_examples import CI_MODE, _get_examples
 # Skip long-running and unsupported examples
 TIME_LIMIT_SECONDS = 120
 SKIP_LINT_EXAMPLES = {
-    "new_decorators_auto_template_refs",  # Uses TemplateRefs to non-existent WorkflowTemplates
     "template_refs",  # Also uses TemplateRefs - the WorkflowTemplates are in the file though
     "parquet_pandas",
     "reusing_cli_app",
@@ -45,13 +44,6 @@ SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(
         "http",
         "init_containers_with_env",
         "map_reduce",
-        "new_dag_decorator_artifacts",
-        "new_dag_decorator_inner_dag",
-        "new_dag_decorator_params",
-        "new_decorators_auto_template_refs",
-        "new_decorators_basic_script",
-        "new_decorators_fanout_loop",
-        "new_steps_decorator_with_parallel_steps",
         "recursive_dag",
         "recursive_steps",
         "resource_flags",
@@ -61,7 +53,6 @@ SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(
         "spacy_inference_pipeline",
         "spark",
         "suspend",
-        "template_sets",
         "testing_templates_and_workflows",
         "typed_script_input_output",
         "user_container",

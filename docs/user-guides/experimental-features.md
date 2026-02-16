@@ -32,24 +32,6 @@ global_config.experimental_features["script_pydantic_io"] = True
 
 Read the full guide on script pydantic IO in [the script user guide](../user-guides/script-runner-io.md).
 
-### Decorators for main template types
-
-Decorators for dags, steps and containers are provided alongside a new script decorator, letting your declare Workflows via Python functions alone.
-
-To enable the decorators, you must install the optional extras under `experimental`
-
-```bash
-pip install hera[experimental]
-```
-
-You can then set the `experimental_feature` flag `decorator_syntax` in your code
-
-```py
-global_config.experimental_features["decorator_syntax"] = True
-```
-
-Read the full guide on decorators in [the decorator user guide](../user-guides/decorators.md).
-
 ## Graduated features
 
 Once an experimental feature is robust and reliable, we "graduate" them to allow their use without setting the
@@ -74,3 +56,13 @@ writing scripts with parameters and artifacts that require additional fields suc
 `name`.
 
 Read the full guide on script annotations in [the script user guide](../user-guides/script-annotations.md).
+
+## Retired features
+
+These features have been retired and are no longer supported.
+
+### Decorators for main template types
+
+Decorators for dags, steps and containers are provided alongside a new script decorator, letting your declare Workflows via Python functions alone.
+
+Read the full guide on decorators in [the decorator user guide](../user-guides/retired/decorators.md).

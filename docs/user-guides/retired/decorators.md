@@ -70,10 +70,10 @@ your code.
 These decorators allow you to define additional Argo Workflow template types in a Pythonic way. For more information on
 how to use these templates, please refer to the relevant examples.
 
-- [`data_template` decorator example](../examples/workflows/experimental/new_data_decorator.md)
-- [`http_template` decorator example](../examples/workflows/experimental/new_http_decorator.md)
-- [`resource_template` decorator example](../examples/workflows/experimental/new_resource_decorator.md)
-- [`suspend_template` decorator example](../examples/workflows/experimental/new_suspend_decorator.md)
+- [`data_template` decorator example](../../examples/workflows/experimental/new_data_decorator.md)
+- [`http_template` decorator example](../../examples/workflows/experimental/new_http_decorator.md)
+- [`resource_template` decorator example](../../examples/workflows/experimental/new_resource_decorator.md)
+- [`suspend_template` decorator example](../../examples/workflows/experimental/new_suspend_decorator.md)
 
 ## `set_entrypoint`
 
@@ -231,4 +231,4 @@ def loop_example():
     [GitHub discussions](https://github.com/argoproj-labs/hera/discussions)!
 
 For more examples, including use of a dag, see
-[the "experimental" examples](../examples/workflows/experimental/new_dag_decorator_params.md).
+[the "experimental" examples](../../examples/workflows/experimental/new_dag_decorator_params.md).

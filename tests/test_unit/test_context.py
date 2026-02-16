@@ -137,18 +137,6 @@ def test_error_outside_of_workflow_context():
             hello()
 
 
-def test_error_outside_of_workflow_context_decorator_flag(global_config_fixture):
-    global_config_fixture.experimental_features["decorator_syntax"] = True
-
-    @script()
-    def hello():
-        print("hello")
-
-    with pytest.raises(SyntaxError, match="Not under a TemplateSet/Workflow context"):
-        with Steps(name="test"):
-            hello()
-
-
 def test_initialise_container_within_steps_context_is_allowed():
     # The Container created under the `Steps` context will be grabbed by `Steps._add_sub`,
     # which will add it to the Workflow templates. The `Step` itself will be added by `Steps._add_sub`, so

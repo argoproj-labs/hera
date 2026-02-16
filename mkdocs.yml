@@ -36,7 +36,6 @@ nav:
     - Best Practices: user-guides/best-practices.md
     - Suspending Workflows: user-guides/suspending.md
     - Hera CLI: user-guides/cli.md
-    - Decorators: user-guides/decorators.md
     - Expr Transpiler: user-guides/expr.md
     - Experimental Features: user-guides/experimental-features.md
   - Examples:
@@ -94,7 +93,6 @@ nav:
         - api/workflows/supporting_classes/resources.md
         - api/workflows/supporting_classes/retry_strategy.md
         - api/workflows/supporting_classes/task.md
-        - api/workflows/supporting_classes/template_set.md
         - api/workflows/supporting_classes/user_container.md
         - api/workflows/supporting_classes/volumes.md
         - api/workflows/supporting_classes/first_party_volumes.md
