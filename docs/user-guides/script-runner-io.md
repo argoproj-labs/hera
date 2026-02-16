@@ -150,4 +150,4 @@ def pydantic_io() -> MyOutput:
     return MyOutput(exit_code=1, result="Test!", param_int=42, artifact_int=my_input.param_int)
 ```
 
-See the full Pydantic IO example [here](../examples/workflows/scripts/script_runner_io.py)!
+See the full Pydantic IO example [here](../examples/workflows/scripts/script_runner_io.md)!
