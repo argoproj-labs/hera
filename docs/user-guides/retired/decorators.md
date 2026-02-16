@@ -1,5 +1,7 @@
 # Decorators
 
+***Please be aware that this page is for historical purposes only. The decorators feature is no longer supported.***
+
 Proposed in [HEP0001](https://github.com/argoproj-labs/hera/blob/73861b/proposals/heps/0001-decorators.md), decorators
 for the other main template types were added in Hera v5.16. They can be used to write Workflows in a more familiar
 Pythonic fashion, taking inspiration from projects such as FastAPI. This feature is intended to replace the context
