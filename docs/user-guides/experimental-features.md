@@ -64,5 +64,6 @@ These features have been retired and are no longer supported.
 ### Decorators for main template types
 
 Decorators for dags, steps and containers are provided alongside a new script decorator, letting your declare Workflows via Python functions alone.
+The maintainers felt it would be better to focus on one fully-supported syntax instead of continuing support for a second, less-supported syntax.
 
 Read the full guide on decorators in [the decorator user guide](../user-guides/retired/decorators.md).
