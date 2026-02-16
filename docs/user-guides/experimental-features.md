@@ -59,7 +59,7 @@ writing scripts with parameters and artifacts that require additional fields suc
 
 Read the full guide on script annotations in [the script user guide](../user-guides/script-annotations.md).
 
-### Script IO Models (since x.xx)
+### Script IO Models (since 6.0)
 
 Hera provides Pydantic models for you to create subclasses from, which allow you to more easily declare script template
 inputs. Any fields that you declare in your subclass of `Input` will become input parameters or artifacts, while
