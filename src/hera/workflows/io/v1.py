@@ -53,8 +53,7 @@ if sys.version_info < (3, 14):
 
         Input is a Pydantic model which users can create a subclass of. When a subclass
         of Input is used as a function parameter type, Hera will take the fields of the
-        user's subclass to create template input parameters and artifacts. See the example
-        for the script_pydantic_io experimental feature.
+        user's subclass to create template input parameters and artifacts.
         """
 
     class Output(OutputMixin, _DeclaringEnabledModel):
@@ -62,8 +61,7 @@ if sys.version_info < (3, 14):
 
         Output is a Pydantic model which users can create a subclass of. When a subclass
         of Output is used as a function return type, Hera will take the fields of the
-        user's subclass to create template output parameters and artifacts. See the example
-        for the script_pydantic_io experimental feature.
+        user's subclass to create template output parameters and artifacts.
         """
 
         exit_code: int = 0

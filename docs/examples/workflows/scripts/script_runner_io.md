@@ -17,7 +17,6 @@ This example shows the use of Pydantic Input/Output to create the input and outp
     from hera.workflows.archive import NoneArchiveStrategy
     from hera.workflows.io import Input, Output
 
-    global_config.experimental_features["script_pydantic_io"] = True
     global_config.set_class_defaults(Script, constructor="runner")
     global_config.set_class_defaults(Script, image="my-image-with-deps")
 
@@ -106,14 +105,12 @@ This example shows the use of Pydantic Input/Output to create the input and outp
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_runner_io:writer
+          - examples.workflows.scripts.script_runner_io:writer
           command:
           - python
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
       - name: pydantic-io
         inputs:
           artifacts:
@@ -139,13 +136,11 @@ This example shows the use of Pydantic Input/Output to create the input and outp
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_runner_io:pydantic_io
+          - examples.workflows.scripts.script_runner_io:pydantic_io
           command:
           - python
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
     ```
 

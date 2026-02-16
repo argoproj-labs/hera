@@ -57,13 +57,6 @@ the equivalent workflows below:
         )
     ```
 
-Using the IO classes requires use of the Hera Runner and the `"script_pydantic_io"` experimental feature flag to be
-enabled:
-
-```py
-global_config.experimental_features["script_pydantic_io"] = True
-```
-
 ## Pydantic V1 or V2?
 
 Importing `Input` and `Output` from the `hera.workflows.io` submodule automatically matches the version of your Pydantic
@@ -157,4 +150,4 @@ def pydantic_io() -> MyOutput:
     return MyOutput(exit_code=1, result="Test!", param_int=42, artifact_int=my_input.param_int)
 ```
 
-See the full Pydantic IO example [here](../examples/workflows/experimental/script_runner_io.md)!
+See the full Pydantic IO example [here](../examples/workflows/scripts/script_runner_io.md)!

@@ -4,7 +4,6 @@ from typing import Annotated, Dict, List, Optional, Union, cast
 
 import pytest
 
-from hera.shared._global_config import _GlobalConfig
 from hera.workflows._mixins import EnvT
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env
@@ -250,8 +249,6 @@ def test_script_returning_annotated_generic():
 
 
 def test_script_returning_pydantic_type(global_config_fixture):
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
-
     class MyOutput(Output):
         foo: str
         bar: int
@@ -424,40 +421,6 @@ class TestRunnerScriptEnv:
     def test_runner_script_pydantic_mode_env_var(self, user_env: EnvT, expected_env: Optional[List[ModelEnvVar]]):
         # GIVEN
         constructor = RunnerScriptConstructor(pydantic_mode=1)
-
-        built_workflow = self.build_workflow(user_env, constructor)
-
-        script_template = cast(ScriptTemplate, built_workflow.spec.templates[0].script)
-        assert script_template is not None
-        assert script_template.env == expected_env
-
-    @pytest.mark.parametrize(
-        "user_env,expected_env",
-        (
-            [
-                None,
-                [
-                    ModelEnvVar(name="hera__script_pydantic_io", value=""),
-                ],
-            ],
-            [
-                Env(name="my_env_var", value=42),
-                [
-                    ModelEnvVar(name="my_env_var", value="42"),
-                    ModelEnvVar(name="hera__script_pydantic_io", value=""),
-                ],
-            ],
-        ),
-    )
-    def test_runner_script_pydantic_io_env_var(
-        self,
-        global_config_fixture: _GlobalConfig,
-        user_env: EnvT,
-        expected_env: Optional[List[ModelEnvVar]],
-    ):
-        # GIVEN
-        global_config_fixture.experimental_features["script_pydantic_io"] = True
-        constructor = RunnerScriptConstructor()
 
         built_workflow = self.build_workflow(user_env, constructor)
 

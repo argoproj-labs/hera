@@ -35,14 +35,12 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.experimental.script_runner_io:writer
+      - examples.workflows.scripts.script_runner_io:writer
       command:
       - python
       env:
       - name: hera__outputs_directory
         value: /tmp/hera-outputs
-      - name: hera__script_pydantic_io
-        value: ''
   - name: pydantic-io
     inputs:
       artifacts:
@@ -68,11 +66,9 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.experimental.script_runner_io:pydantic_io
+      - examples.workflows.scripts.script_runner_io:pydantic_io
       command:
       - python
       env:
       - name: hera__outputs_directory
         value: /tmp/hera-outputs
-      - name: hera__script_pydantic_io
-        value: ''

@@ -221,14 +221,10 @@ def _save_annotated_return_outputs(
     if len(function_outputs) != len(output_annotations):
         raise ValueError("The number of outputs does not match the annotation")
 
-    if os.environ.get("hera__script_pydantic_io", None) is not None:
-        return_obj = None
+    return_obj = None
 
     for output_value, dest in zip(function_outputs, output_annotations):
         if isinstance(output_value, (OutputV1, OutputV2)):
-            if os.environ.get("hera__script_pydantic_io", None) is None:
-                raise ValueError("hera__script_pydantic_io environment variable is not set")
-
             return_obj = output_value
 
             for field, value in model_dump(output_value).items():
@@ -253,7 +249,7 @@ def _save_annotated_return_outputs(
             path = _get_outputs_path(dest[1])
             _write_to_path(path, output_value, _get_dumper_function(dest[1]))
 
-    if os.environ.get("hera__script_pydantic_io", None) is not None:
+    if return_obj is not None:
         return return_obj
 
     return None
@@ -285,9 +281,6 @@ def _save_dummy_outputs(
     """
     for dest in output_annotations:
         if isinstance(dest, type) and issubclass(dest, (OutputV1, OutputV2)):
-            if os.environ.get("hera__script_pydantic_io", None) is None:
-                raise ValueError("hera__script_pydantic_io environment variable is not set")
-
             for field in get_fields(dest):
                 if field in {"exit_code", "result"}:
                     continue
