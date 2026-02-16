@@ -114,11 +114,6 @@ w.create()
   and `hera generate python --help` for more information.
 - **_The CLI is an experimental feature and subject to change!_**
 
-#### `experimental`
-
-- Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features
-  that have not yet graduated into stable features.
-
 #### `async-client`
 
 - Install via `hera[async-client]`. The `[async-client]` option installs `httpx` to allow the use of the `async_*`

@@ -94,6 +94,22 @@ class ContextMixin(BaseMixin):
         raise NotImplementedError()
 
 
+class ExperimentalMixin(BaseMixin):
+    _experimental_warning_message: str = (
+        "Unable to instantiate {} since it is an experimental feature."
+        " Please turn on experimental features by setting "
+        '`hera.shared.global_config.experimental_features["{}"] = True`.'
+        " Note that experimental features are unstable and subject to breaking changes."
+    )
+
+    _flag: str
+
+    def __post_init__(self):
+        super().__post_init__()
+        if not global_config.experimental_features[self._flag]:
+            raise ValueError(self._experimental_warning_message.format(self, self._flag))
+
+
 def _set_model_attr(model: APIBaseModel, attrs: List[str], value: Any):
     # The `attrs` list represents a path to an attribute in `model`, whose attributes
     # are BaseModels themselves. Therefore we use `getattr` to get a reference to the final
