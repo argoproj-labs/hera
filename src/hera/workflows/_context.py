@@ -8,7 +8,7 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import List, Optional
 
-from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, BaseMixin, _flag_enabled
+from hera.shared._global_config import BaseMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.protocol import Subbable
 
@@ -95,14 +95,8 @@ class _HeraContext:
         ):
             from hera.workflows.workflow import Workflow
 
-            if _flag_enabled(_DECORATOR_SYNTAX_FLAG):
-                from hera.workflows.template_set import TemplateSet
-
-                if not isinstance(pieces[0], (TemplateSet, Workflow)):
-                    raise SyntaxError("Not under a TemplateSet/Workflow context")
-            else:
-                if not isinstance(pieces[0], Workflow):
-                    raise SyntaxError("Not under a Workflow context")
+            if not isinstance(pieces[0], Workflow):
+                raise SyntaxError("Not under a Workflow context")
 
             # Add template to the workflow
             found = False

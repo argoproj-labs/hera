@@ -5,18 +5,17 @@ for more on Workflows.
 """
 
 import asyncio
-import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Annotated, Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+from typing import Annotated, Any, Dict, List, Optional, Type, TypeVar, Union
 
 from typing_extensions import ParamSpec
 
 from hera import _yaml
 from hera.shared import global_config
 from hera.shared._pydantic import APIBaseModel
-from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
+from hera.workflows._meta_mixins import ContextMixin, HookMixin, ModelMapperMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
     ArgumentsT,
@@ -64,7 +63,6 @@ from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TWorkflow, VolumeClaimable
 from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.service import WorkflowsService
-from hera.workflows.template_set import TemplateSet
 from hera.workflows.workflow_status import WorkflowStatus
 
 ImagePullSecretsT = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
@@ -84,11 +82,11 @@ class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
 @dataclass(kw_only=True)
 class Workflow(
     ArgumentsMixin,
+    ContextMixin,
     HookMixin,
     VolumeMixin,
     MetricsMixin,
     ModelMapperMixin,
-    TemplateDecoratorFuncsMixin,
 ):
     """The base Workflow class for Hera.
 
@@ -588,25 +586,6 @@ class Workflow(
         assert self.workflows_service is not None, "Cannot fetch a workflow link without a service"
         assert self.name is not None, "Cannot fetch a workflow link without a workflow name"
         return self.workflows_service.get_workflow_link(self.name)
-
-    def set_entrypoint(self, func: Callable[P, T]) -> Callable[P, T]:
-        """Decorator function to set entrypoint."""
-        if not hasattr(func, "template_name"):
-            raise SyntaxError("`set_entrypoint` decorator must be above template decorator")
-
-        if self.entrypoint is not None:
-            if self.entrypoint == func.template_name:
-                return func
-
-            logging.warning(f"entrypoint is being reassigned from {self.entrypoint} to {func.template_name}")
-
-        self.entrypoint = func.template_name  # type: ignore
-        return func
-
-    def add_template_set(self, template_set: TemplateSet) -> None:
-        """Add the templates stored in the template_set to this Workflow."""
-        for template in template_set.templates:
-            self._add_sub(template)
 
 
 __all__ = ["Workflow"]

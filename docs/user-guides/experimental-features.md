@@ -16,23 +16,7 @@ usually announce changes in [the Hera slack channel](https://cloud-native.slack.
 
 ## Currently supported experimental features:
 
-### Decorators for main template types
-
-Decorators for dags, steps and containers are provided alongside a new script decorator, letting your declare Workflows via Python functions alone.
-
-To enable the decorators, you must install the optional extras under `experimental`
-
-```bash
-pip install hera[experimental]
-```
-
-You can then set the `experimental_feature` flag `decorator_syntax` in your code
-
-```py
-global_config.experimental_features["decorator_syntax"] = True
-```
-
-Read the full guide on decorators in [the decorator user guide](../user-guides/decorators.md).
+There's currently no experimental features.
 
 ## Graduated features
 
@@ -67,3 +51,15 @@ inputs. Any fields that you declare in your subclass of `Input` will become inpu
 or `Artifact`, as any fields with a basic type will become `Parameters`.
 
 Read the full guide on script pydantic IO in [the script user guide](../user-guides/script-runner-io.md).
+
+## Retired features
+
+These features have been retired and are no longer supported.
+
+### Decorators for main template types
+
+Decorators for dags, steps and containers are provided alongside a new script decorator, letting your declare Workflows via Python functions alone.
+The maintainers felt it would be better to focus on one fully-supported syntax instead of continuing support for a second, less-supported syntax.
+The decorator syntax was an attempt to introduce local-running to Hera, but was extremely limited and not worth further investment.
+
+Read the full guide on decorators in [the decorator user guide](../user-guides/retired/decorators.md).
