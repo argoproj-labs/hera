@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import inspect
+import sys
 from collections import defaultdict
 from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
 
 from hera.auth import TokenGenerator
 
@@ -73,8 +79,25 @@ class _GlobalConfig:
     script_command: Optional[List[str]] = field(default_factory=lambda: ["python"])
     """the default script command to use in starting up `Script` containers"""
 
-    experimental_features: Dict[str, bool] = field(default_factory=lambda: defaultdict(bool))
-    """an indicator holder for any Hera experimental features to use"""
+    _experimental_features: Dict[str, bool] = field(default_factory=lambda: defaultdict(bool))
+
+    @property
+    @deprecated("experimental_features is not used as there are no experimental features.")
+    def experimental_features(self) -> Dict[str, bool]:
+        """An indicator holder for any Hera experimental features to use.
+
+        Note: There are currently no experimental features, so this property is not used anymore.
+        """
+        return self._experimental_features
+
+    @experimental_features.setter
+    @deprecated("experimental_features is not used as there are no experimental features.")
+    def experimental_features(self, value: Dict[str, bool]) -> None:
+        """An indicator holder for any Hera experimental features to use.
+
+        Note: There are currently no experimental features, so this property is not used anymore.
+        """
+        self._experimental_features = value
 
     def reset(self) -> None:
         """Resets the global config container to its initial state."""
