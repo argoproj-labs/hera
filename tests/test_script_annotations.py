@@ -15,20 +15,18 @@ from .test_examples import _compare_workflows
 
 
 @pytest.mark.parametrize("module_name", ["combined", "description", "enum"])
-def test_script_annotations_parameter_regression(module_name, global_config_fixture):
+def test_script_annotations_parameter_regression(module_name):
     """Regression tests for the input parameter annotations.
 
     Check if the workflow created using the new syntax is equivalent
     to one created using the old syntax.
     """
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = False
     workflow_old = importlib.import_module(
         f"tests.script_annotations_inputs_regression.script_annotations_parameters_{module_name}_old"
     ).w
     output_old = workflow_old.to_dict()
 
-    global_config_fixture.experimental_features["script_annotations"] = True
     workflow_new = importlib.import_module(
         f"tests.script_annotations_inputs_regression.script_annotations_parameters_{module_name}_new"
     ).w
@@ -42,20 +40,18 @@ def test_script_annotations_parameter_regression(module_name, global_config_fixt
     "module_name",
     ["artifactory", "azure", "gcs", "git", "hdfs", "optional", "mode", "mode_recurse", "oss", "raw", "subpath", "s3"],
 )
-def test_script_annotations_artifact_regression(module_name, global_config_fixture):
+def test_script_annotations_artifact_regression(module_name):
     """Regression tests for the input artifact annotations.
 
     Check if the workflow created using the new syntax is equivalent
     to one created using the old syntax.
     """
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = False
     workflow_old = importlib.import_module(
         f"tests.script_annotations_inputs_regression.script_annotations_artifacts_{module_name}_old"
     ).w
     output_old = workflow_old.to_dict()
 
-    global_config_fixture.experimental_features["script_annotations"] = True
     workflow_new = importlib.import_module(
         f"tests.script_annotations_inputs_regression.script_annotations_artifacts_{module_name}_new"
     ).w
@@ -65,7 +61,7 @@ def test_script_annotations_artifact_regression(module_name, global_config_fixtu
     _compare_workflows(workflow_old, output_old, output_new)
 
 
-def test_parameter_default_throws_a_value_error(global_config_fixture):
+def test_parameter_default_throws_a_value_error():
     """Test asserting that it is not possible to define default in the annotation."""
 
     # GIVEN
@@ -73,7 +69,6 @@ def test_parameter_default_throws_a_value_error(global_config_fixture):
     def echo_int(an_int: Annotated[int, Parameter(default=1)]):
         print(an_int)
 
-    global_config_fixture.experimental_features["script_annotations"] = True
     with pytest.raises(ValueError) as e:
         with Workflow(generate_name="test-default-", entrypoint="my-steps") as w:
             with Steps(name="my-steps"):
@@ -84,12 +79,10 @@ def test_parameter_default_throws_a_value_error(global_config_fixture):
     assert ("default cannot be set via the Parameter's default, use a Python default value instead") in str(e.value)
 
 
-def test_pydantic_input_with_default_throws_a_value_error(global_config_fixture):
+def test_pydantic_input_with_default_throws_a_value_error():
     """Test asserting that it is not possible to define default in the annotation in a Hera Input class."""
 
     # GIVEN
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
-
     class ExampleInput(Input):
         an_int: Annotated[int, Parameter(default=1)]
 
@@ -97,7 +90,6 @@ def test_pydantic_input_with_default_throws_a_value_error(global_config_fixture)
     def echo_int(pydantic_input: ExampleInput):
         print(pydantic_input.an_int)
 
-    global_config_fixture.experimental_features["script_annotations"] = True
     with pytest.raises(ValueError) as e:
         with Workflow(generate_name="test-default-", entrypoint="my-steps") as w:
             with Steps(name="my-steps"):
@@ -162,10 +154,9 @@ def test_pydantic_input_with_default_throws_a_value_error(global_config_fixture)
         ),
     ],
 )
-def test_script_annotated_outputs(function_name, expected_input, expected_output, global_config_fixture):
+def test_script_annotated_outputs(function_name, expected_input, expected_output):
     """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
     import tests.script_annotations.outputs as module
@@ -186,13 +177,11 @@ def test_script_annotated_outputs(function_name, expected_input, expected_output
 
 def test_configmap(global_config_fixture):
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = False
     workflow_old = importlib.import_module(
         "tests.script_annotations_inputs_regression.script_annotations_configmap_old"
     ).w
     output_old = workflow_old.to_dict()
 
-    global_config_fixture.experimental_features["script_annotations"] = True
     workflow_new = importlib.import_module(
         "tests.script_annotations_inputs_regression.script_annotations_configmap_new"
     ).w
@@ -338,11 +327,9 @@ def test_configmap(global_config_fixture):
         ),
     ],
 )
-def test_script_pydantic_io(pydantic_mode, function_name, expected_input, expected_output, global_config_fixture):
+def test_script_pydantic_io(pydantic_mode, function_name, expected_input, expected_output):
     """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
     module_name = f"tests.script_annotations.pydantic_io_v{pydantic_mode}"
@@ -391,11 +378,9 @@ def test_script_pydantic_io(pydantic_mode, function_name, expected_input, expect
         ),
     ],
 )
-def test_script_pydantic_io_strs(pydantic_mode, function_name, expected_input, expected_output, global_config_fixture):
+def test_script_pydantic_io_strs(pydantic_mode, function_name, expected_input, expected_output):
     """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
     module_name = f"tests.script_annotations.pydantic_io_v{pydantic_mode}_strs"
@@ -415,11 +400,9 @@ def test_script_pydantic_io_strs(pydantic_mode, function_name, expected_input, e
     assert template["outputs"] == expected_output
 
 
-def test_script_pydantic_invalid_outputs(global_config_fixture):
+def test_script_pydantic_invalid_outputs():
     """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
     import tests.script_annotations.pydantic_io_invalid_outputs as module
@@ -434,11 +417,9 @@ def test_script_pydantic_invalid_outputs(global_config_fixture):
     assert "Output cannot be part of a tuple output" in str(e.value)
 
 
-def test_script_pydantic_multiple_inputs(global_config_fixture):
+def test_script_pydantic_multiple_inputs():
     """Test that parameters with same annotated name raises ValueError."""
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
     import tests.script_annotations.pydantic_io_invalid_multiple_inputs as module
@@ -460,11 +441,9 @@ def test_script_pydantic_multiple_inputs(global_config_fixture):
         "tests.script_annotations.pydantic_io_with_param",  # Pydantic IO types
     ],
 )
-def test_script_with_param(global_config_fixture, module_name):
+def test_script_with_param(module_name):
     """Test that with_param works correctly with annotated/Pydantic IO types."""
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
 
@@ -499,13 +478,9 @@ def test_script_with_param(global_config_fixture, module_name):
         pytest.param("tests.script_annotations.pydantic_io_literals", "my_str", id="pydantic-io"),
     ],
 )
-@pytest.mark.parametrize("experimental_feature", ["", "script_annotations", "script_pydantic_io"])
-def test_script_literals(global_config_fixture, module_name, input_name, experimental_feature):
+def test_script_literals(module_name, input_name):
     """Test that Literals work correctly as direct type annotations."""
     # GIVEN
-    if experimental_feature:
-        global_config_fixture.experimental_features[experimental_feature] = True
-
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
     module = importlib.import_module(module_name)
