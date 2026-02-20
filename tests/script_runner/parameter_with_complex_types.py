@@ -1,9 +1,6 @@
 from typing import Annotated, Optional, Tuple, Union
 
-from hera.shared import global_config
 from hera.workflows import Parameter, script
-
-global_config.experimental_features["script_annotations"] = True
 
 
 @script(constructor="runner")

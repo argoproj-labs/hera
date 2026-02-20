@@ -2,12 +2,9 @@
 
 from typing import Annotated
 
-from hera.shared import global_config
 from hera.workflows import Workflow, script
 from hera.workflows.artifact import Artifact, RawArtifact
 from hera.workflows.steps import Steps
-
-global_config.experimental_features["script_annotations"] = True
 
 
 @script()

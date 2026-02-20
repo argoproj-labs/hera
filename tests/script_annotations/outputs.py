@@ -3,11 +3,8 @@
 from pathlib import Path
 from typing import Annotated, Tuple
 
-from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, RunnerScriptConstructor, Workflow, script
 from hera.workflows.steps import Steps
-
-global_config.experimental_features["script_annotations"] = True
 
 
 @script(constructor=RunnerScriptConstructor(outputs_directory="/user/chosen/outputs"))

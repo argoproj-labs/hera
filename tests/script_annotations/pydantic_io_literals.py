@@ -1,9 +1,6 @@
 from typing import Literal
 
-from hera.shared import global_config
 from hera.workflows import Input, Output, Steps, Workflow, script
-
-global_config.experimental_features["script_pydantic_io"] = True
 
 
 class ExampleInput(Input):

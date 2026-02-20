@@ -5,7 +5,6 @@ from typing import Annotated
 
 from pydantic.v1 import BaseModel
 
-from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, script
 
 if sys.version_info >= (3, 14):
@@ -18,9 +17,6 @@ else:
         Input,
         Output,
     )
-
-
-global_config.experimental_features["script_pydantic_io"] = True
 
 
 class MyBaseModel(BaseModel):
