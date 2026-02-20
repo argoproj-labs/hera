@@ -49,6 +49,7 @@ class APIBaseModel(V2BaseModel):
         frozen=False,
         use_enum_values=True,
         arbitrary_types_allowed=True,
+        extra="forbid",
     )
 
 
