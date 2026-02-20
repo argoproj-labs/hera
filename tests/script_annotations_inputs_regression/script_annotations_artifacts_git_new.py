@@ -3,12 +3,9 @@
 from typing import Annotated
 
 import hera.workflows.models as m
-from hera.shared import global_config
 from hera.workflows import Workflow, script
 from hera.workflows.artifact import Artifact, GitArtifact
 from hera.workflows.steps import Steps
-
-global_config.experimental_features["script_annotations"] = True
 
 
 @script()

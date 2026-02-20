@@ -22,7 +22,8 @@ assert output_file is not None, "Expected the output file to be passed as the se
 
 tmp_file = Path("/tmp/" + os.path.split(open_api_spec_url)[1])
 
-if tmp_file.exists() and tmp_file.read_text() != "":
+# Run with CACHE=true environment variable to cache the spec and reuse it
+if os.environ.get("CACHE", False) and tmp_file.exists() and tmp_file.read_text() != "":
     print(f"Reading local copy from {tmp_file}")
     spec = json.loads(Path(tmp_file).read_text())
 else:
@@ -30,8 +31,9 @@ else:
     # download the spec
     response = requests.get(open_api_spec_url, timeout=60)
     # cache it for next time
-    with open(tmp_file, "w") as f:
-        f.write(response.text)
+    if os.environ.get("CACHE", False):
+        with open(tmp_file, "w") as f:
+            f.write(response.text)
 
     # get the spec into a dictionary
     spec = response.json()

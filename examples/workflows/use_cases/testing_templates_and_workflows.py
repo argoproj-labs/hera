@@ -27,10 +27,10 @@ with Workflow(
 ) as w:
     with DAG(name="dag"):
         A = calculate_area_of_rectangle(
-            name="rectangle-1", arguments={"rectangle": Rectangle(length=1.2, width=3.4).json()}
+            name="rectangle-1", arguments={"rectangle": Rectangle(length=1.2, width=3.4).model_dump_json()}
         )
         B = calculate_area_of_rectangle(
-            name="rectangle-2", arguments={"rectangle": Rectangle(length=4.3, width=2.1).json()}
+            name="rectangle-2", arguments={"rectangle": Rectangle(length=4.3, width=2.1).model_dump_json()}
         )
         A >> B
 

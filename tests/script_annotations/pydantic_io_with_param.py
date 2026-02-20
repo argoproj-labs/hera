@@ -1,9 +1,6 @@
 from typing import Annotated, List
 
-from hera.shared import global_config
 from hera.workflows import DAG, Input, Output, Parameter, Workflow, script
-
-global_config.experimental_features["script_pydantic_io"] = True
 
 
 class GenerateOutput(Output):

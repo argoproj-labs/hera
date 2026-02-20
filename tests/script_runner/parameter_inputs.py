@@ -4,10 +4,7 @@ from typing import Annotated, Any, List, Literal, Union
 from pydantic import BaseModel as V2BaseModel
 from pydantic.v1 import BaseModel as V1BaseModel
 
-from hera.shared import global_config
 from hera.workflows import Parameter, RunnerScriptConstructor, script
-
-global_config.experimental_features["script_annotations"] = True
 
 
 class Input(V2BaseModel):

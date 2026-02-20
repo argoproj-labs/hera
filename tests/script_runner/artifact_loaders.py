@@ -4,11 +4,8 @@ from typing import Annotated
 from pydantic import BaseModel
 from tests.helper import ARTIFACT_PATH
 
-from hera.shared import global_config
 from hera.workflows import script
 from hera.workflows.artifact import Artifact, ArtifactLoader
-
-global_config.experimental_features["script_annotations"] = True
 
 
 class MyArtifact(BaseModel):

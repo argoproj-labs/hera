@@ -1,9 +1,6 @@
 from typing import Annotated, List
 
-from hera.shared import global_config
 from hera.workflows import DAG, Parameter, Workflow, script
-
-global_config.experimental_features["script_annotations"] = True
 
 
 @script(constructor="runner")

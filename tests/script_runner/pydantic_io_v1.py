@@ -5,7 +5,6 @@ from typing import Annotated, List
 from pydantic.v1 import BaseModel as V1BaseModel
 from tests.helper import ARTIFACT_PATH
 
-from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, script
 
 if sys.version_info >= (3, 14):
@@ -18,9 +17,6 @@ else:
         Input,
         Output,
     )
-
-global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_pydantic_io"] = True
 
 
 class ParamOnlyInput(Input):

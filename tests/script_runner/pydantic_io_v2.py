@@ -4,12 +4,8 @@ from typing import Annotated, List
 from pydantic import BaseModel
 from tests.helper import ARTIFACT_PATH
 
-from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, script
 from hera.workflows.io.v2 import Input, Output
-
-global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_pydantic_io"] = True
 
 
 class ParamOnlyInput(Input):
