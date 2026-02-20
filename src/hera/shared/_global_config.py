@@ -9,6 +9,8 @@ from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
+from pydantic.config import ExtraValues
+
 if sys.version_info < (3, 13):
     from typing_extensions import deprecated
 else:
@@ -69,6 +71,13 @@ class _GlobalConfig:
 
     api_version: str = "argoproj.io/v1alpha1"
     """the Argo API verison to use on models"""
+
+    api_models_extra_fields_config: ExtraValues = "forbid"
+    """whether to ignore, allow, or forbid extra data during model initialization a config for the auto-generated Pydantic API Models. Read more at https://docs.pydantic.dev/dev/api/config/#pydantic.config.ConfigDict.extra.
+
+    In Hera, this defaults to "forbid" (as opposed to "ignore" in Pydantic itself). Note that if using the WorkflowsService
+    to fetch Workflows it will automatically be changed to "ignore" due to how the API models are created. If you are having any
+    difficulties instantiating model classes, try setting this value to "ignore"."""
 
     namespace: Optional[str] = None
     """the Kubernetes namespace to use on any submitted workflows. This is used by the Argo workflow controller"""

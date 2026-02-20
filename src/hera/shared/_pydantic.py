@@ -12,6 +12,8 @@ from pydantic import (
 from pydantic.fields import FieldInfo
 from pydantic.v1 import BaseModel as V1BaseModel
 
+from hera.shared._global_config import global_config
+
 _PYDANTIC_VERSION: int = int(VERSION.split(".")[0])
 
 
@@ -42,7 +44,7 @@ class APIBaseModel(V2BaseModel):
         frozen=False,
         use_enum_values=True,
         arbitrary_types_allowed=True,
-        extra="forbid",
+        extra=global_config.api_models_extra_fields_config,
     )
 
 

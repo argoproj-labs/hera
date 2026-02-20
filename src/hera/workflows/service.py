@@ -101,6 +101,8 @@ class WorkflowsService:
 
         self.namespace = namespace or global_config.namespace
 
+        global_config.api_models_extra_fields_config = "ignore"
+
     def _request(self, method, **kwargs):
         """Make a request using the session if enabled."""
         return self.session.request(method, **kwargs)
