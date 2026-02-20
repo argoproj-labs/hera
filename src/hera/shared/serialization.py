@@ -5,9 +5,6 @@ from json import JSONEncoder
 from typing import Any, Optional
 
 from pydantic import BaseModel as V2BaseModel
-
-# NOTE: Use the original BaseModel in order to support serializing user-defined models,
-# for hera internal models, we only support V2 BaseModels.
 from pydantic.v1 import BaseModel as V1BaseModel
 
 MISSING = object()
