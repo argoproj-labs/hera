@@ -10,14 +10,7 @@ from pydantic import (
     ConfigDict,
 )
 from pydantic.fields import FieldInfo
-from pydantic.v1 import (
-    BaseModel as V1BaseModel,
-    Field,
-    PrivateAttr,
-    ValidationError,
-    root_validator,
-    validator,
-)
+from pydantic.v1 import BaseModel as V1BaseModel
 
 _PYDANTIC_VERSION: int = int(VERSION.split(".")[0])
 
@@ -54,11 +47,8 @@ class APIBaseModel(V2BaseModel):
 
 __all__ = [
     "APIBaseModel",
-    "Field",
     "FieldInfo",
-    "PrivateAttr",
-    "V1BaseModel",  # Export for serialization.py to cover user-defined models
-    "ValidationError",
-    "root_validator",
-    "validator",
+    "get_field_annotations",
+    "get_fields",
+    "model_dump",
 ]
