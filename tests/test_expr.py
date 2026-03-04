@@ -53,7 +53,7 @@ from hera.expr import C, P, g, it, sprig
         (g.test.to_json(), "toJson(test)"),
         (g.test[g.test.length() - 1], "test[len(test) - 1]"),
         (g.test.string(), "string(test)"),
-        (g.test.jsonpath(Fields("foo").child("test").child(Slice("*"))), "jsonpath(test, 'foo.test.[*]')"),
+        (g.test.jsonpath(Fields("foo").child("test").child(Slice("*"))), "jsonpath(test, '((foo.test).[*])')"),
         (g.test.jsonpath("test").test.length(), """len(jsonpath(test, 'test').test)"""),
         (g.test.jsonpath("test").test.as_float(), """asFloat(jsonpath(test, 'test').test)"""),
         (g.test.jsonpath("test").test.as_int(), """asInt(jsonpath(test, 'test').test)"""),
