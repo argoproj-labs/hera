@@ -15,6 +15,7 @@ from hera.workflows.parameter import Parameter
 from hera.workflows.script import script
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import NAME_LIMIT, Workflow
+from hera.workflows.workflow_status import WorkflowStatus
 
 
 def test_workflow_name_validators():
@@ -152,3 +153,20 @@ def test_reassign_workflow_arguments():
     built_workflow = w.build()
 
     assert built_workflow.spec.arguments.parameters == [ModelParameter(name="another-param", value="another-value")]
+
+
+def test_workflow_status():
+    assert WorkflowStatus.from_argo_status("Pending") == WorkflowStatus.pending
+    assert WorkflowStatus.from_argo_status("Running") == WorkflowStatus.running
+    assert WorkflowStatus.from_argo_status("Succeeded") == WorkflowStatus.succeeded
+    assert WorkflowStatus.from_argo_status("Failed") == WorkflowStatus.failed
+    assert WorkflowStatus.from_argo_status("Error") == WorkflowStatus.error
+    assert WorkflowStatus.from_argo_status("Terminated") == WorkflowStatus.terminated
+
+    with pytest.raises(KeyError) as e:
+        WorkflowStatus.from_argo_status("NotARealStatus")
+
+    assert (
+        "Unrecognized status NotARealStatus. Available Argo statuses are: ['Pending', 'Running', 'Succeeded', 'Failed', 'Error', 'Terminated']"
+        in str(e.value)
+    )
