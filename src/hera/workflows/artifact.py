@@ -158,17 +158,6 @@ class Artifact:
         artifact = self._build_artifact()
         return _ModelArtifactPaths(**artifact.model_dump())
 
-    def as_name(self, name: str) -> _ModelArtifact:
-        """Returns a 'built' copy of the current artifact, renamed using the specified `name`.
-
-        Warning: DEPRECATED
-            use with_name.
-        """
-        _logger.warning("'as_name' is deprecated, use 'with_name'")
-        artifact = self._build_artifact()
-        artifact.name = name
-        return artifact
-
     def with_name(self, name: str) -> Artifact:
         """Returns a copy of the current artifact, renamed using the specified `name`."""
         artifact = deepcopy(self)
