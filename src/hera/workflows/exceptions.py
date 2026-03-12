@@ -25,16 +25,10 @@ class InvalidDispatchType(WorkflowsException):
     ...
 
 
-class TemplateNameConflict(WorkflowsException):
-    """Currently unused."""
-
-    ...
-
-
 class NodeNameConflict(WorkflowsException):
     """Exception raised when multiple Task/Step are found with the same name."""
 
     ...
 
 
-__all__ = ["InvalidType", "InvalidTemplateCall", "InvalidDispatchType", "TemplateNameConflict", "NodeNameConflict"]
+__all__ = ["InvalidType", "InvalidTemplateCall", "InvalidDispatchType", "NodeNameConflict"]

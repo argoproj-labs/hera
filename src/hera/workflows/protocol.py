@@ -6,28 +6,12 @@ from typing_extensions import Protocol, runtime_checkable
 
 from hera.workflows.models import (
     ClusterWorkflowTemplate,
-    ContainerSetTemplate,
     CronWorkflow,
-    DAGTemplate,
     PersistentVolumeClaim,
-    ResourceTemplate,
-    ScriptTemplate,
-    SuspendTemplate,
     Template,
     Workflow,
     WorkflowTemplate,
 )
-
-TTemplate = Union[
-    ContainerSetTemplate,
-    DAGTemplate,
-    ResourceTemplate,
-    ScriptTemplate,
-    SuspendTemplate,
-    Template,
-]
-"""`TTemplate` is a union type collection of all the model Template classes"""
-# Unused in codebase, TBD if deprecated
 
 TWorkflow = Union[
     CronWorkflow,
