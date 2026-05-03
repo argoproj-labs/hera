@@ -3,6 +3,7 @@
 # we want the init of `workflows.models` to have a filtered import of Workflow models
 # we can parse out the JSON using the old code and filter on Workflow objects
 import os
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -169,6 +170,23 @@ def ensure_init():
                     f.write("")
 
 
+def strip_enum_string_defaults(models_type: str) -> None:
+    """Strip enum-typed string defaults that datamodel-codegen propagates from definition level.
+
+    The Argo Workflows v4 swagger places `default: "CONFIGMAP"` on the `sync.SyncConfigType` enum
+    definition itself, which datamodel-codegen propagates to every field that references the type.
+    The result is `type: SyncConfigType | None = "CONFIGMAP"` -- a string default on an enum-typed
+    field, which mypy rejects. The intent is "no default", so rewrite to `= None`.
+    """
+    sync_path = Path(f"src/hera/{models_type}/models/sync.py")
+    if not sync_path.exists():
+        return
+    text = sync_path.read_text()
+    rewritten = re.sub(r'(:\s*SyncConfigType \| None)\s*=\s*[\'"][A-Z]+[\'"]', r"\1 = None", text)
+    if rewritten != text:
+        sync_path.write_text(rewritten)
+
+
 if __name__ == "__main__":
     models_type = get_models_type()
     openapi_spec_url = get_openapi_spec_url()
@@ -180,3 +198,4 @@ if __name__ == "__main__":
     imports = get_import_paths_from_refs(filtered_refs, root_path)
     write_imports(imports, models_type, openapi_spec_url)
     ensure_init()
+    strip_enum_string_defaults(models_type)

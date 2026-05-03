@@ -344,7 +344,7 @@ def get_endpoints(
     """Assembles a series of endpoints for the service definition."""
     switch = {
         "workflows": ["events", "event", "eventsource", "sensor"],
-        "events": ["workflow", "workflows"],
+        "events": ["workflow", "workflows", "sync"],
     }
     exceptions = switch.get(models_type)
     endpoints = []

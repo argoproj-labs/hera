@@ -21,7 +21,6 @@ SKIP_FILES = [
     "cluster-workflow-template--clustertemplates.upstream.yaml",  # multiple workflows in one file, generates correctly
     "cron-backfill.upstream.yaml",  # multiple workflows in one file, generates correctly
     "workflow-template--templates.upstream.yaml",  # multiple workflows in one file, generates correctly
-    "memoize-simple.upstream.yaml",  # memoize not working
     "workflow-event-binding--github-path-filter-workflowtemplate.upstream.yaml",  # value is a list (invalid?)
     "testvolume.upstream.yaml",  # not a workflow
     "configmaps--simple-parameters-configmap.upstream.yaml",  # not a workflow

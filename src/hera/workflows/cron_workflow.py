@@ -81,7 +81,6 @@ class CronWorkflow(Workflow):
     failed_jobs_history_limit: Annotated[Optional[int], _CronWorkflowModelMapper("spec.failed_jobs_history_limit")] = (
         None
     )
-    schedule: Annotated[Optional[str], _CronWorkflowModelMapper("spec.schedule")] = None
     schedules: Annotated[Optional[List[str]], _CronWorkflowModelMapper("spec.schedules")] = None
     starting_deadline_seconds: Annotated[Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")] = (
         None
@@ -211,6 +210,7 @@ class CronWorkflow(Workflow):
         model_cron_workflow = _ModelCronWorkflow(
             metadata=model_workflow.metadata,
             spec=CronWorkflowSpec(
+                schedules=self.schedules or [],
                 workflow_spec=model_workflow.spec,
             ),
         )

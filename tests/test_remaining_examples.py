@@ -19,11 +19,22 @@ UPSTREAM_EXAMPLES_FOLDER = Path("examples/workflows/upstream")
 UPSTREAM_EXAMPLE_XFAIL_FILES = {
     "cluster-workflow-template--clustertemplates.upstream.yaml",
     "cron-backfill.upstream.yaml",
-    "memoize-simple.upstream.yaml",
     "workflow-template--templates.upstream.yaml",
     "workflow-event-binding--github-path-filter-workflowtemplate.upstream.yaml",
     "cluster-workflow-template--clustertemplates.upstream.yaml",
-    "artifact-passing-explicit-plugin.upstream.yaml",
+    # Legacy singular `mutex`/`semaphore` fields removed in Argo Workflows v4;
+    # only the list-shaped `mutexes`/`semaphores` remain, so these fixtures lose
+    # information on round-trip.
+    "synchronization-mutex-tmpl-level-legacy.upstream.yaml",
+    "synchronization-mutex-wf-level-legacy.upstream.yaml",
+    "synchronization-tmpl-level-legacy.upstream.yaml",
+    "synchronization-wf-level-legacy.upstream.yaml",
+    "steps-daemon-retry-strategy.upstream.yaml",
+    "dag-daemon-retry-strategy.upstream.yaml",
+    # Argo v4 simplified `Cache.configMap` from ConfigMapKeySelector (key+name)
+    # to LocalObjectReference (name only); this fixture's `cache.configMap.key`
+    # is dropped on round-trip.
+    "fibonacci-seq-conditional-param.upstream.yaml",
 }
 
 

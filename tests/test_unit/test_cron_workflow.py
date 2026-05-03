@@ -13,7 +13,7 @@ def test_cron_workflow_update_existing_cw():
     with CronWorkflow(
         name="my-cw",
         namespace="my-namespace",
-        schedule="* * * * *",
+        schedules=["* * * * *"],
     ) as cw:
         pass
 
@@ -41,7 +41,7 @@ def test_cron_workflow_update_non_existent():
     with CronWorkflow(
         name="my-cw",
         namespace="my-namespace",
-        schedule="* * * * *",
+        schedules=["* * * * *"],
     ) as cw:
         pass
 
@@ -67,27 +67,27 @@ def test_cron_workflow_update_non_existent():
 
 def test_returns_expected_workflow_link():
     with pytest.raises(AssertionError) as e:
-        cw = CronWorkflow(name="test", schedule="* * * * *")
+        cw = CronWorkflow(name="test", schedules=["* * * * *"])
         cw.workflows_service = None
         cw.get_workflow_link()
     assert str(e.value) == "Cannot fetch a cron workflow link without a service"
 
     with pytest.raises(AssertionError) as e:
         CronWorkflow(
-            schedule="* * * * *", workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace")
+            schedules=["* * * * *"], workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace")
         ).get_workflow_link()
     assert str(e.value) == "Cannot fetch a cron workflow link without a cron workflow name"
 
     w = CronWorkflow(
         name="test",
-        schedule="* * * * *",
+        schedules=["* * * * *"],
         workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace"),
     )
     assert w.get_workflow_link() == "hera.test/cron-workflows/my-namespace/test"
 
     w = CronWorkflow(
         name="test",
-        schedule="* * * * *",
+        schedules=["* * * * *"],
         workflows_service=WorkflowsService(host="https://localhost:8443/argo/", namespace="my-namespace"),
     )
     assert w.get_workflow_link() == "https://localhost:8443/argo/cron-workflows/my-namespace/test"
