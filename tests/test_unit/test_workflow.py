@@ -170,3 +170,52 @@ def test_workflow_status():
         "Unrecognized status NotARealStatus. Available Argo statuses are: ['Pending', 'Running', 'Succeeded', 'Failed', 'Error', 'Terminated']"
         in str(e.value)
     )
+
+
+def test_workflow_template_defaults_validation():
+    # GIVEN
+    workflow_data = {
+        "apiVersion": "argoproj.io/v1alpha1",
+        "kind": "Workflow",
+        "metadata": {"name": "test-workflow"},
+        "spec": {
+            "templateDefaults": {
+                "container": {
+                    "name": "my-container-default",
+                    "env": [{"name": "FOO", "value": "BAR"}],
+                },
+                "script": {
+                    "name": "my-script-default",
+                    "env": [{"name": "BAZ", "value": "QUX"}],
+                },
+            },
+            "templates": [
+                {
+                    "name": "my-template",
+                    "container": {
+                        "name": "my-container",
+                        "image": "alpine:latest",
+                        "command": ["echo"],
+                    },
+                }
+            ],
+        },
+    }
+
+    # WHEN
+    parsed_wf = Workflow.from_dict(workflow_data)
+
+    # THEN
+    assert parsed_wf.template_defaults is not None
+    assert parsed_wf.template_defaults.container is not None
+    assert parsed_wf.template_defaults.container.image is None
+    assert parsed_wf.template_defaults.container.env is not None
+    assert parsed_wf.template_defaults.container.env[0].name == "FOO"
+    assert parsed_wf.template_defaults.container.env[0].value == "BAR"
+
+    assert parsed_wf.template_defaults.script is not None
+    assert parsed_wf.template_defaults.script.image is None
+    assert parsed_wf.template_defaults.script.source is None
+    assert parsed_wf.template_defaults.script.env is not None
+    assert parsed_wf.template_defaults.script.env[0].name == "BAZ"
+    assert parsed_wf.template_defaults.script.env[0].value == "QUX"
