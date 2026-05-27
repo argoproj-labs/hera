@@ -25,7 +25,7 @@ def _merge_dicts(a: Dict, b: Dict, path=None):
     return a
 
 
-def _convert_cpu_value(value: Union[float, int, str]) -> float:
+def _normalise_cpu_value(value: Union[float, int, str]) -> float:
     if isinstance(value, (int, float)):
         return float(value)
     return convert_cpu_units(value)
@@ -97,7 +97,7 @@ class Resources:
             validate_cpu_units(self.cpu_limit)
 
         if self.cpu_request is not None and self.cpu_limit is not None:
-            if _convert_cpu_value(self.cpu_request) > _convert_cpu_value(self.cpu_limit):
+            if _normalise_cpu_value(self.cpu_request) > _normalise_cpu_value(self.cpu_limit):
                 raise ValueError("CPU request must be smaller or equal to limit")
 
     def build(self) -> _ModelResourceRequirements:
