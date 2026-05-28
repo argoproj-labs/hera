@@ -240,10 +240,14 @@ class CronWorkflow(Workflow):
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
 
+        # The v4 CronWorkflowSpec requires ``schedules`` (previously ``schedule`` was an alternative).
+        # Seed with a copy of ``self.schedules`` so the ModelMapper-driven assignment that follows
+        # does not mutate the caller's list, and so a missing list does not blow up validation.
         model_workflow = cast(_ModelWorkflow, super().build())
         model_cron_workflow = _ModelCronWorkflow(
             metadata=model_workflow.metadata,
             spec=CronWorkflowSpec(
+                schedules=list(self.schedules or []),
                 workflow_spec=model_workflow.spec,
             ),
         )
