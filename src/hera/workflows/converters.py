@@ -35,7 +35,7 @@ def _convert_decimal_units(value: str) -> float:
     Returns:
         float: Float value of the given decimal units.
     """
-    pattern = r"^\s*([+-]?\d+(?:\.\d+)?)([mkMGTPE]?)\s*$"
+    pattern = r"^\s*(\d+(?:\.\d+)?)([mkMGTPE]?)\s*$"
     matches = re.match(pattern, value)
 
     if matches:
@@ -60,7 +60,7 @@ def _convert_binary_units(value: str) -> float:
     Returns:
         float: Float value of the given binary units.
     """
-    pattern = r"^\s*([+-]?\d+(?:\.\d+)?)([KMGTPE]i)?\s*$"
+    pattern = r"^\s*(\d+(?:\.\d+)?)([KMGTPE]i)?\s*$"
     matches = re.match(pattern, value)
 
     if matches:

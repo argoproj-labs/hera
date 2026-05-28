@@ -37,6 +37,9 @@ def test_convert_binary_units(value, expected):
         "abc",
         "1.5Ki",
         "1.5Mi",
+        "-500m",
+        "-1",
+        "+500m",
     ],
 )
 def test_convert_decimal_units_invalid(value):
@@ -51,6 +54,9 @@ def test_convert_decimal_units_invalid(value):
         "abc",
         "500m",
         "2k",
+        "-512Mi",
+        "-1Gi",
+        "+512Mi",
     ],
 )
 def test_convert_binary_units_invalid(value):
