@@ -214,6 +214,11 @@ test-on-cluster: ## Run workflow tests (requires local argo cluster)
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
 	@poetry run python -m pytest -n 6 tests/submissions -m on_cluster -k "not lint"
 
+.PHONY: test-on-cluster-shim-v3
+test-on-cluster-shim-v3: ## Run only the v3-wire-compat shim tests on a v3 cluster
+	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
+	@poetry run python -m pytest tests/submissions -m "on_cluster and shim_v3_compat"
+
 .PHONY: lint-on-cluster
 lint-on-cluster: ## Lint workflows (requires local argo cluster)
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
