@@ -19,7 +19,7 @@ def _merge_dicts(a: Dict, b: Dict, path=None):
             elif a[key] == b[key]:
                 pass  # same leaf value
             else:
-                raise Exception("Conflict at `%s`" % ".".join(path + [str(key)]))
+                raise ValueError("Conflict at `%s`" % ".".join(path + [str(key)]))
         else:
             a[key] = b[key]
     return a
