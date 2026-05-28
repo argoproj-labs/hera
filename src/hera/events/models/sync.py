@@ -25,7 +25,7 @@ class CreateSyncLimitRequest(APIBaseModel):
     key: str | None = None
     limit: int | None = None
     namespace: str | None = None
-    type: SyncConfigType | None = "CONFIGMAP"
+    type: SyncConfigType | None = None
 
 
 class SyncLimitResponse(APIBaseModel):
@@ -33,7 +33,7 @@ class SyncLimitResponse(APIBaseModel):
     key: str | None = None
     limit: int | None = None
     namespace: str | None = None
-    type: SyncConfigType | None = "CONFIGMAP"
+    type: SyncConfigType | None = None
 
 
 class UpdateSyncLimitRequest(APIBaseModel):
@@ -41,4 +41,4 @@ class UpdateSyncLimitRequest(APIBaseModel):
     key: str | None = None
     limit: int | None = None
     namespace: str | None = None
-    type: SyncConfigType | None = "CONFIGMAP"
+    type: SyncConfigType | None = None

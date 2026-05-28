@@ -10,7 +10,6 @@ from hera.events.models import (
     CreateEventSourceRequest,
     CreateSensorRequest,
     DeleteSensorResponse,
-    DeleteSyncLimitResponse,
     Event,
     EventResponse,
     EventSource,
@@ -25,7 +24,6 @@ from hera.events.models import (
     SensorList,
     SensorLogEntry,
     SensorWatchEvent,
-    SyncLimitResponse,
     UpdateEventSourceRequest,
     UpdateSensorRequest,
     Version,
@@ -657,50 +655,6 @@ class EventsService:
 
         if resp.ok:
             return SensorLogEntry(**resp.json())
-
-        raise exception_from_server_response(resp)
-
-    def get_sync_limit(
-        self, key: str, namespace: Optional[str] = None, type_: Optional[str] = None, cm_name: Optional[str] = None
-    ) -> SyncLimitResponse:
-        """API documentation."""
-        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
-        resp = self._request(
-            method="get",
-            url=urljoin(self.host, "api/v1/sync/{namespace}/{key}").format(
-                key=key, namespace=namespace if namespace is not None else self.namespace
-            ),
-            params={"type": type_, "cmName": cm_name},
-            headers={"Authorization": self.token},
-            data=None,
-            verify=self.verify_ssl,
-            cert=self.client_certs,
-        )
-
-        if resp.ok:
-            return SyncLimitResponse()
-
-        raise exception_from_server_response(resp)
-
-    def delete_sync_limit(
-        self, key: str, namespace: Optional[str] = None, type_: Optional[str] = None, cm_name: Optional[str] = None
-    ) -> DeleteSyncLimitResponse:
-        """API documentation."""
-        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
-        resp = self._request(
-            method="delete",
-            url=urljoin(self.host, "api/v1/sync/{namespace}/{key}").format(
-                key=key, namespace=namespace if namespace is not None else self.namespace
-            ),
-            params={"type": type_, "cmName": cm_name},
-            headers={"Authorization": self.token},
-            data=None,
-            verify=self.verify_ssl,
-            cert=self.client_certs,
-        )
-
-        if resp.ok:
-            return DeleteSyncLimitResponse()
 
         raise exception_from_server_response(resp)
 

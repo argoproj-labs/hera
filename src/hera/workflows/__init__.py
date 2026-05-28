@@ -17,6 +17,7 @@ from hera.workflows.artifact import (
     HDFSArtifact,
     HTTPArtifact,
     OSSArtifact,
+    PluginArtifact,
     RawArtifact,
     S3Artifact,
 )
@@ -144,6 +145,7 @@ __all__ = [
     "Parallel",
     "Parameter",
     "PhotonPersistentDiskVolume",
+    "PluginArtifact",
     "PortworxVolume",
     "ProjectedVolume",
     "QuobyteVolume",

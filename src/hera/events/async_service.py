@@ -8,7 +8,6 @@ from hera.events.models import (
     CreateEventSourceRequest,
     CreateSensorRequest,
     DeleteSensorResponse,
-    DeleteSyncLimitResponse,
     Event,
     EventResponse,
     EventSource,
@@ -23,7 +22,6 @@ from hera.events.models import (
     SensorList,
     SensorLogEntry,
     SensorWatchEvent,
-    SyncLimitResponse,
     UpdateEventSourceRequest,
     UpdateSensorRequest,
     Version,
@@ -664,46 +662,6 @@ class AsyncEventsService:
 
         if resp.is_success:
             return SensorLogEntry(**resp.json())
-
-        raise exception_from_server_response(resp)
-
-    async def get_sync_limit(
-        self, key: str, namespace: Optional[str] = None, type_: Optional[str] = None, cm_name: Optional[str] = None
-    ) -> SyncLimitResponse:
-        """API documentation."""
-        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
-        resp = await self._request(
-            method="get",
-            url=urljoin(self.host, "api/v1/sync/{namespace}/{key}").format(
-                key=key, namespace=namespace if namespace is not None else self.namespace
-            ),
-            params={k: v for k, v in {"type": type_, "cmName": cm_name}.items() if v is not None},
-            headers={"Authorization": self.token or ""},
-            data=None,
-        )
-
-        if resp.is_success:
-            return SyncLimitResponse()
-
-        raise exception_from_server_response(resp)
-
-    async def delete_sync_limit(
-        self, key: str, namespace: Optional[str] = None, type_: Optional[str] = None, cm_name: Optional[str] = None
-    ) -> DeleteSyncLimitResponse:
-        """API documentation."""
-        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
-        resp = await self._request(
-            method="delete",
-            url=urljoin(self.host, "api/v1/sync/{namespace}/{key}").format(
-                key=key, namespace=namespace if namespace is not None else self.namespace
-            ),
-            params={k: v for k, v in {"type": type_, "cmName": cm_name}.items() if v is not None},
-            headers={"Authorization": self.token or ""},
-            data=None,
-        )
-
-        if resp.is_success:
-            return DeleteSyncLimitResponse()
 
         raise exception_from_server_response(resp)
 

@@ -131,6 +131,16 @@ for obj_name, field in FIELD_REMAPPINGS.items():
         if existing_field != new_field:
             del curr_property[existing_field]
 
+# Some enum definitions ship with a string ``default`` that datamodel-codegen then propagates as a
+# raw string literal to every property using ``$ref`` to the enum. That confuses mypy (the field
+# is typed as the enum but defaults to a string). Strip those defaults here.
+ENUM_DEFINITIONS_TO_STRIP_DEFAULT: List[str] = [
+    "sync.SyncConfigType",
+]
+for definition in ENUM_DEFINITIONS_TO_STRIP_DEFAULT:
+    if definition in spec["definitions"]:
+        spec["definitions"][definition].pop("default", None)
+
 # there are also some specifications that have to be introduced manually for backwards compatibility purposes. This
 # block allows us to define those specifications and add them to the spec.
 MANUAL_SPECIFICATIONS: List[Tuple[str, Dict]] = [
