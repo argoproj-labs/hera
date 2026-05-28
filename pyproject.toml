@@ -71,6 +71,7 @@ filterwarnings = [
 markers = [
     "on_cluster: tests that run on an Argo cluster",
     "cli: tests that verify CLI functionality",
+    "shim_v3_compat: tests that verify Hera emits a wire payload compatible with Argo Workflows v3 (run against the v3 cluster job)",
 ]
 
 # Convert the following to config
