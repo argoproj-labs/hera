@@ -25,6 +25,7 @@ nav:
     - Further Reading:
       - walk-through/workflow-features.md
       - walk-through/template-features.md
+      - walk-through/upgrading-from-v6.md
   - User Guides:
     - Intro Tutorial: user-guides/hera-tutorial.md
     - Core Concepts: user-guides/core-concepts.md

@@ -4,6 +4,7 @@ See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
 
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional, Type, Union, cast
@@ -81,7 +82,13 @@ class CronWorkflow(Workflow):
     failed_jobs_history_limit: Annotated[Optional[int], _CronWorkflowModelMapper("spec.failed_jobs_history_limit")] = (
         None
     )
-    schedule: Annotated[Optional[str], _CronWorkflowModelMapper("spec.schedule")] = None
+    schedule: Optional[str] = None
+    """Deprecated: ``spec.schedule`` was removed in Argo Workflows v4. Use ``schedules`` instead.
+
+    For backwards compatibility, Hera v7 still accepts ``schedule``: setting it emits a
+    DeprecationWarning and appends the value to ``schedules`` (initialising the list if needed).
+    The shim will be removed in Hera v8.
+    """
     schedules: Annotated[Optional[List[str]], _CronWorkflowModelMapper("spec.schedules")] = None
     starting_deadline_seconds: Annotated[Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")] = (
         None
@@ -94,6 +101,32 @@ class CronWorkflow(Workflow):
     timezone: Annotated[Optional[str], _CronWorkflowModelMapper("spec.timezone")] = None
     when: Annotated[Optional[str], _CronWorkflowModelMapper("spec.when")] = None
     cron_status: Annotated[Optional[CronWorkflowStatus], _CronWorkflowModelMapper("status")] = None
+
+    def __post_init__(self) -> None:
+        """Apply parent post-init logic and translate the deprecated ``schedule`` field."""
+        super().__post_init__()
+        self._translate_legacy_schedule()
+
+    def _translate_legacy_schedule(self) -> None:
+        """Translate ``schedule`` (removed in Argo Workflows v4) to ``schedules`` and warn.
+
+        If both ``schedule`` and ``schedules`` are set, the legacy value is appended after the
+        existing schedules: e.g. ``schedule="X"`` + ``schedules=["Y"]`` becomes
+        ``schedules=["Y", "X"]``. The legacy attribute is then cleared so the v4 wire payload
+        contains only ``schedules``.
+        """
+        if self.schedule is None:
+            return
+        warnings.warn(
+            "CronWorkflowSpec.schedule was removed in Argo Workflows v4; use `schedules=[...]` "
+            "instead. Hera will translate this for you in v7 but will remove the shim in v8.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        if self.schedules is None:
+            self.schedules = []
+        self.schedules.append(self.schedule)
+        self.schedule = None
 
     def create(self) -> TWorkflow:  # type: ignore
         """Creates the CronWorkflow on the Argo cluster."""
@@ -207,10 +240,14 @@ class CronWorkflow(Workflow):
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
 
+        # The v4 CronWorkflowSpec requires ``schedules`` (previously ``schedule`` was an alternative).
+        # Seed with a copy of ``self.schedules`` so the ModelMapper-driven assignment that follows
+        # does not mutate the caller's list, and so a missing list does not blow up validation.
         model_workflow = cast(_ModelWorkflow, super().build())
         model_cron_workflow = _ModelCronWorkflow(
             metadata=model_workflow.metadata,
             spec=CronWorkflowSpec(
+                schedules=list(self.schedules or []),
                 workflow_spec=model_workflow.spec,
             ),
         )

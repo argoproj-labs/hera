@@ -16,11 +16,13 @@ from hera.workflows.models import (
     ClusterWorkflowTemplateList,
     ClusterWorkflowTemplateUpdateRequest,
     CreateCronWorkflowRequest,
+    CreateSyncLimitRequest,
     CronWorkflow,
     CronWorkflowDeletedResponse,
     CronWorkflowList,
     CronWorkflowResumeRequest,
     CronWorkflowSuspendRequest,
+    DeleteSyncLimitResponse,
     GetUserInfoResponse,
     InfoResponse,
     LabelKeys,
@@ -28,7 +30,9 @@ from hera.workflows.models import (
     LintCronWorkflowRequest,
     ResubmitArchivedWorkflowRequest,
     RetryArchivedWorkflowRequest,
+    SyncLimitResponse,
     UpdateCronWorkflowRequest,
+    UpdateSyncLimitRequest,
     V1alpha1LogEntry,
     Version,
     Workflow,
@@ -134,6 +138,7 @@ class AsyncWorkflowsService:
         send_initial_events: Optional[bool] = None,
         name_prefix: Optional[str] = None,
         namespace: Optional[str] = None,
+        name_filter: Optional[str] = None,
     ) -> WorkflowList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -155,6 +160,7 @@ class AsyncWorkflowsService:
                     "listOptions.sendInitialEvents": send_initial_events,
                     "namePrefix": name_prefix,
                     "namespace": namespace,
+                    "nameFilter": name_filter,
                 }.items()
                 if v is not None
             },
@@ -668,6 +674,86 @@ class AsyncWorkflowsService:
 
         raise exception_from_server_response(resp)
 
+    async def create_sync_limit(
+        self, req: CreateSyncLimitRequest, namespace: Optional[str] = None
+    ) -> SyncLimitResponse:
+        """API documentation."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
+        resp = await self._request(
+            method="post",
+            url=urljoin(self.host, "api/v1/sync/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
+            params=None,
+            headers={"Authorization": self.token or "", "Content-Type": "application/json"},
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
+        )
+
+        if resp.is_success:
+            return SyncLimitResponse()
+
+        raise exception_from_server_response(resp)
+
+    async def get_sync_limit(
+        self, key: str, namespace: Optional[str] = None, type_: Optional[str] = None, cm_name: Optional[str] = None
+    ) -> SyncLimitResponse:
+        """API documentation."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
+        resp = await self._request(
+            method="get",
+            url=urljoin(self.host, "api/v1/sync/{namespace}/{key}").format(
+                key=key, namespace=namespace if namespace is not None else self.namespace
+            ),
+            params={k: v for k, v in {"type": type_, "cmName": cm_name}.items() if v is not None},
+            headers={"Authorization": self.token or ""},
+            data=None,
+        )
+
+        if resp.is_success:
+            return SyncLimitResponse()
+
+        raise exception_from_server_response(resp)
+
+    async def update_sync_limit(
+        self, key: str, req: UpdateSyncLimitRequest, namespace: Optional[str] = None
+    ) -> SyncLimitResponse:
+        """API documentation."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
+        resp = await self._request(
+            method="put",
+            url=urljoin(self.host, "api/v1/sync/{namespace}/{key}").format(
+                key=key, namespace=namespace if namespace is not None else self.namespace
+            ),
+            params=None,
+            headers={"Authorization": self.token or "", "Content-Type": "application/json"},
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
+        )
+
+        if resp.is_success:
+            return SyncLimitResponse()
+
+        raise exception_from_server_response(resp)
+
+    async def delete_sync_limit(
+        self, key: str, namespace: Optional[str] = None, type_: Optional[str] = None, cm_name: Optional[str] = None
+    ) -> DeleteSyncLimitResponse:
+        """API documentation."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
+        resp = await self._request(
+            method="delete",
+            url=urljoin(self.host, "api/v1/sync/{namespace}/{key}").format(
+                key=key, namespace=namespace if namespace is not None else self.namespace
+            ),
+            params={k: v for k, v in {"type": type_, "cmName": cm_name}.items() if v is not None},
+            headers={"Authorization": self.token or ""},
+            data=None,
+        )
+
+        if resp.is_success:
+            return DeleteSyncLimitResponse()
+
+        raise exception_from_server_response(resp)
+
     async def get_user_info(self) -> GetUserInfoResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -983,6 +1069,7 @@ class AsyncWorkflowsService:
         namespace: Optional[str] = None,
         resource_version: Optional[str] = None,
         fields: Optional[str] = None,
+        uid: Optional[str] = None,
     ) -> Workflow:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -993,7 +1080,7 @@ class AsyncWorkflowsService:
             ),
             params={
                 k: v
-                for k, v in {"getOptions.resourceVersion": resource_version, "fields": fields}.items()
+                for k, v in {"getOptions.resourceVersion": resource_version, "fields": fields, "uid": uid}.items()
                 if v is not None
             },
             headers={"Authorization": self.token or ""},
