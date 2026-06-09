@@ -1,9 +1,9 @@
 """On-cluster test pinning the CronWorkflow.schedule -> schedules shim.
 
 Runs in both the v4 and v3 cluster jobs. The v3 job runs *only* this file (and
-any other ``shim_v3_compat``-tagged tests); the v4 job runs it as part of the
+any other `shim_v3_compat`-tagged tests); the v4 job runs it as part of the
 full on-cluster suite. Either way, what we care about is that the payload Hera
-emits for a CronWorkflow built with the legacy ``schedule=`` argument is
+emits for a CronWorkflow built with the legacy `schedule=` argument is
 accepted by the controller.
 """
 
@@ -24,7 +24,7 @@ def _service() -> WorkflowsService:
 @pytest.mark.on_cluster
 @pytest.mark.shim_v3_compat
 def test_cron_workflow_schedule_shim_lints_on_cluster():
-    """A CronWorkflow built with legacy ``schedule=`` must lint cleanly.
+    """A CronWorkflow built with legacy `schedule=` must lint cleanly.
 
     This is the cheapest possible round-trip: lint is a server-side validation
     of the manifest, so a successful lint proves the wire payload matches the

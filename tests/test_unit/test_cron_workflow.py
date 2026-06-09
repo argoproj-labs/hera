@@ -99,7 +99,7 @@ def test_returns_expected_workflow_link():
 # ---------------------------------------------------------------------------
 @pytest.mark.shim_v3_compat
 def test_schedule_only_emits_warning_and_is_translated_to_schedules():
-    """Setting only ``schedule`` warns and translates to ``schedules``."""
+    """Setting only `schedule` warns and translates to `schedules`."""
     with pytest.warns(DeprecationWarning, match="CronWorkflowSpec.schedule was removed"):
         cw = CronWorkflow(name="cw", schedule="0 * * * *")
 
@@ -109,13 +109,13 @@ def test_schedule_only_emits_warning_and_is_translated_to_schedules():
 
     built = cw.build()
     assert built.spec.schedules == ["0 * * * *"]
-    # ``schedule`` does not exist as an attribute on the v4 model at all.
+    # `schedule` does not exist as an attribute on the v4 model at all.
     assert not hasattr(built.spec, "schedule")
 
 
 @pytest.mark.shim_v3_compat
 def test_schedules_only_emits_no_warning():
-    """Setting only ``schedules`` is the v4 path and must not warn."""
+    """Setting only `schedules` is the v4 path and must not warn."""
     with warnings.catch_warnings():
         warnings.simplefilter("error", DeprecationWarning)
         cw = CronWorkflow(name="cw", schedules=["*/5 * * * *"])
@@ -127,11 +127,11 @@ def test_schedules_only_emits_no_warning():
 
 @pytest.mark.shim_v3_compat
 def test_both_schedule_and_schedules_appends_legacy_to_existing_list():
-    """If both are set, the legacy ``schedule`` is appended to ``schedules``."""
+    """If both are set, the legacy `schedule` is appended to `schedules`."""
     with pytest.warns(DeprecationWarning, match="CronWorkflowSpec.schedule was removed"):
         cw = CronWorkflow(name="cw", schedule="X X X X X", schedules=["Y Y Y Y Y"])
 
-    # Final list preserves the explicit ``schedules`` first and appends the legacy value.
+    # Final list preserves the explicit `schedules` first and appends the legacy value.
     assert cw.schedule is None
     assert cw.schedules == ["Y Y Y Y Y", "X X X X X"]
     assert cw.build().spec.schedules == ["Y Y Y Y Y", "X X X X X"]

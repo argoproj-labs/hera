@@ -22,10 +22,10 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = {
     "cron-backfill.upstream.yaml",
     "workflow-template--templates.upstream.yaml",
     "workflow-event-binding--github-path-filter-workflowtemplate.upstream.yaml",
-    # v4 dropped the ``key`` field from ConfigMap-backed Cache (memoization).
+    # v4 dropped the `key` field from ConfigMap-backed Cache (memoization).
     "fibonacci-seq-conditional-param.upstream.yaml",
-    # v4 removed ``synchronization.mutex`` / ``synchronization.semaphore`` (now
-    # ``synchronization.mutexes`` / ``synchronization.semaphores``); kept upstream
+    # v4 removed `synchronization.mutex` / `synchronization.semaphore` (now
+    # `synchronization.mutexes` / `synchronization.semaphores`); kept upstream
     # for v3 users.
     "dag-daemon-retry-strategy.upstream.yaml",
     "steps-daemon-retry-strategy.upstream.yaml",

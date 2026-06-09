@@ -2,7 +2,7 @@
 
 Hera v7 targets Argo Workflows v4 instead of v3.7.
 Most code keeps working unchanged because the models and services are regenerated automatically.
-Where v4 dropped a field that Hera's hand-written wrapper still accepts, Hera v7 emits a `DeprecationWarning` and rewrites the call to the v4 equivalent.
+Where Argo Workflows v4 dropped a field that Hera's hand-written wrapper still accepts, Hera v7 emits a `DeprecationWarning` and rewrites the call to the v4 equivalent.
 
 The shims will be removed in Hera v8.
 Migrate when convenient.

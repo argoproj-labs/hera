@@ -429,8 +429,8 @@ class OSSArtifact(Artifact):
 class PluginArtifact(Artifact):
     """An artifact sourced from a custom artifact driver plugin.
 
-    Added in Argo Workflows v4.0. The driver plugin matches by ``name`` and reads any
-    plugin-specific options from ``configuration``.
+    Added in Argo Workflows v4.0. The driver plugin matches by `name` and reads any
+    plugin-specific options from `configuration`.
     """
 
     configuration: Optional[str] = None
