@@ -3810,7 +3810,7 @@ class Container(APIBaseModel):
         ),
     ] = None
     image: Annotated[
-        str,
+        str | None,
         Field(
             description=(
                 "Container image name. More info:"
@@ -3820,7 +3820,7 @@ class Container(APIBaseModel):
                 " and StatefulSets."
             )
         ),
-    ]
+    ] = None
     image_pull_policy: Annotated[
         str | None,
         Field(

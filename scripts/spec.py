@@ -49,6 +49,8 @@ DEFINITION_TO_OPTIONAL_FIELDS: Dict[str, List[str]] = {
     "io.argoproj.workflow.v1alpha1.WorkflowTemplateList": ["items"],
     "io.argoproj.workflow.v1alpha1.WorkflowEventBindingList": ["items"],
     "io.argoproj.workflow.v1alpha1.Metrics": ["prometheus"],
+    "io.argoproj.workflow.v1alpha1.ScriptTemplate": ["image", "source"],
+    "io.k8s.api.core.v1.Container": ["image"],
 }
 for definition, optional_fields in DEFINITION_TO_OPTIONAL_FIELDS.items():
     try:
