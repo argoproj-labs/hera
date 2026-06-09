@@ -25,6 +25,12 @@ def _merge_dicts(a: Dict, b: Dict, path=None):
     return a
 
 
+def _normalise_cpu_value(value: Union[float, int, str]) -> float:
+    if isinstance(value, (int, float)):
+        return float(value)
+    return convert_cpu_units(value)
+
+
 @dataclass(kw_only=True)
 class Resources:
     """A representation of a collection of resources that are requested to be consumed by a task for execution.
@@ -84,17 +90,15 @@ class Resources:
         if self.cpu_limit is not None and isinstance(self.cpu_limit, (int, float)):
             if self.cpu_limit < 0:
                 raise ValueError("CPU limit must be positive")
-            if self.cpu_request is not None and isinstance(self.cpu_request, (int, float)):
-                if self.cpu_request > self.cpu_limit:
-                    raise ValueError("CPU request must be smaller or equal to limit")
 
         if self.cpu_request is not None and isinstance(self.cpu_request, str):
             validate_cpu_units(self.cpu_request)
         if self.cpu_limit is not None and isinstance(self.cpu_limit, str):
             validate_cpu_units(self.cpu_limit)
-            if self.cpu_request is not None and isinstance(self.cpu_request, str):
-                if convert_cpu_units(self.cpu_request) > convert_cpu_units(self.cpu_limit):
-                    raise ValueError("CPU request must be smaller or equal to limit")
+
+        if self.cpu_request is not None and self.cpu_limit is not None:
+            if _normalise_cpu_value(self.cpu_request) > _normalise_cpu_value(self.cpu_limit):
+                raise ValueError("CPU request must be smaller or equal to limit")
 
     def build(self) -> _ModelResourceRequirements:
         """Builds the resource requirements of the pod."""
