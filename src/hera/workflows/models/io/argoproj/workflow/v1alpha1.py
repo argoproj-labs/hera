@@ -3163,7 +3163,7 @@ class ScriptTemplate(APIBaseModel):
         ),
     ] = None
     image: Annotated[
-        str,
+        str | None,
         Field(
             description=(
                 "Container image name. More info:"
@@ -3173,7 +3173,7 @@ class ScriptTemplate(APIBaseModel):
                 " and StatefulSets."
             )
         ),
-    ]
+    ] = None
     image_pull_policy: Annotated[
         str | None,
         Field(
@@ -3295,9 +3295,9 @@ class ScriptTemplate(APIBaseModel):
         ),
     ] = None
     source: Annotated[
-        str,
+        str | None,
         Field(description="Source contains the source code of the script to execute"),
-    ]
+    ] = None
     startup_probe: Annotated[
         v1.Probe | None,
         Field(
