@@ -17,13 +17,22 @@ UPSTREAM_EXAMPLES_FOLDER = Path("examples/workflows/upstream")
 # A subset of the upstream examples are known to fail, but a majority pass. We'll
 # selectively xfail these examples rather than all until they can be fixed.
 UPSTREAM_EXAMPLE_XFAIL_FILES = {
+    # Multi-document YAMLs are not supported by the round-trip harness.
     "cluster-workflow-template--clustertemplates.upstream.yaml",
     "cron-backfill.upstream.yaml",
-    "memoize-simple.upstream.yaml",
     "workflow-template--templates.upstream.yaml",
     "workflow-event-binding--github-path-filter-workflowtemplate.upstream.yaml",
-    "cluster-workflow-template--clustertemplates.upstream.yaml",
-    "artifact-passing-explicit-plugin.upstream.yaml",
+    # v4 dropped the `key` field from ConfigMap-backed Cache (memoization).
+    "fibonacci-seq-conditional-param.upstream.yaml",
+    # v4 removed `synchronization.mutex` / `synchronization.semaphore` (now
+    # `synchronization.mutexes` / `synchronization.semaphores`); kept upstream
+    # for v3 users.
+    "dag-daemon-retry-strategy.upstream.yaml",
+    "steps-daemon-retry-strategy.upstream.yaml",
+    "synchronization-mutex-tmpl-level-legacy.upstream.yaml",
+    "synchronization-mutex-wf-level-legacy.upstream.yaml",
+    "synchronization-tmpl-level-legacy.upstream.yaml",
+    "synchronization-wf-level-legacy.upstream.yaml",
 }
 
 

@@ -1,3 +1,4 @@
+import warnings
 from unittest.mock import MagicMock
 
 import pytest
@@ -91,3 +92,46 @@ def test_returns_expected_workflow_link():
         workflows_service=WorkflowsService(host="https://localhost:8443/argo/", namespace="my-namespace"),
     )
     assert w.get_workflow_link() == "https://localhost:8443/argo/cron-workflows/my-namespace/test"
+
+
+# ---------------------------------------------------------------------------
+# Deprecation shim for CronWorkflowSpec.schedule (removed in Argo Workflows v4)
+# ---------------------------------------------------------------------------
+@pytest.mark.shim_v3_compat
+def test_schedule_only_emits_warning_and_is_translated_to_schedules():
+    """Setting only `schedule` warns and translates to `schedules`."""
+    with pytest.warns(DeprecationWarning, match="CronWorkflowSpec.schedule was removed"):
+        cw = CronWorkflow(name="cw", schedule="0 * * * *")
+
+    # The legacy attribute is cleared so it never reaches the v4 wire payload.
+    assert cw.schedule is None
+    assert cw.schedules == ["0 * * * *"]
+
+    built = cw.build()
+    assert built.spec.schedules == ["0 * * * *"]
+    # `schedule` does not exist as an attribute on the v4 model at all.
+    assert not hasattr(built.spec, "schedule")
+
+
+@pytest.mark.shim_v3_compat
+def test_schedules_only_emits_no_warning():
+    """Setting only `schedules` is the v4 path and must not warn."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        cw = CronWorkflow(name="cw", schedules=["*/5 * * * *"])
+
+    assert cw.schedule is None
+    assert cw.schedules == ["*/5 * * * *"]
+    assert cw.build().spec.schedules == ["*/5 * * * *"]
+
+
+@pytest.mark.shim_v3_compat
+def test_both_schedule_and_schedules_appends_legacy_to_existing_list():
+    """If both are set, the legacy `schedule` is appended to `schedules`."""
+    with pytest.warns(DeprecationWarning, match="CronWorkflowSpec.schedule was removed"):
+        cw = CronWorkflow(name="cw", schedule="X X X X X", schedules=["Y Y Y Y Y"])
+
+    # Final list preserves the explicit `schedules` first and appends the legacy value.
+    assert cw.schedule is None
+    assert cw.schedules == ["Y Y Y Y Y", "X X X X X"]
+    assert cw.build().spec.schedules == ["Y Y Y Y Y", "X X X X X"]

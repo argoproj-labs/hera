@@ -26,6 +26,7 @@ from hera.workflows.models import (
     HDFSArtifact as _ModelHDFSArtifact,
     HTTPArtifact as _ModelHTTPArtifact,
     OSSArtifact as _ModelOSSArtifact,
+    PluginArtifact as _ModelPluginArtifact,
     RawArtifact as _ModelRawArtifact,
     S3Artifact as _ModelS3Artifact,
     SecretKeySelector,
@@ -421,6 +422,40 @@ class OSSArtifact(Artifact):
             "lifecycle_rule",
             "secret_key_secret",
             "security_token",
+        ]
+
+
+@dataclass(kw_only=True)
+class PluginArtifact(Artifact):
+    """An artifact sourced from a custom artifact driver plugin.
+
+    Added in Argo Workflows v4.0. The driver plugin matches by `name` and reads any
+    plugin-specific options from `configuration`.
+    """
+
+    configuration: Optional[str] = None
+    connection_timeout_seconds: Optional[int] = None
+    key: str
+    plugin_name: Optional[str] = None
+
+    def _build_artifact(self) -> _ModelArtifact:
+        artifact = super()._build_artifact()
+        artifact.plugin = _ModelPluginArtifact(
+            configuration=self.configuration,
+            connection_timeout_seconds=self.connection_timeout_seconds,
+            key=self.key,
+            name=self.plugin_name,
+        )
+        return artifact
+
+    @classmethod
+    def _get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super()._get_input_attributes() + [
+            "configuration",
+            "connection_timeout_seconds",
+            "key",
+            "plugin_name",
         ]
 
 

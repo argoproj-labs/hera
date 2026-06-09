@@ -1,4 +1,4 @@
-ARGO_WORKFLOWS_VERSION=3.7.3
+ARGO_WORKFLOWS_VERSION=4.0.5
 OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v$(ARGO_WORKFLOWS_VERSION)/api/openapi-spec/swagger.json"
 SPEC_PATH="$(shell pwd)/argo-workflows-$(ARGO_WORKFLOWS_VERSION).json"
 
@@ -194,7 +194,7 @@ set-up-cluster: ## Create the cluster and argo namespace
 .PHONY: set-up-argo
 set-up-argo: ## Start the argo service
 	kubectl get namespace argo || kubectl create namespace argo
-	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
+	kubectl apply --server-side -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
 	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
 	kubectl create rolebinding default-admin --clusterrole=admin --serviceaccount=argo:default --namespace=argo
 	kubectl rollout status -n argo deployment/argo-server --timeout=120s --watch=true
@@ -213,6 +213,11 @@ stop-cluster:  ## Stop the cluster
 test-on-cluster: ## Run workflow tests (requires local argo cluster)
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
 	@poetry run python -m pytest -n 6 tests/submissions -m on_cluster -k "not lint"
+
+.PHONY: test-on-cluster-shim-v3
+test-on-cluster-shim-v3: ## Run only the v3-wire-compat shim tests on a v3 cluster
+	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
+	@poetry run python -m pytest tests/submissions -m "on_cluster and shim_v3_compat"
 
 .PHONY: lint-on-cluster
 lint-on-cluster: ## Lint workflows (requires local argo cluster)

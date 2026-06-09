@@ -57,10 +57,25 @@ jobs:
           path: dist/*.whl
 
   workflow-tests:
-    name: run workflow tests
+    # Run the on-cluster suite against both Argo Workflows v4 (the supported
+    # release, full suite) and v3 (shim_v3_compat subset only, to confirm the
+    # CronWorkflow.schedule deprecation shim emits a v3-wire-compatible payload).
+    name: workflow tests (argo ${{ matrix.argo-version }})
     timeout-minutes: 10
 
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - argo-version: "4.0.5"
+            # Full on-cluster suite against v4 (matches the Makefile default).
+            test-target: "test-on-cluster lint-on-cluster"
+          - argo-version: "3.7.14"
+            # Only the shim-compatibility tests run against v3; the rest of the
+            # suite uses v4-only fields and would (correctly) fail.
+            test-target: 'test-on-cluster-shim-v3'
 
     steps:
       - name: checkout
@@ -79,10 +94,10 @@ jobs:
         run: poetry install --all-extras
 
       - name: set up cluster
-        run: make install-k3d set-up-cluster set-up-argo set-up-artifacts
+        run: make install-k3d set-up-cluster set-up-argo set-up-artifacts ARGO_WORKFLOWS_VERSION=${{ matrix.argo-version }}
 
       - name: run workflow tests
-        run: CI=1 make test-on-cluster lint-on-cluster
+        run: CI=1 make ${{ matrix.test-target }} ARGO_WORKFLOWS_VERSION=${{ matrix.argo-version }}
 
       - name: stop argo cluster
         run: make stop-cluster

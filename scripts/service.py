@@ -342,7 +342,10 @@ def get_endpoints(
     """Assembles a series of endpoints for the service definition."""
     switch = {
         "workflows": ["events", "event", "eventsource", "sensor"],
-        "events": ["workflow", "workflows"],
+        # Argo v4 introduced /api/v1/sync/... endpoints whose URLs do not contain
+        # "workflow", so they are not naturally filtered out for the events
+        # service the way the rest are. Add "sync" explicitly here.
+        "events": ["workflow", "workflows", "sync"],
     }
     exceptions = switch.get(models_type)
     endpoints = []
