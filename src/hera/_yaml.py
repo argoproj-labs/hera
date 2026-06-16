@@ -23,6 +23,60 @@ else:
     _yaml.representer.SafeRepresenter.add_representer(str, str_presenter)
 
 
+def _line_indent(line: str) -> int:
+    return len(line) - len(line.lstrip())
+
+
+def _is_block_scalar(line: str) -> bool:
+    stripped = line.rstrip()
+    return (
+        stripped.endswith(": |")
+        or stripped.endswith(": |-")
+        or stripped.endswith(": |+")
+        or stripped.endswith(": >")
+        or stripped.endswith(": >-")
+        or stripped.endswith(": >+")
+    )
+
+
+def _squash_wrapped_expressions(yaml_str: str) -> str:
+    lines = yaml_str.splitlines()
+    if not lines:
+        return yaml_str
+
+    squashed = []
+    block_scalar_indent = None
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+
+        if block_scalar_indent is not None:
+            if line == "" or _line_indent(line) > block_scalar_indent:
+                squashed.append(line)
+                i += 1
+                continue
+            block_scalar_indent = None
+
+        if _is_block_scalar(line):
+            block_scalar_indent = _line_indent(line)
+            squashed.append(line)
+            i += 1
+            continue
+
+        while line.count("{{") > line.count("}}") and i + 1 < len(lines):
+            i += 1
+            line += " " + lines[i].lstrip()
+
+        squashed.append(line)
+        i += 1
+
+    result = "\n".join(squashed)
+    if yaml_str.endswith("\n"):
+        result += "\n"
+    return result
+
+
 def dump(*args, **kwargs) -> str:
     """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
     if not _yaml:
@@ -31,4 +85,4 @@ def dump(*args, **kwargs) -> str:
     # Set some default options if not provided by the user
     kwargs.setdefault("default_flow_style", False)
     kwargs.setdefault("sort_keys", False)
-    return _yaml.dump(*args, **kwargs)
+    return _squash_wrapped_expressions(_yaml.dump(*args, **kwargs))
