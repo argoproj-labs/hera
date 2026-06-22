@@ -217,7 +217,7 @@ class WorkflowPythonBuilder:
             context_expr=ast.Call(
                 func=ast.Name(id=hera_workflow_class.__name__, ctx=ast.Load()),
                 args=[],
-                keywords=keywords,
+                keywords=self._sort_keywords(keywords),
             ),
             optional_vars=ast.Name(id="w", ctx=ast.Store()),
         )
@@ -230,6 +230,27 @@ class WorkflowPythonBuilder:
         if attr == "api_version":
             return value == global_config.api_version
         return False
+
+    def _sort_keywords(self, keywords: List[ast.keyword]) -> List[ast.keyword]:
+        """Sort generated kwargs for readability.
+
+        This mirrors the requested ordering from issue #1446:
+        `name` first, then scalar values, then nested calls, then collections.
+        """
+
+        def keyword_order(keyword: ast.keyword) -> tuple[int, str]:
+            arg = keyword.arg or ""
+            if arg == "name":
+                return (0, arg)
+            if isinstance(keyword.value, ast.Constant):
+                return (1, arg)
+            if isinstance(keyword.value, ast.Call):
+                return (2, arg)
+            if isinstance(keyword.value, (ast.List, ast.Dict)):
+                return (3, arg)
+            return (4, arg)
+
+        return sorted(keywords, key=keyword_order)
 
     def _build_expression(
         self,
@@ -279,7 +300,7 @@ class WorkflowPythonBuilder:
             return ast.Call(
                 func=ast.Name(id=model_name, ctx=ast.Load()),
                 args=[],
-                keywords=keywords,
+                keywords=self._sort_keywords(keywords),
             )
 
         raise ValueError(f"Unsupported type: {type(value)} for value {value}")
@@ -379,7 +400,7 @@ class WorkflowPythonBuilder:
             value=ast.Call(
                 func=ast.Name(id=hera_template_class.__name__, ctx=ast.Load()),
                 args=[],
-                keywords=keywords,
+                keywords=self._sort_keywords(keywords),
             )
         )
 
@@ -462,7 +483,7 @@ class WorkflowPythonBuilder:
                     context_expr=ast.Call(
                         func=ast.Name(id=hera_template_class.__name__, ctx=ast.Load()),
                         args=[],
-                        keywords=keywords,
+                        keywords=self._sort_keywords(keywords),
                     ),
                     optional_vars=ast.Name(id=invocator_type, ctx=ast.Store()),
                 )
@@ -495,6 +516,6 @@ class WorkflowPythonBuilder:
             value=ast.Call(
                 func=ast.Name(id=hera_class.__name__, ctx=ast.Load()),
                 args=[],
-                keywords=keywords,
+                keywords=self._sort_keywords(keywords),
             )
         )

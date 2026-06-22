@@ -143,9 +143,44 @@ spec: {}
     output = get_stdout(capsys)
     assert output == (
         "from hera.workflows import Workflow\n\n"
-        'with Workflow(api_version="argoproj.io/v1beta1", name="single") as w:\n'
+        'with Workflow(name="single", api_version="argoproj.io/v1beta1") as w:\n'
         "    pass\n"
     )
+
+
+@pytest.mark.cli
+def test_generated_kwargs_keep_name_and_scalars_before_nested_structures(capsys, tmp_path: Path):
+    yaml_path = tmp_path / "workflow.yaml"
+    yaml_path.write_text(
+        """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: http-template-condition-
+spec:
+  entrypoint: main
+  templates:
+    - name: http-status-is-201
+      inputs:
+        parameters:
+          - name: url
+      http:
+        successCondition: "response.statusCode == 201"
+        url: "{{inputs.parameters.url}}"
+"""
+    )
+
+    runner.invoke(str(yaml_path))
+
+    output = get_stdout(capsys)
+    assert (
+        "HTTP(\n"
+        '        name="http-status-is-201",\n'
+        '        success_condition="response.statusCode == 201",\n'
+        '        url="{{inputs.parameters.url}}",\n'
+        '        inputs=Inputs(parameters=[Parameter(name="url")]),\n'
+        "    )\n"
+    ) in output
 
 
 @pytest.mark.cli
