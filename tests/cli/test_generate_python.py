@@ -77,41 +77,33 @@ def test_yaml_converter(file_name: str, tmp_path: Path):
 single_workflow_output = """\
 from hera.workflows import Workflow
 
-with Workflow(api_version="argoproj.io/v1alpha1", kind="Workflow", name="single") as w:
+with Workflow(name="single") as w:
     pass
 """
 
 workflow_template_output = """\
 from hera.workflows import WorkflowTemplate
 
-with WorkflowTemplate(
-    api_version="argoproj.io/v1alpha1",
-    kind="WorkflowTemplate",
-    name="workflow-template",
-) as w:
+with WorkflowTemplate(name="workflow-template") as w:
     pass
 """
 
 cluster_workflow_template_output = """\
 from hera.workflows import ClusterWorkflowTemplate
 
-with ClusterWorkflowTemplate(
-    api_version="argoproj.io/v1alpha1",
-    kind="ClusterWorkflowTemplate",
-    name="cluster-workflow-template",
-) as w:
+with ClusterWorkflowTemplate(name="cluster-workflow-template") as w:
     pass
 """
 
 multiple_workflow_output = """\
 from hera.workflows import Workflow
 
-with Workflow(api_version="argoproj.io/v1alpha1", kind="Workflow", name="one") as w:
+with Workflow(name="one") as w:
     pass
 
 from hera.workflows import Workflow
 
-with Workflow(api_version="argoproj.io/v1alpha1", kind="Workflow", name="two") as w:
+with Workflow(name="two") as w:
     pass
 """
 
@@ -131,6 +123,29 @@ def test_single_workflow(capsys):
 
     output = get_stdout(capsys)
     assert output == single_workflow_output
+
+
+@pytest.mark.cli
+def test_non_default_api_version_is_preserved(capsys, tmp_path: Path):
+    yaml_path = tmp_path / "workflow.yaml"
+    yaml_path.write_text(
+        """\
+apiVersion: argoproj.io/v1beta1
+kind: Workflow
+metadata:
+  name: single
+spec: {}
+"""
+    )
+
+    runner.invoke(str(yaml_path))
+
+    output = get_stdout(capsys)
+    assert output == (
+        "from hera.workflows import Workflow\n\n"
+        'with Workflow(api_version="argoproj.io/v1beta1", name="single") as w:\n'
+        "    pass\n"
+    )
 
 
 @pytest.mark.cli

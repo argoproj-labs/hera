@@ -11,6 +11,7 @@ from pydantic import RootModel
 
 from hera._cli.base import GeneratePython
 from hera._cli.generate.util import YAML_EXTENSIONS, convert_code, expand_paths, write_output
+from hera.shared import global_config
 from hera.shared._pydantic import APIBaseModel
 from hera.shared._type_util import (
     get_annotated_metadata,
@@ -195,6 +196,8 @@ class WorkflowPythonBuilder:
 
                             body.append(self._build_statement(template))
                     else:
+                        if self._should_skip_workflow_kwarg(attr, value, hera_workflow_class):
+                            continue
                         value = self._build_expression(value)
                         keywords.append(
                             ast.keyword(
@@ -219,6 +222,14 @@ class WorkflowPythonBuilder:
             optional_vars=ast.Name(id="w", ctx=ast.Store()),
         )
         return ast.With(items=[with_item], body=body)
+
+    def _should_skip_workflow_kwarg(self, attr: str, value: Any, hera_workflow_class: Type[Workflow]) -> bool:
+        """Return whether a workflow constructor kwarg is redundant in generated code."""
+        if attr == "kind":
+            return value == hera_workflow_class.__name__
+        if attr == "api_version":
+            return value == global_config.api_version
+        return False
 
     def _build_expression(
         self,
