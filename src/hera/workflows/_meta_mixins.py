@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import functools
 import inspect
 import sys
@@ -402,7 +403,7 @@ class CallableTemplateMixin(BaseMixin):
                 #   times, which can happen if "calling" the same script multiple times to add it to the workflow,
                 #   or initializing a second `Container` exactly like the first.
                 if isinstance(self, Script):
-                    _context.add_sub_node(self)
+                    _context.add_sub_node(copy.deepcopy(self))
                     return None
 
                 raise InvalidTemplateCall(
