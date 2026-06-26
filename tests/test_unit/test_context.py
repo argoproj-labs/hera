@@ -240,3 +240,44 @@ def test_wrong_subtype_under_steps_context():
         with Workflow(generate_name="test-"):
             with Steps(name="test"):
                 Task(name="task", template=Container(name="container"))
+
+
+def test_reused_script_template_is_copied_per_workflow_when_called_under_steps():
+    @script()
+    def hello():
+        print("hello")
+
+    def build_workflow() -> Workflow:
+        with Workflow(generate_name="test-", entrypoint="steps") as w:
+            with Steps(name="steps"):
+                hello()
+        return w
+
+    first = build_workflow()
+    second = build_workflow()
+
+    assert first.templates[1] is not second.templates[1]
+
+    first.templates[1].name = "mutated"
+
+    assert second.templates[1].name == "hello"
+
+
+def test_reused_script_template_is_copied_per_workflow_when_called_under_workflow():
+    @script()
+    def hello():
+        print("hello")
+
+    def build_workflow() -> Workflow:
+        with Workflow(generate_name="test-") as w:
+            hello()
+        return w
+
+    first = build_workflow()
+    second = build_workflow()
+
+    assert first.templates[0] is not second.templates[0]
+
+    first.templates[0].name = "mutated"
+
+    assert second.templates[0].name == "hello"
