@@ -4,6 +4,7 @@ This module provides the functionality necessary to support the implementation b
 clauses for workflows and DAGs.
 """
 
+import copy
 from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import List, Optional
@@ -105,7 +106,7 @@ class _HeraContext:
                     found = True
                     break
             if not found:
-                pieces[0]._add_sub(node.template)
+                pieces[0]._add_sub(copy.deepcopy(node.template))
 
         # Add template to the current context (steps/parallel/dag/etc)
         pieces[-1]._add_sub(node)
