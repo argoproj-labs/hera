@@ -9,14 +9,25 @@ try:
 except ImportError:
     _yaml = None
 else:
+    # YAML 1.1 (used by Argo/kubectl) parses unquoted y/Y/n/N as booleans, but PyYAML
+    # leaves them unquoted on dump. Longer forms (yes, no, on, off, ...) are already
+    # quoted by PyYAML; only the single-letter forms need forcing here.
+    _YAML_1_1_BOOL_LITERALS = frozenset({"y", "Y", "n", "N"})
 
     def str_presenter(dumper, data):
-        """Configures yaml for dumping multiline strings.
+        """Represent string scalars so the dumped YAML stays safe for Argo/kubectl.
 
-        Ref: https://github.com/yaml/pyyaml/issues/240
+        - Multiline strings use block scalar style (``|``).
+        - Single-letter YAML 1.1 boolean literals (``y``, ``Y``, ``n``, ``N``) are
+          single-quoted so Argo/kubectl do not parse them as booleans.
+
+        Refs: https://github.com/yaml/pyyaml/issues/240
+              https://github.com/yaml/pyyaml/issues/791
         """
         if data.count("\n") > 0:  # check for multiline string
             return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
+        if data in _YAML_1_1_BOOL_LITERALS:
+            return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="'")
         return dumper.represent_scalar("tag:yaml.org,2002:str", data)
 
     _yaml.add_representer(str, str_presenter)

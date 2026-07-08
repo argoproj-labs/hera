@@ -27,6 +27,34 @@ def test_dump_does_not_wrap_long_strings_by_default():
     )
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        "y",
+        "Y",
+        "yes",
+        "Yes",
+        "YES",
+        "on",
+        "On",
+        "ON",
+        "n",
+        "N",
+        "no",
+        "No",
+        "NO",
+        "off",
+        "Off",
+        "OFF",
+    ],
+)
+def test_dump_quotes_yaml_1_1_bool_aliases(value):
+    result = _yaml.dump({"name": value})
+
+    assert f"name: {value}" not in result.splitlines(), f"Argo/kubectl YAML 1.1 parses unquoted {value!r} as a boolean"
+    assert f"name: '{value}'" in result.splitlines()
+
+
 def test_dump_squashes_multiple_wrapped_expressions_on_one_line():
     result = _yaml._squash_wrapped_expressions(
         dedent(
