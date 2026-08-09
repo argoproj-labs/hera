@@ -25,6 +25,7 @@ In Hera, we can declare a function as a "Script" template using the `@script` de
 ```py
 from hera.workflows import script
 
+
 @script()
 def echo(message):
     print(message)
@@ -56,6 +57,7 @@ in Hera. Let's update that to a more recent version of Python in the decorator:
 ```py
 from hera.workflows import script
 
+
 @script(image="python:3.12")
 def echo(message):
     print(message)
@@ -73,9 +75,11 @@ time we submit the Workflow.
 ```py
 from hera.workflows import Workflow, script
 
+
 @script(image="python:3.12")
 def echo(message):
     print(message)
+
 
 with Workflow(generate_name="dag-diamond-") as w:
     ...
@@ -91,9 +95,11 @@ DAG using the `DAG` class from `hera.workflows`, using it as a context manager. 
 ```py
 from hera.workflows import DAG, Workflow, script
 
+
 @script(image="python:3.12")
 def echo(message):
     print(message)
+
 
 with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
     with DAG(name="diamond"):
@@ -108,9 +114,11 @@ tasks! We can pass arguments to the echo template used by each `Task` in a dicti
 ```py
 from hera.workflows import DAG, Task, Workflow, script
 
+
 @script(image="python:3.12")
 def echo(message):
     print(message)
+
 
 with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
     with DAG(name="diamond"):
@@ -127,9 +135,11 @@ allows you to use Python lists of Tasks in places. Let's create the diamond!
 ```py
 from hera.workflows import DAG, Task, Workflow, script
 
+
 @script(image="python:3.12")
 def echo(message):
     print(message)
+
 
 with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
     with DAG(name="diamond"):
@@ -150,9 +160,11 @@ assuming a `localhost`, we can submit the workflow by passing a `WorkflowsServic
 ```py
 from hera.workflows import DAG, Task, Workflow, WorkflowsService, script
 
+
 @script(image="python:3.12")
 def echo(message):
     print(message)
+
 
 with Workflow(
     generate_name="dag-diamond-",
@@ -179,9 +191,11 @@ If you want to save on some typing, you can use the name of the function in plac
 ```py
 from hera.workflows import DAG, Workflow, WorkflowsService, script
 
+
 @script(image="python:3.12")
 def echo(message):
     print(message)
+
 
 with Workflow(
     generate_name="dag-diamond-",
@@ -230,6 +244,7 @@ and width:
 ```py
 from hera.workflows import script
 
+
 @script(constructor="runner", image="my-built-python-image")
 def calculate_area_of_rectangle(length: float, width: float):
     print(length * width)
@@ -255,12 +270,14 @@ convenience functions on that object, such as an `area()` function. Let's try it
 ```py
 from pydantic import BaseModel
 
+
 class Rectangle(BaseModel):
     length: float
     width: float
 
     def area(self) -> float:
         return self.length * self.width
+
 
 @script(constructor="runner", image="my-built-python-image")
 def calculate_area_of_rectangle(rectangle: Rectangle):
@@ -275,7 +292,6 @@ as before.
 @script(constructor="runner", image="my-built-python-image")
 def calculate_area_of_rectangle(rectangle: Rectangle) -> float:
     return rectangle.area()
-
 ```
 
 Now we can test this function - acting as a script template - in isolation outside of Argo!
@@ -302,6 +318,7 @@ def echo_to_param(message: str):
     with open("/tmp/message-out", "w") as f:
         f.write(message)
 
+
 def get_workflow_definition() -> Workflow:
     with Workflow(generate_name="hello-world-", entrypoint="steps") as w:
         with Steps(name="steps"):
@@ -319,7 +336,9 @@ def test_create_workflow():
 
     echo_node = next(
         filter(
-            lambda n: n.display_name == "echo-to-param",  # use display_name to get the human-readable name of the nodes
+            lambda n: (
+                n.display_name == "echo-to-param"
+            ),  # use display_name to get the human-readable name of the nodes
             model_workflow.status.nodes.values(),
         )
     )

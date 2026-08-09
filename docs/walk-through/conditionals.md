@@ -16,20 +16,14 @@ The following compares an output parameter with a value:
 
     ```py
     previous_step = script_func(...)
-    another_script(
-        ...,
-        when=f'{previous_step.get_parameter("some-parameter")} == "some-value"'
-    )
+    another_script(..., when=f'{previous_step.get_parameter("some-parameter")} == "some-value"')
     ```
 
 === "Full"
 
     ```py
     script_func(...)
-    another_script(
-        ...,
-        when='{{steps.script-func.outputs.parameter.some-parameter}} == "some-value"'
-    )
+    another_script(..., when='{{steps.script-func.outputs.parameter.some-parameter}} == "some-value"')
     ```
 
 This compares the special `result` output with a value:
@@ -38,20 +32,14 @@ This compares the special `result` output with a value:
 
     ```py
     previous_step = script_func(...)
-    run_script(
-        ...,
-        when=f'{previous_step.result} == "some-value"'
-    )
+    run_script(..., when=f'{previous_step.result} == "some-value"')
     ```
 
 === "Full"
 
     ```py
     script_func(...)
-    run_script(
-        ...,
-        when='{{steps.script-func.outputs.result}} == "some-value"'
-    )
+    run_script(..., when='{{steps.script-func.outputs.result}} == "some-value"')
     ```
 
 ## Complex `when` Clauses

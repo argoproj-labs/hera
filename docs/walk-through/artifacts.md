@@ -58,8 +58,7 @@ Using multiple input Artifacts is as easy as adding multiple function arguments:
 def whalesay(
     message_1: Annotated[str, Artifact(name="hello-art")],
     message_2: Annotated[str, Artifact(name="hello-art-2")],
-):
-    ...
+): ...
 ```
 
 ## Artifacts for Inline Scripts
@@ -103,8 +102,7 @@ Artifact outputs work by exporting a file from the container. In this case, we w
 
 ```py
 @script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
-def writer():
-    ...
+def writer(): ...
 ```
 
 We then write to the specified path within the function:
@@ -194,7 +192,6 @@ the `in-art` Artifact is mounted to the path `/tmp/file`. Here, we just want to 
 def consumer():
     with open("/tmp/file", "r") as f:
         print(f.readlines())  # prints `Hello, world!` to `stdout`
-
 ```
 
 Now, we can call this function as a `Step` or `Task`, expanding on our Workflow started earlier. We pass the `out-art`

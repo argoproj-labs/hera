@@ -23,7 +23,6 @@ a user manually resumes the Workflow (in the UI or CLI):
         generate_name="suspending-workflow-",
         entrypoint="steps",
     ) as w:
-
         suspend_template = Suspend(name="wait-for-resume")
 
         with Steps(name="steps"):
@@ -96,7 +95,6 @@ user can still manually resume the Workflow before the time is up:
         generate_name="suspending-workflow-",
         entrypoint="steps",
     ) as w:
-
         suspend_template = Suspend(name="wait-10-seconds", duration=10)
 
         with Steps(name="steps"):
@@ -172,7 +170,6 @@ This Workflow suspends indefinitely, waiting for user input, and echoes the user
         generate_name="intermediate-parameter-workflow-",
         entrypoint="steps",
     ) as w:
-
         suspend_template = Suspend(
             name="suspend-with-intermediate-param",
             intermediate_parameters=[Parameter(name="my-message", default="")],
@@ -250,7 +247,6 @@ We can also
         generate_name="approval-workflow-",
         entrypoint="steps",
     ) as w:
-
         approval_template = Suspend(
             name="approval",
             intermediate_parameters=[Parameter(name="approve", default="NO", enum=["YES", "NO"])],

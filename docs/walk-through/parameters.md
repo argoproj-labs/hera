@@ -174,6 +174,7 @@ functions:
 def hello(message: str):
     print(f"Hello {message}")
 
+
 @script()
 def repeat_back(message: str):
     print(f"You just said: '{message}'")
@@ -297,6 +298,7 @@ handle the file saving for you:
 from typing import Annotated
 from hera.workflows import Parameter, script
 
+
 @script(constructor="runner", image="my-image:v1")
 def hello() -> Annotated[str, Parameter(name="hello-output")]:
     return "Hello World!"
@@ -309,6 +311,7 @@ You can return multiple output parameters by using a `Tuple`:
 ```py
 from typing import Annotated
 from hera.workflows import Parameter, script
+
 
 @script(constructor="runner", image="my-image:v1")
 def hello() -> Tuple[

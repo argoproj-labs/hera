@@ -196,7 +196,7 @@ from hera.workflows import Workflow, Container
 
 global_config.host = "https://my-argo-server.com"
 global_config.token = "abc-123"  # this will be injected to all workflows' services for auth purposes!
-global_config.client_certs = ("/path-to-client-cert","/path-to-client-key")
+global_config.client_certs = ("/path-to-client-cert", "/path-to-client-key")
 with Workflow(
     generate_name="test-",
     entrypoint="c",
@@ -209,23 +209,24 @@ w.create()
 #### A function that returns a `(str, str) or (Path, Path)` (`Callable[[], Union[Optional[Tuple[Path, Path]], Optional[Tuple[str, str]]]]`)
 
 ```python
-from typing import Optional,Tuple
+from typing import Optional, Tuple
 from pathlib import Path
 from hera.shared import global_config
 from hera.workflows import Workflow, Container
 
 
-def get_certs() -> Optional[Tuple[str,str]]:
-    """Generate or grab client certs for Hera. 
+def get_certs() -> Optional[Tuple[str, str]]:
+    """Generate or grab client certs for Hera.
     This process can do anything and generate a token however you need it to"""
-    return ("/path-to-client-cert","/path-to-client-key")
+    return ("/path-to-client-cert", "/path-to-client-key")
+
 
 def get_cert_paths() -> Optional[Tuple[Path, Path]]:
     return (Path("/path-to-client-cert"), Path("/path-to-client-key"))
 
 
 global_config.host = "https://my-argo-server.com"
-global_config.token = get_certs # or get_cert_paths
+global_config.token = get_certs  # or get_cert_paths
 
 with Workflow(
     generate_name="test-",

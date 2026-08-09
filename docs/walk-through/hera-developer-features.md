@@ -51,6 +51,7 @@ workflow was written in Hera!"
 from hera.shared import register_pre_build_hook
 from hera.workflows import Workflow
 
+
 @register_pre_build_hook
 def set_workflow_default_labels(workflow: Workflow) -> Workflow:
     if workflow.annotations is None:
@@ -102,7 +103,9 @@ with WorkflowTemplate(
     with Steps(name="steps"):
         cowsay()
 
-wt.create_as_workflow(generate_name="my-wt-test-1-")  # submitted and given a generated name by Argo like "my-wt-test-1-abcde"
+wt.create_as_workflow(
+    generate_name="my-wt-test-1-"
+)  # submitted and given a generated name by Argo like "my-wt-test-1-abcde"
 wt.create_as_workflow()  # submitted and given a generated name by Argo like "my-wtabcde"
 wt.create_as_workflow()  # submitted and given a generated name by Argo like "my-wtvwxyz"
 ```

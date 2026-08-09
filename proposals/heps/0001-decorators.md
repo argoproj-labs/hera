@@ -65,9 +65,11 @@ app = FastAPI()
 internal_router = APIRouter()
 users_router = APIRouter()
 
+
 @users_router.get("/users/")
 def read_users():
     return [{"name": "Rick"}, {"name": "Morty"}]
+
 
 internal_router.include_router(users_router)
 app.include_router(internal_router)
@@ -84,16 +86,21 @@ import hera.workflows.io as hio
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
+
 # Users must subclass `hio.Input` to define the template's inputs
 class MyInput(hio.Input):
     user: str
 
+
 @wt.entrypoint  # Sets hello_world as the default entrypoint for the workflow template, it is an error to set entrypoint on multiple functions
 @wt.script  # Adds a new script template to the workflow template called hello_world. This will enforce use of the script runner.
-def hello_world(my_input: MyInput) -> hio.Output:  # A subclass of hio.Output must be used for the output of the function
+def hello_world(
+    my_input: MyInput,
+) -> hio.Output:  # A subclass of hio.Output must be used for the output of the function
     output = hio.Output()
     output.result = f"Hello Hera User: {my_input.user}!"
     return output
+
 
 # `run` is a new function for users to instantiate a workflow template as a workflow
 workflow = wt.run(MyInput(name="happy-hera-user"), wait=True)
@@ -112,21 +119,26 @@ import hera.workflows.io as hio
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
+
 @wt.script  # Adds a new script template to the workflow template
 def setup() -> hio.Output:
     return hio.Output(result="Setting things up")
+
 
 class ConcatInput(hio.Input):
     word_a: str
     word_b: str
 
+
 @wt.script  # Adds a new script template to the workflow template
 def concat(concat_input: ConcatInput) -> hio.Output:
     return hio.Output(result=f"{concat_input.word_a} {concat_input.word_b}")
 
+
 class WorkerInput(hio.Input):
     value_a: str
     value_b: str
+
 
 class WorkerOutput(hio.Output):
     value: str
@@ -147,7 +159,6 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
     # setup_task will be a `Task` when building the workflow, vs an `hio.Output` object
     # when running locally.
 
-
     # Note how easy it is to reference variables from the DAG template input
     # or previous tasks.
     task_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_task.result))
@@ -163,7 +174,7 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
     # tasks that don't share variables directly
 
     # Easily "forward" task output parameters to the DAG's output parameters
-    # which replaces the existing syntax, which requires a "forward declaration"
+    # which replaces the existing syntax, which requires a "forward declaration"
     # of the intended output parameter:
     # with DAG(
     #     ...,
@@ -183,11 +194,13 @@ import hera.workflows.io as hio
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
+
 # This defines the template's inputs
 class CalculatorInput(hio.Input):
     x: int
     y: int
     operation: Literal["add", "sub"] = "add"
+
 
 @wt.script  # Adds a new script template to the workflow template called calculator
 def calculator(calc_input: CalculatorInput) -> hio.Output:
@@ -195,12 +208,15 @@ def calculator(calc_input: CalculatorInput) -> hio.Output:
         return hio.Output(calc_input.x + calc_input.y)
     return hio.Output(calc_input.x - calc_input.y)
 
+
 # This defines another template's inputs
 class FiboInput(hio.Input):
     num: int
 
+
 class FiboOutput(hio.Output):
     num: int
+
 
 @wt.entrypoint
 @wt.steps  # Adds a new steps template to the workflow template called fibonacci
@@ -225,21 +241,26 @@ import hera.workflows.io as hio
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
+
 @wt.script  # Adds a new script template to the workflow template
 def setup() -> hio.Output:
     return hio.Output(result="success")
+
 
 class ConcatInput(hio.Input):
     word_a: str
     word_b: str
 
+
 @wt.script  # Adds a new script template to the workflow template
 def concat(concat_input: ConcatInput) -> hio.Output:
     return hio.Output(result=f"{concat_input.word_a} {concat_input.word_b}")
 
+
 class WorkerInput(hio.Input):
     value_a: str
     value_b: str
+
 
 class WorkerOutput(hio.Output):
     value: str
@@ -269,9 +290,11 @@ import hera.workflows.io as hio
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
+
 # This defines the template's inputs
 class MyInput(hio.Input):
     user: str = "Hera"
+
 
 class MyOutput(hio.Output):
     container_greeting: Annotated[
@@ -282,10 +305,10 @@ class MyOutput(hio.Output):
         ),
     ]
 
+
 @wt.entrypoint
 @wt.container(command=["sh", "-c"], args=["echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt"])
-def basic_hello_world(my_input: MyInput) -> hio.Output:
-    ...
+def basic_hello_world(my_input: MyInput) -> hio.Output: ...
 
 
 @wt.entrypoint
@@ -319,16 +342,20 @@ awt = WorkflowTemplate(name="another-workflow-template")
 # Ultimately, awt and ewt will behave the same way when their templates are invoked in dag/steps functions.
 ewt = ClusterWorkflowTemplate(name="external-workflow-template")
 
+
 @awt.script  # Adds a new script template to a workflow template called "another-workflow-template"
 def setup() -> hio.Output:
     return hio.Output(result="Setting things up")
+
 
 class ConcatInput(hio.Input):
     word_a: str
     word_b: str
 
+
 class ConcatOutput(hio.Output):
     value: str
+
 
 # We assume we can autogenerate stubs such as these for templates in "external-workflow-template"
 @ewt.script
@@ -338,17 +365,20 @@ def concat(concat_input: ConcatInput) -> ConcatOutput:
     # again here to run "local" mock versions of this template ref
     # this will be useful in local testing
 
+
 # In the case of kebab-case template names or other details, we can pass the extra info to the decorator:
 @ewt.script(name="my-concat-function")
-def my_concat_function(concat_input: ConcatInput) -> ConcatOutput:
-    ...
+def my_concat_function(concat_input: ConcatInput) -> ConcatOutput: ...
+
 
 class MyDagInput(hio.Input):
     value_a: str
     value_b: str
 
+
 class MyDagOutput(hio.Output):
     value: str
+
 
 @wt.entrypoint
 @wt.dag
@@ -372,9 +402,11 @@ from hera.workflows import TemplateSet, WorkflowTemplate
 wt = WorkflowTemplate(name="my-template")
 templates = TemplateSet()
 
+
 @templates.script
 def setup() -> hio.Output:
     return hio.Output(result="Setting things up")
+
 
 wt.add_template_set(templates)
 ```
@@ -398,17 +430,13 @@ class Workflow(
 ):
     # ...
 
-    def container(**container_kwargs) -> Callable:
-        ...
+    def container(**container_kwargs) -> Callable: ...
 
-    def dag(**dag_kwargs) -> Callable:
-        ...
+    def dag(**dag_kwargs) -> Callable: ...
 
-    def steps(**steps_kwargs) -> Callable:
-        ...
+    def steps(**steps_kwargs) -> Callable: ...
 
-    def script(**script_kwargs) -> Callable:
-        ...
+    def script(**script_kwargs) -> Callable: ...
 ```
 
 We will enforce the single input and output of the function within the decorator to be the `hera.workflows.io.Input` and `hera.workflows.io.Output` classes. We will repurpose the RunnerInput/RunnerOutput classes and deprecate the `script_pydantic_io` experimental feature, as we will stop development on the old `script` decorator to instead promote the new decorators as "the golden path" for development with Hera.
@@ -444,8 +472,11 @@ we need to make use of libraries that can perform AST inspection. `sorcery` intr
 
 ```py
 from varname import varname
+
+
 def function():
     return varname()
+
 
 func = function()  # func == 'func'
 ```
@@ -454,14 +485,14 @@ Therefore, in the new `script` decorator function, when building the workflow, w
 
 ```py
 class Workflow(...):
-
     def script(self, *args, **kwargs):
         def wrapper(f):
             signature = inspect.signature(f)
             outputs = signature.return_annotation
-            inputs = signature.parameters['in_'].annotation
+            inputs = signature.parameters["in_"].annotation
             s = Script(name=f.__name__)
             self._templates.append(s)
+
             def wrapped(*args, **kwargs):
                 if building:
                     # name of the task/step, which may be in the kwargs or inferred from the variable name:
@@ -492,14 +523,17 @@ As Prefect is in control of its own platform, it offers decorators for "flows" (
 ```py
 from prefect import flow, task
 
+
 @task
 def my_task():
     return 1
+
 
 @flow
 def my_flow():
     task_result = my_task()
     return task_result + 1
+
 
 result = my_flow()
 assert result == 2
@@ -521,6 +555,8 @@ import json
 import pendulum
 
 from airflow.decorators import dag, task
+
+
 @dag(
     schedule=None,
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
@@ -536,6 +572,7 @@ def tutorial_taskflow_api():
     located
     [here](https://airflow.apache.org/docs/apache-airflow/stable/tutorial_taskflow_api.html)
     """
+
     @task()
     def extract():
         """
@@ -562,6 +599,7 @@ def tutorial_taskflow_api():
             total_order_value += value
 
         return {"total_order_value": total_order_value}
+
     @task()
     def load(total_order_value: float):
         """
@@ -575,6 +613,7 @@ def tutorial_taskflow_api():
     order_data = extract()
     order_summary = transform(order_data)
     load(order_summary["total_order_value"])
+
 
 tutorial_taskflow_api()
 ```
@@ -591,23 +630,24 @@ Something like a "[linear flow](https://docs.metaflow.org/metaflow/basics#linear
 ```py
 from metaflow import FlowSpec, step
 
-class LinearFlow(FlowSpec):
 
+class LinearFlow(FlowSpec):
     @step
     def start(self):
-        self.my_var = 'hello world'
+        self.my_var = "hello world"
         self.next(self.a)
 
     @step
     def a(self):
-        print('the data artifact is: %s' % self.my_var)
+        print("the data artifact is: %s" % self.my_var)
         self.next(self.end)
 
     @step
     def end(self):
-        print('the data artifact is still: %s' % self.my_var)
+        print("the data artifact is still: %s" % self.my_var)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     LinearFlow()
 ```
 
@@ -616,18 +656,16 @@ Metaflow also has the problem of fan-out syntax being less native using "[foreac
 ```py
 from metaflow import FlowSpec, step
 
-class ForeachFlow(FlowSpec):
 
+class ForeachFlow(FlowSpec):
     @step
     def start(self):
-        self.titles = ['Stranger Things',
-                       'House of Cards',
-                       'Narcos']
-        self.next(self.a, foreach='titles')
+        self.titles = ["Stranger Things", "House of Cards", "Narcos"]
+        self.next(self.a, foreach="titles")
 
     @step
     def a(self):
-        self.title = '%s processed' % self.input
+        self.title = "%s processed" % self.input
         self.next(self.join)
 
     @step
@@ -637,9 +675,10 @@ class ForeachFlow(FlowSpec):
 
     @step
     def end(self):
-        print('\n'.join(self.results))
+        print("\n".join(self.results))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     ForeachFlow()
 ```
 
@@ -660,10 +699,7 @@ Future features that are out of scope but will build off this HEP include
 Using `with_items` or `with_param` using the new syntax will need revisiting to improve the syntax and ensure local-running is still possible. Currently, a fan-out task would look like:
 
 ```py
-    process_data_task = process_data(
-        WorkerInput(value="{{item}}"),
-        with_items=["a", "b", "c", "d", "e"]
-    )
+process_data_task = process_data(WorkerInput(value="{{item}}"), with_items=["a", "b", "c", "d", "e"])
 ```
 
 In order to avoid breaking the abstraction of Hera on Argo, we don't want to expose the user to templated Argo strings. We could do this with special `hio.Item` or `hio.Param` classes, explored below. Or we could invent our own special syntax based on `sorcery` (as seen in e.g. [custom switch statement](https://github.com/alexmojaki/sorcery/blob/65e976d66064dbdd498e29715578b1e5fdad43d5/sorcery/spells.py#L576-L595)).
@@ -683,20 +719,24 @@ import hera.workflows.io as hio
 
 wt = WorkflowTemplate(name="my-template")
 
+
 class WorkerInput(hio.Input):
     value: str
 
+
 class StorageInput(hio.Input):
     data: str
+
 
 @wt.script
 def process_data(worker_input: WorkerInput) -> hio.Output:
     new_data = worker_input.value * 5  # "a" becomes "aaaaa"
     return hio.Output(result=new_data)
 
+
 @wt.script
-def store_data(storage_input: Storage_input) -> None:
-    ...
+def store_data(storage_input: Storage_input) -> None: ...
+
 
 @wt.entrypoint
 @wt.dag
@@ -716,22 +756,26 @@ import hera.workflows.io as hio
 
 wt = WorkflowTemplate(name="my-template")
 
+
 class WorkerInput(hio.Input):
     param_1: str
     param_2: str
     param_3: str
 
+
 class StorageInput(hio.Input):
     data: str
+
 
 @wt.script
 def process_data(worker_input: WorkerInput) -> hio.Output:
     new_data = f"{worker_input.param_1}{worker_input.param_2}{worker_input.param_3}"
     return hio.Output(result=new_data)
 
+
 @wt.script
-def store_data(storage_input: Storage_input) -> None:
-    ...
+def store_data(storage_input: Storage_input) -> None: ...
+
 
 @wt.entrypoint
 @wt.dag
@@ -752,7 +796,9 @@ def fanout_dag():
     # Create a task which will fan-out to process the data
     process_data_task = process_data(
         WorkerInput(
-            param_1=hio.Item["param_1"],  # Access the item's keys via dictionary key syntax on the special `Item` class
+            param_1=hio.Item[
+                "param_1"
+            ],  # Access the item's keys via dictionary key syntax on the special `Item` class
             param_2=hio.Item["param_2"],
             param_3=hio.Item["param_3"],
         ),
@@ -773,25 +819,30 @@ import hera.workflows.io as hio
 
 wt = WorkflowTemplate(name="my-template")
 
+
 class WorkerInput(hio.Input):
     value: str
 
+
 class StorageInput(hio.Input):
     data: str
+
 
 @wt.script
 def get_data() -> hio.Output:
     data = random.sample("abcdef", 5)  # e.g. data=['e', 'b', 'a', 'c', 'd']
     return hio.Output(result=data)
 
+
 @wt.script
 def process_data(worker_input: WorkerInput) -> hio.Output:
     new_data = worker_input.value * 5  # "a" becomes "aaaaa"
     return hio.Output(result=new_data)
 
+
 @wt.script
-def store_data(storage_input: Storage_input) -> None:
-    ...
+def store_data(storage_input: Storage_input) -> None: ...
+
 
 @wt.entrypoint
 @wt.dag

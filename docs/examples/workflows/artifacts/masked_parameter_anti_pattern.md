@@ -23,7 +23,7 @@ At runtime on Argo Workflows, the function parameter has no value.
 ```py
 @script(inputs=Artifact(name="i", path="/tmp/i"))
 def consume(i):
-    print(i) # -> `None`
+    print(i)  # -> `None`
 ```
 
 You must load from a file:

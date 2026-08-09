@@ -15,7 +15,7 @@ with Workflow(
     generate_name="hello-world-",
     entrypoint="steps",
     namespace="argo",
-    workflows_service=WorkflowsService(host="https://localhost:2746")
+    workflows_service=WorkflowsService(host="https://localhost:2746"),
 ) as w:
     with Steps(name="steps"):
         echo(arguments={"message": "Hello world!"})
@@ -63,11 +63,14 @@ all script templates automatically:
 
 ```py
 from hera.shared import global_config
+
 global_config.image = "python:3.13"
+
 
 @script()  # "echo" will use python:3.13
 def echo(message: str):
     print(message)
+
 
 @script()  # "echo_twice" will also use python:3.13
 def echo_twice(message: str):

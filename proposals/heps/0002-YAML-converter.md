@@ -102,11 +102,9 @@ with Workflow(
     generate_name="hello-world-",
     entrypoint="hello-world",
     labels={
-      "workflows.argoproj.io/archive-strategy": "false",
+        "workflows.argoproj.io/archive-strategy": "false",
     },
-    annotations={
-      "workflows.argoproj.io/description": "This is a simple hello world example."
-    }
+    annotations={"workflows.argoproj.io/description": "This is a simple hello world example."},
 ) as w:
     Container(
         name="hello-world",
@@ -150,8 +148,8 @@ with Workflow(
     generate_name="hello-world-",
     entrypoint="hello-world",
     arguments={
-      "message": "test",
-    }
+        "message": "test",
+    },
 ) as w:
     Container(
         name="hello-world",

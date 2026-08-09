@@ -18,6 +18,7 @@ parameters to the script template.
 ```py
 from hera.workflows import Resources, script
 
+
 @script(image="python:3.11", resources=Resources(memory_request="5Gi"))
 def echo(message: str):
     print(message)
@@ -118,6 +119,7 @@ DAG:
     ```py
     def echo(message):
         print(message)
+
 
     with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         echo_template = Script(name="echo", source=echo, image="python:3.11", resources=Resources(memory_request="5Gi"))

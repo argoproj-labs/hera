@@ -81,12 +81,14 @@ from hera.workflows.io import Input
 
 class MyObject(BaseModel):
     """This is a model class, to be used within an Input."""
+
     a_dict: dict
     a_str: str = "a default string"
 
 
 class MyInput(Input):
     """This is the Input class."""
+
     param_int: int = 42
     an_object: Annotated[MyObject, Parameter(name="obj-input")] = MyObject(
         a_dict={"my-key": "a-value"}, a_str="hello world!"
@@ -97,8 +99,7 @@ class MyInput(Input):
 @script(constructor="runner")
 def pydantic_io(
     my_input: MyInput,
-) -> ...:
-    ...
+) -> ...: ...
 ```
 
 This will create a script template named `pydantic_io`, with input parameters `"param_int"` and `"obj-input"`, but _not_
