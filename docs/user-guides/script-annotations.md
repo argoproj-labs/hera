@@ -54,7 +54,7 @@ through a variable:
 ```python
 @script(inputs=Artifact(name="my-artifact", path="/tmp/file"))
 def read_artifact():
-     # Repeating "/tmp/file" is prone to human error!
+    # Repeating "/tmp/file" is prone to human error!
     with open("/tmp/file") as a_file:
         print(a_file.read())
 ```
@@ -68,9 +68,7 @@ difference will be the name and path shown in the YAML:
 
     ```python
     @script(constructor="runner")
-    def read_artifact(
-        an_artifact: Annotated[Path, Artifact()]
-    ):
+    def read_artifact(an_artifact: Annotated[Path, Artifact()]):
         print(an_artifact.read_text())
     ```
 
@@ -89,9 +87,7 @@ difference will be the name and path shown in the YAML:
 
     ```python
     @script(constructor="runner")
-    def read_artifact(
-        an_artifact: Annotated[Path, Artifact(name="my-artifact-name", path="/tmp/an-artifact")]
-    ):
+    def read_artifact(an_artifact: Annotated[Path, Artifact(name="my-artifact-name", path="/tmp/an-artifact")]):
         print(an_artifact.read_text())
     ```
 
@@ -178,6 +174,7 @@ deserialised and validated to that type, just as happens automatically for `Para
 ```python
 from pydantic import BaseModel
 
+
 class MyArtifact(BaseModel):
     a = "hello "
     b = "world"
@@ -214,8 +211,8 @@ For a simple hello world output artifact example using an inline script we have:
 ```python
 @script(outputs=Artifact(name="hello-artifact", path="/tmp/hello_world.txt"))
 def hello_world():
-   with open("/tmp/hello_world.txt", "w") as f:
-       f.write("Hello, world!")
+    with open("/tmp/hello_world.txt", "w") as f:
+        f.write("Hello, world!")
 ```
 
 The `Annotated` approach allows us to return a value directly, and the Hera Runner will handle the serialisation and
@@ -256,10 +253,9 @@ See the following two functions for specifying custom paths:
 def hello_world() -> Annotated[str, Artifact(name="hello-artifact", path="/tmp/hello_world_art.txt")]:
     return "Hello, world!"
 
+
 @script()
-def hello_world() -> Annotated[
-    str, Parameter(name="hello-param", value_from={"path": "/tmp/hello_world_param.txt"})
-]:
+def hello_world() -> Annotated[str, Parameter(name="hello-param", value_from={"path": "/tmp/hello_world_param.txt"})]:
     return "Hello, world!"
 ```
 

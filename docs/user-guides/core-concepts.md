@@ -24,7 +24,7 @@ with Workflow(
     generate_name="hello-world-",
     entrypoint="steps",
     namespace="argo",
-    workflows_service=WorkflowsService(host="https://localhost:2746")
+    workflows_service=WorkflowsService(host="https://localhost:2746"),
 ) as w:
     with Steps(name="steps"):
         echo(arguments={"message": "Hello world!"})
@@ -55,7 +55,7 @@ with WorkflowTemplate(
     name="my-hello-world-template",
     entrypoint="steps",
     namespace="argo",
-    workflows_service=WorkflowsService(host="https://localhost:2746")
+    workflows_service=WorkflowsService(host="https://localhost:2746"),
 ) as w:
     with Steps(name="steps"):
         echo(arguments={"message": "Hello world!"})
@@ -224,9 +224,11 @@ Functions decorated with `@script` also work in the same way under `Steps`:
 ```py
 from hera.workflows import Steps, WorkflowTemplate, script
 
+
 @script()
 def echo(message: str):
     print(message)
+
 
 with Workflow(
     name="hello-world-steps",
@@ -247,9 +249,11 @@ the rshift syntax for specifying simple Task dependencies.
 ```py
 from hera.workflows import DAG, Workflow, script
 
+
 @script()
 def echo(message):
     print(message)
+
 
 with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
     with DAG(name="diamond"):
@@ -258,7 +262,6 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         C = echo(name="C", arguments={"message": "C"})
         D = echo(name="D", arguments={"message": "D"})
         A >> [B, C] >> D
-
 ```
 
 Read more about `DAG`s in the [walk-through](../walk-through/dags.md)!

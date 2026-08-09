@@ -11,6 +11,7 @@ form of the Workflow to the YAML:
     ```py
     from hera.workflows import InlineScriptConstructor
 
+
     @script(constructor=InlineScriptConstructor())
     def hello(s: str):
         print("Hello, {s}!".format(s=s))
@@ -74,11 +75,13 @@ You must `import` any modules you use in the function, within the function itsel
     def hello(s: str):
         print("Hello, {s}!".format(s=s))
 
+
     @script()
     def my_matcher(string: str):
         import re
 
         print(bool(re.match("test", string)))
+
 
     with Workflow(
         generate_name="hello-world-",
@@ -177,17 +180,21 @@ We can write a script template function using Pydantic objects such as:
     from hera.workflows import RunnerScriptConstructor
     from pydantic.v1 import BaseModel
 
+
     class Input(BaseModel):
         a: int
         b: str = "foo"
 
+
     class Output(BaseModel):
         output: List[Input]
+
 
     @script(constructor=RunnerScriptConstructor(), image="my-code-image:v1")
     def my_function(input: Input) -> Output:
         return Output(output=[input])
-        
+
+
     with Workflow(
         generate_name="hello-world-",
         entrypoint="hello",
@@ -250,9 +257,11 @@ classes in function inputs is as simple as inheriting from Pydantic's `BaseModel
 from pydantic import BaseModel
 from hera.workflows import script
 
+
 class MyModel(BaseModel):
     my_int: int
     my_string: str
+
 
 @script(constructor="runner")
 def my_pydantic_function(my_pydantic_input: MyModel):

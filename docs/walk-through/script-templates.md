@@ -34,7 +34,7 @@ Here's an example using an inline script:
         generate_name="hello-world-",
         entrypoint="steps",
         namespace="argo",
-        workflows_service=WorkflowsService(host="https://localhost:2746")
+        workflows_service=WorkflowsService(host="https://localhost:2746"),
     ) as w:
         with Steps(name="steps"):
             echo(arguments={"message": "Hello world!"})

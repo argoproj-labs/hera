@@ -93,17 +93,21 @@ global_config.experimental_features["decorator_syntax"] = True
 
 w = WorkflowTemplate(name="my-template")
 
+
 class MyInput(Input):
     user: str
 
+
 class MyOutput(Output):
     my_str: str
+
 
 @w.script()
 def hello_world(my_input: MyInput) -> MyOutput:
     output = MyOutput()
     output.my_str = f"Hello Hera User: {my_input.user}!"
     return output
+
 
 # You can pass script kwargs (including an alternative public template name) in the decorator
 @w.script(name="goodbye-world", labels={"my-label": "my-value"})
@@ -142,6 +146,7 @@ Then, we declare some Input/Output classes, inheriting from the Pydantic classes
 class MyInput(Input):
     user: str
 
+
 class MyOutput(Output):
     my_str: str
 ```
@@ -161,6 +166,7 @@ def hello_world(my_input: MyInput) -> MyOutput:
     output = MyOutput()
     output.my_str = f"Hello Hera User: {my_input.user}!"
     return output
+
 
 # You can pass script kwargs (including an alternative public template name) in the decorator
 @w.script(name="goodbye-world", labels={"my-label": "my-value"})

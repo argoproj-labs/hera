@@ -200,6 +200,7 @@ Hera lets you omit the `arguments` passed to a Task or Step if all the keys matc
     def echo(foo: str, bar: int):
         print(foo, bar)
 
+
     with Workflow(
         generate_name="dictionary-items-",
         entrypoint="steps",

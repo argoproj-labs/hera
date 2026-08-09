@@ -135,7 +135,7 @@ might look like:
 
 ```python
 VERSION = my_package.__version__
-global_config.image = os.environ .get("IMAGE_NAME", f"my-package:v{VERSION}")
+global_config.image = os.environ.get("IMAGE_NAME", f"my-package:v{VERSION}")
 
 from my_package import workflow_template
 

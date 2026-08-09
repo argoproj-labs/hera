@@ -104,7 +104,6 @@ from argo.workflows.dsl.templates import *
 
 
 class DagDiamond(Workflow):
-
     @task
     @parameter(name="message", value="A")
     def A(self, message: V1alpha1Parameter) -> V1alpha1Template:
