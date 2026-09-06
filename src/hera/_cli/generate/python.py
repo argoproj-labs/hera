@@ -78,20 +78,37 @@ def generate_python(options: GeneratePython):
 
 def load_yaml_workflows(path: Path) -> Generator[ModelWorkflow, None, None]:
     """Load the YAML file containing a Workflow(s)."""
-    for yaml_workflow in yaml.safe_load_all(path.read_text()):
-        if isinstance(yaml_workflow, dict):
-            if yaml_workflow["kind"] == "Workflow":
-                yield _ModelWorkflow.model_validate(yaml_workflow)
-            elif yaml_workflow["kind"] == "WorkflowTemplate":
-                yield _ModelWorkflowTemplate.model_validate(yaml_workflow)
-            elif yaml_workflow["kind"] == "ClusterWorkflowTemplate":
-                yield _ModelClusterWorkflowTemplate.model_validate(yaml_workflow)
-            elif yaml_workflow["kind"] == "CronWorkflow":
-                yield _ModelCronWorkflow.model_validate(yaml_workflow)
+    loader = yaml.SafeLoader(path.read_text())
+    try:
+        while loader.check_data():
+            node = loader.get_node()
+            # Empty documents have an implicit null scalar with no source content.
+            # Explicit null values remain invalid workflows.
+            if (
+                isinstance(node, yaml.ScalarNode)
+                and node.tag == "tag:yaml.org,2002:null"
+                and node.start_mark.index == node.end_mark.index
+            ):
+                continue
+            yaml_workflow = loader.construct_document(node)
+            if isinstance(yaml_workflow, dict):
+                kind = yaml_workflow.get("kind")
+                if kind == "Workflow":
+                    yield _ModelWorkflow.model_validate(yaml_workflow)
+                elif kind == "WorkflowTemplate":
+                    yield _ModelWorkflowTemplate.model_validate(yaml_workflow)
+                elif kind == "ClusterWorkflowTemplate":
+                    yield _ModelClusterWorkflowTemplate.model_validate(yaml_workflow)
+                elif kind == "CronWorkflow":
+                    yield _ModelCronWorkflow.model_validate(yaml_workflow)
+                elif kind is None:
+                    raise ValueError("Invalid YAML workflow: missing kind")
+                else:
+                    raise ValueError(f"Unrecognised Workflow kind: {kind}")
             else:
-                raise ValueError(f"Unrecognised Workflow kind: {yaml_workflow['kind']}")
-        else:
-            raise ValueError(f"Invalid YAML workflow: {yaml_workflow}")
+                raise ValueError(f"Invalid YAML workflow: {yaml_workflow}")
+    finally:
+        loader.dispose()
 
 
 def workflow_to_python(model: ModelWorkflow) -> str:

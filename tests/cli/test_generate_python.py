@@ -352,3 +352,71 @@ def test_recursive_flatten_source_folder_to_output_folder_with_name_clash_append
 
     assert (output_folder / "single_workflow.py").exists()
     assert (output_folder / "single_workflow.py").read_text() == "\n".join([single_workflow_output] * 2)
+
+
+@pytest.mark.cli
+@pytest.mark.parametrize(
+    ("prefix", "separator", "suffix"),
+    [
+        ("---\n---\n", "---\n", ""),
+        ("", "---\n", "---\n"),
+        ("", "---\n---\n---\n", ""),
+        ("---\n# empty\n---\n", "---\n# empty\n---\n", "---\n# empty\n...\n"),
+    ],
+    ids=["leading", "trailing", "consecutive", "comments"],
+)
+def test_empty_yaml_documents_between_workflows(capsys, tmp_path: Path, prefix: str, separator: str, suffix: str):
+    workflows = Path("tests/cli/examples/multiple_workflow.yaml").read_text().split("---\n")
+    yaml_path = tmp_path / "workflows.yaml"
+    yaml_path.write_text(prefix + separator.join(workflows) + suffix)
+
+    runner.invoke(str(yaml_path))
+
+    assert get_stdout(capsys) == multiple_workflow_output
+
+
+@pytest.mark.cli
+@pytest.mark.parametrize("content", ["", "# empty\n", "---\n", "---\n---\n...\n"])
+def test_empty_yaml_documents_only(capsys, tmp_path: Path, content: str):
+    yaml_path = tmp_path / "empty.yaml"
+    yaml_path.write_text(content)
+
+    runner.invoke(str(yaml_path))
+    assert get_stdout(capsys) == ""
+
+    output_path = tmp_path / "empty.py"
+    runner.invoke(str(yaml_path), "--to", str(output_path))
+    assert output_path.read_text() == ""
+
+
+@pytest.mark.cli
+@pytest.mark.parametrize(
+    ("content", "message"),
+    [
+        ("null", "Invalid YAML workflow: None"),
+        ("~", "Invalid YAML workflow: None"),
+        ('!!null ""', "Invalid YAML workflow: None"),
+        ('""', "Invalid YAML workflow: "),
+        ("false", "Invalid YAML workflow: False"),
+        ("0", "Invalid YAML workflow: 0"),
+        ("[]", "Invalid YAML workflow: []"),
+        ("kind: ConfigMap", "Unrecognised Workflow kind: ConfigMap"),
+    ],
+)
+def test_nonempty_invalid_yaml_documents(tmp_path: Path, content: str, message: str):
+    yaml_path = tmp_path / "invalid.yaml"
+    yaml_path.write_text(content)
+
+    with pytest.raises(ValueError) as exc:
+        runner.invoke(str(yaml_path))
+    assert str(exc.value) == message
+
+
+@pytest.mark.cli
+@pytest.mark.parametrize("content", ["{}", "metadata:\n  name: no-kind"])
+def test_yaml_document_missing_kind(tmp_path: Path, content: str):
+    yaml_path = tmp_path / "invalid.yaml"
+    yaml_path.write_text(content)
+
+    with pytest.raises(ValueError, match="Invalid YAML workflow: missing kind"):
+        runner.invoke(str(yaml_path))
