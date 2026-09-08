@@ -25,6 +25,7 @@ from hera.workflows.dag import DAG
 from hera.workflows.data import Data
 from hera.workflows.http_template import HTTP
 from hera.workflows.models import (
+    Arguments as _ModelArguments,
     ClusterWorkflowTemplate as _ModelClusterWorkflowTemplate,
     CronWorkflow as _ModelCronWorkflow,
     Metadata,
@@ -49,6 +50,9 @@ ModelWorkflow = Union[
 ]
 
 DEFAULT_EXTENSION = ".py"
+
+DICT_ARGUMENTS_CLASSES = frozenset({Workflow, WorkflowTemplate, ClusterWorkflowTemplate, CronWorkflow, Step, Task})
+"""The `hera.workflows` classes whose `arguments` field accepts the `{name: value}` dict shorthand."""
 
 
 def generate_python(options: GeneratePython):
@@ -198,7 +202,7 @@ class WorkflowPythonBuilder:
                     else:
                         if self._should_skip_workflow_kwarg(attr, value, hera_workflow_class):
                             continue
-                        value = self._build_expression(value)
+                        value = self._build_kwarg_expression(attr, value, hera_workflow_class)
                         keywords.append(
                             ast.keyword(
                                 arg=attr,
@@ -251,6 +255,41 @@ class WorkflowPythonBuilder:
             return (4, arg)
 
         return sorted(keywords, key=keyword_order)
+
+    def _build_kwarg_expression(self, attr: str, value: Any, hera_class: Any) -> ast.expr:
+        """Build the expression for a single constructor kwarg of `hera_class`."""
+        if attr == "arguments" and hera_class in DICT_ARGUMENTS_CLASSES:
+            dict_expression = self._try_build_arguments_dict(value)
+            if dict_expression is not None:
+                return dict_expression
+
+        return self._build_expression(value)
+
+    def _try_build_arguments_dict(self, value: Any) -> Optional[ast.Dict]:
+        """Build the `{name: value}` shorthand for `arguments`, or `None` if it would not round-trip.
+
+        `ArgumentsMixin` expands `{"foo": "bar"}` to a `Parameter(name="foo", value="bar")` and nothing
+        else, so the shorthand is only equivalent when there are no artifacts and every parameter sets
+        exactly `name` and `value`. Anything richer (`valueFrom`, `default`, `enum`, artifacts, ...)
+        falls back to an explicit `Arguments(...)` call.
+        """
+        if not isinstance(value, _ModelArguments) or value.artifacts or not value.parameters:
+            return None
+
+        keys: List[Optional[ast.expr]] = []
+        values: List[ast.expr] = []
+        seen: Set[str] = set()
+        for parameter in value.parameters:
+            if parameter.value is None or parameter.model_dump(exclude_none=True, exclude={"name", "value"}):
+                return None
+            if parameter.name in seen:
+                # Duplicate names would silently collapse into a single dict entry.
+                return None
+            seen.add(parameter.name)
+            keys.append(ast.Constant(value=parameter.name))
+            values.append(ast.Constant(value=parameter.value))
+
+        return ast.Dict(keys=keys, values=values)
 
     def _build_expression(
         self,
@@ -504,7 +543,7 @@ class WorkflowPythonBuilder:
         keywords: List[ast.keyword] = []
         for field in hera_class_fields:
             if field in template_keys and getattr(model_class_obj, field) is not None:
-                val = self._build_expression(getattr(model_class_obj, field))
+                val = self._build_kwarg_expression(field, getattr(model_class_obj, field), hera_class)
                 keywords.append(
                     ast.keyword(
                         arg=field,
