@@ -1125,6 +1125,15 @@ def test_script_with_complex_types(
     assert serialize(output) == expected_output
 
 
+def test_runner_resolves_future_annotations():
+    output = _runner(
+        "tests.script_runner.future_annotations:increment",
+        [{"name": "value", "value": "41"}],
+    )
+
+    assert output == 42
+
+
 def test_script_partially_annotated_tuple_should_raise_an_error():
     # GIVEN
     entrypoint = "tests.script_runner.parameter_with_complex_types:fn_with_output_tuple_partially_annotated"
