@@ -66,12 +66,12 @@ def write_output(
     dest_is_file = output_path.suffix.lower() in extensions or output_path.exists() and output_path.is_file()
 
     if dest_is_file:
-        output_path.parent.mkdir(exist_ok=True)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         output = join_delimiter.join(input_paths_to_output.values())
         output_path.write_text(output)
     else:
-        output_path.mkdir(exist_ok=True)
+        output_path.mkdir(parents=True, exist_ok=True)
 
         for dest_path, content in input_paths_to_output.items():
             dest = (output_path / dest_path).with_suffix(default_extension)

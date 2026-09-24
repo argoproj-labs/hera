@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
 
@@ -92,6 +92,23 @@ def pydantic_io_within_generic(
     pass
 
 
+class NoneDefaultInput(Input):
+    my_optional_str: Optional[str] = None
+    my_optional_int: Optional[int] = None
+    my_required_str: str
+
+
+class NoneDefaultOutput(Output):
+    my_optional_output: Optional[str] = None
+
+
+@script(constructor="runner")
+def pydantic_io_none_defaults(
+    my_input: NoneDefaultInput,
+) -> NoneDefaultOutput:
+    pass
+
+
 with Workflow(generate_name="pydantic-io-") as w:
     pydantic_io_params()
     pydantic_io_params_unrelated_annotation()
@@ -99,3 +116,4 @@ with Workflow(generate_name="pydantic-io-") as w:
     pydantic_io()
     pydantic_io_with_defaults()
     pydantic_io_within_generic()
+    pydantic_io_none_defaults()

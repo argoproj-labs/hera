@@ -325,6 +325,25 @@ def test_configmap(global_config_fixture):
             },
             id="runnerinput-within-generic",
         ),
+        pytest.param(
+            "pydantic_io_none_defaults",
+            {
+                "parameters": [
+                    {"name": "my_optional_str", "default": "null"},
+                    {"name": "my_optional_int", "default": "null"},
+                    {"name": "my_required_str"},
+                ],
+            },
+            {
+                "parameters": [
+                    {
+                        "name": "my_optional_output",
+                        "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_optional_output"},
+                    },
+                ],
+            },
+            id="runnerinput-none-default",
+        ),
     ],
 )
 def test_script_pydantic_io(pydantic_mode, function_name, expected_input, expected_output):

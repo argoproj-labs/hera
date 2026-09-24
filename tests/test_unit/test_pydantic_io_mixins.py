@@ -1,5 +1,5 @@
 import sys
-from typing import Annotated
+from typing import Annotated, List, Optional
 
 from pydantic import Field
 
@@ -21,6 +21,30 @@ def test_get_parameters_unannotated():
         Parameter(name="foo"),
         Parameter(name="bar", default="a default"),
     ]
+
+
+def test_get_parameters_with_none_default():
+    class Foo(Input):
+        foo: Optional[str] = None
+        bar: Optional[int] = None
+        baz: Optional[str]
+
+    # `None` is a real default, so `foo` and `bar` get one (serialized to the string "null"),
+    # while `baz` has no default and stays a required input parameter.
+    assert Foo._get_parameters() == [
+        Parameter(name="foo", default=None),
+        Parameter(name="bar", default=None),
+        Parameter(name="baz"),
+    ]
+    assert [p.default for p in Foo._get_parameters()] == ["null", "null", None]
+
+
+def test_get_parameters_with_default_factory():
+    class Foo(Input):
+        foo: List[str] = Field(default_factory=list)
+
+    # A `default_factory` has no static value to serialize into the template
+    assert Foo._get_parameters() == [Parameter(name="foo")]
 
 
 def test_get_parameters_with_pydantic_annotations():
@@ -335,6 +359,27 @@ def test_get_outputs_no_path_unannotated():
         Parameter(name="fum", default=5),
         Parameter(name="bar", default="a default"),
     ]
+
+
+def test_get_outputs_no_path_with_none_default():
+    class Foo(Output):
+        foo: Optional[str] = None
+        bar: Optional[str]
+
+    assert Foo._get_outputs() == [
+        Parameter(name="foo", default=None),
+        Parameter(name="bar"),
+    ]
+    assert [p.default for p in Foo._get_outputs()] == ["null", None]
+
+
+def test_get_output_with_none_default():
+    class Foo(Output):
+        foo: Optional[str] = None
+        bar: Optional[str]
+
+    assert Foo._get_output("foo") == Parameter(name="foo", default=None)
+    assert Foo._get_output("bar") == Parameter(name="bar")
 
 
 def test_get_outputs_no_path_with_pydantic_annotations():

@@ -8,9 +8,8 @@ else:
 
 from pydantic import BaseModel as V2BaseModel
 from pydantic.v1 import BaseModel as V1BaseModel
-from pydantic_core import PydanticUndefined
 
-from hera.shared._pydantic import FieldInfo, get_field_annotations, get_fields, model_dump
+from hera.shared._pydantic import FieldInfo, field_has_default, get_field_annotations, get_fields, model_dump
 from hera.shared._type_util import construct_io_from_annotation, get_workflow_annotation
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.artifact import Artifact
@@ -49,7 +48,7 @@ class InputMixin:
                     )
                 if object_override:
                     param.default = serialize(getattr(object_override, field))
-                elif field_info.default is not None and field_info.default != PydanticUndefined:  # type: ignore
+                elif field_has_default(field_info):
                     # Serialize the value (usually done in Parameter's validator)
                     param.default = serialize(field_info.default)  # type: ignore
                 parameters.append(param)
@@ -118,10 +117,8 @@ class OutputMixin:
             if field in {"exit_code", "result"}:
                 continue
             if isinstance(annotation, Parameter):
-                if annotation.default is None:
-                    default = field_info.default
-                    if default is not None and default != PydanticUndefined:
-                        annotation.default = serialize(default)
+                if annotation.default is None and field_has_default(field_info):
+                    annotation.default = serialize(field_info.default)
 
                 if add_missing_path and annotation.value_from is None:
                     annotation.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{annotation.name}")
@@ -141,10 +138,9 @@ class OutputMixin:
             return output
 
         # Create a Parameter from basic type annotations
-        default = get_fields(cast(Type[V1BaseModel] | Type[V2BaseModel], cls))[field_name].default
-        if default is None or default == PydanticUndefined:
-            default = MISSING
-        return Parameter(name=field_name, default=default)  # type: ignore
+        field_info = get_fields(cast(Type[V1BaseModel] | Type[V2BaseModel], cls))[field_name]
+        default = field_info.default if field_has_default(field_info) else MISSING
+        return Parameter(name=field_name, default=default)
 
     def _get_as_invocator_output(self) -> List[Union[Artifact, Parameter]]:
         """Get the Output model as the output of a dag/steps template.

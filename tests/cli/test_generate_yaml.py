@@ -164,10 +164,12 @@ def test_scan_folder(capsys):
 
 
 @pytest.mark.cli
+@pytest.mark.parametrize("relative_path", ["my_dir/foo.yaml", "build/manifests/foo.yaml"])
 def test_source_file_to_single_file(
     tmp_path: Path,
+    relative_path: str,
 ):
-    output_file = tmp_path / "my_dir/foo.yaml"
+    output_file = tmp_path / relative_path
     assert not output_file.parent.exists()  # ensure folder created
 
     runner.invoke("tests/cli/examples/single_workflow.py", "--to", str(output_file))
@@ -191,13 +193,16 @@ def test_source_folder_to_single_file(
 
 
 @pytest.mark.cli
+@pytest.mark.parametrize("relative_path", [".", "build/manifests"])
 def test_source_file_to_output_folder(
     tmp_path: Path,
+    relative_path: str,
 ):
-    runner.invoke("tests/cli/examples/single_workflow.py", "--to", str(tmp_path))
+    output_folder = tmp_path / relative_path
+    runner.invoke("tests/cli/examples/single_workflow.py", "--to", str(output_folder))
 
-    assert (tmp_path / "single_workflow.yaml").exists()
-    assert (tmp_path / "single_workflow.yaml").read_text() == single_workflow_output
+    assert (output_folder / "single_workflow.yaml").exists()
+    assert (output_folder / "single_workflow.yaml").read_text() == single_workflow_output
 
 
 @pytest.mark.cli
