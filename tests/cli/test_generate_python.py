@@ -29,8 +29,6 @@ SKIP_FILES = [
     "workflow-count-resourcequota.upstream.yaml",  # not a workflow
     "dag-disable-failFast.upstream.yaml",  # fail fast is duplicated by the Argo spec itself, so we duplicate it in the roundtrip. This example otherwise generates correctly.
     "loops-param-argument.upstream.yaml",  # This example added a "display-name" feature by adding another `annotations` field under Template, but it doesn't seem to be in the actual spec.
-    "pod-resources-template-override.upstream.yaml",  # Hera templates do not expose `podResources` yet.
-    "resource-claims-template-override.upstream.yaml",  # Hera templates do not expose `resourceClaims` yet.
     "workflow-level-executor-plugin.upstream.yaml",  # Plugin templates crash the converter; Hera does not expose `executorPlugins` yet.
 ]
 
