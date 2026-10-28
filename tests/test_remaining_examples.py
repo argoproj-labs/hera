@@ -33,10 +33,8 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = {
     "synchronization-mutex-wf-level-legacy.upstream.yaml",
     "synchronization-tmpl-level-legacy.upstream.yaml",
     "synchronization-wf-level-legacy.upstream.yaml",
-    # v4.1 added `podResources`, `resourceClaims` and `executorPlugins` to the
-    # workflow spec and templates; Hera does not expose them yet.
-    "pod-resources.upstream.yaml",
-    "pod-resources-template-override.upstream.yaml",
+    # v4.1 added `resourceClaims` and `executorPlugins` to the workflow spec
+    # and templates; Hera does not expose them yet.
     "resource-claims.upstream.yaml",
     "resource-claims-template-override.upstream.yaml",
     "workflow-level-executor-plugin.upstream.yaml",

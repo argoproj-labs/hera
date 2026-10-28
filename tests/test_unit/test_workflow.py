@@ -9,9 +9,12 @@ from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.models import (
     ImagePullPolicy,
     Parameter as ModelParameter,
+    Quantity,
+    ResourceRequirements,
     WorkflowCreateRequest,
 )
 from hera.workflows.parameter import Parameter
+from hera.workflows.resources import Resources
 from hera.workflows.script import script
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import NAME_LIMIT, Workflow
@@ -219,3 +222,25 @@ def test_workflow_template_defaults_validation():
     assert parsed_wf.template_defaults.script.env is not None
     assert parsed_wf.template_defaults.script.env[0].name == "BAZ"
     assert parsed_wf.template_defaults.script.env[0].value == "QUX"
+
+
+def test_workflow_pod_resources():
+    # GIVEN
+    with Workflow(
+        name="w",
+        entrypoint="c",
+        pod_resources=Resources(cpu_request="100m", memory_limit="512Mi"),
+    ) as w:
+        Container(name="c", image="busybox", pod_resources=Resources(cpu_limit=2))
+
+    # WHEN
+    built = w.build()
+
+    # THEN
+    assert built.spec.pod_resources == ResourceRequirements(
+        requests={"cpu": Quantity(root="100m")}, limits={"memory": Quantity(root="512Mi")}
+    )
+    assert built.spec.templates[0].pod_resources == ResourceRequirements(limits={"cpu": Quantity(root="2")})
+
+    # Round trip keeps both levels
+    assert Workflow.from_dict(w.to_dict()).to_dict() == w.to_dict()

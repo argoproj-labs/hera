@@ -43,6 +43,7 @@ from hera.workflows.models import (
     PodDNSConfig,
     PodGC,
     PodSecurityContext,
+    ResourceRequirements,
     RetryStrategy as ModelRetryStrategy,
     Synchronization,
     Template as _ModelTemplate,
@@ -61,6 +62,7 @@ from hera.workflows.models import (
 )
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TWorkflow, VolumeClaimable
+from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow_status import WorkflowStatus
@@ -106,6 +108,11 @@ class Workflow(
         if isinstance(self.on_exit, Templatable):
             return self.on_exit._build_template().name  # type: ignore
         return self.on_exit
+
+    def _build_pod_resources(self) -> Optional[ResourceRequirements]:
+        if self.pod_resources is None or isinstance(self.pod_resources, ResourceRequirements):
+            return self.pod_resources
+        return self.pod_resources.build()
 
     def _build_retry_strategy(self) -> Optional[ModelRetryStrategy]:
         if self.retry_strategy is None:
@@ -218,6 +225,10 @@ class Workflow(
     pod_gc: Annotated[Optional[PodGC], _WorkflowModelMapper("spec.pod_gc")] = None
     pod_metadata: Annotated[Optional[Metadata], _WorkflowModelMapper("spec.pod_metadata")] = None
     pod_priority_class_name: Annotated[Optional[str], _WorkflowModelMapper("spec.pod_priority_class_name")] = None
+    pod_resources: Annotated[
+        Optional[Union[ResourceRequirements, Resources]],
+        _WorkflowModelMapper("spec.pod_resources", _build_pod_resources),
+    ] = None
     pod_spec_patch: Annotated[Optional[str], _WorkflowModelMapper("spec.pod_spec_patch")] = None
     priority: Annotated[Optional[int], _WorkflowModelMapper("spec.priority")] = None
     retry_strategy: Annotated[

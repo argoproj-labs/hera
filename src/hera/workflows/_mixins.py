@@ -423,6 +423,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
     plugin: Optional[Plugin] = None
+    pod_resources: Optional[Union[ResourceRequirements, Resources]] = None
     pod_spec_patch: Optional[str] = None
     priority_class_name: Optional[str] = None
     retry_strategy: Optional[Union[RetryStrategy, ModelRetryStrategy]] = None
@@ -443,6 +444,12 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
             return None
 
         return [i.build() if isinstance(i, UserContainer) else i for i in self.init_containers]
+
+    def _build_pod_resources(self) -> Optional[ResourceRequirements]:
+        """Parses the pod-level resources and returns a generated `ResourceRequirements` object."""
+        if self.pod_resources is None or isinstance(self.pod_resources, ResourceRequirements):
+            return self.pod_resources
+        return self.pod_resources.build()
 
     def _build_sidecars(self) -> Optional[List[ModelUserContainer]]:
         """Builds the `sidecars` field and optionally returns a list of `UserContainer`."""

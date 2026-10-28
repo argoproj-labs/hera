@@ -38,8 +38,6 @@ Explore the examples through the side bar!
 | [memoize-simple](https://github.com/argoproj/argo-workflows/blob/main/examples/memoize-simple.yaml) |
 | [parameter-aggregation](https://github.com/argoproj/argo-workflows/blob/main/examples/parameter-aggregation.yaml) |
 | [parameter-aggregation-script](https://github.com/argoproj/argo-workflows/blob/main/examples/parameter-aggregation-script.yaml) |
-| [pod-resources](https://github.com/argoproj/argo-workflows/blob/main/examples/pod-resources.yaml) |
-| [pod-resources-template-override](https://github.com/argoproj/argo-workflows/blob/main/examples/pod-resources-template-override.yaml) |
 | [pod-spec-from-previous-step](https://github.com/argoproj/argo-workflows/blob/main/examples/pod-spec-from-previous-step.yaml) |
 | [resource-claims](https://github.com/argoproj/argo-workflows/blob/main/examples/resource-claims.yaml) |
 | [resource-claims-template-override](https://github.com/argoproj/argo-workflows/blob/main/examples/resource-claims-template-override.yaml) |

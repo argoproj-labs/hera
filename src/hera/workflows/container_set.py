@@ -192,6 +192,7 @@ class ContainerSet(
             node_selector=self.node_selector,
             outputs=self._build_outputs(),
             plugin=self.plugin,
+            pod_resources=self._build_pod_resources(),
             pod_spec_patch=self.pod_spec_patch,
             priority_class_name=self.priority_class_name,
             retry_strategy=self._build_retry_strategy(),
