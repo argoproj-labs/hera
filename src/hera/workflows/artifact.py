@@ -280,6 +280,7 @@ class GitArtifact(Artifact):
             disable_submodules=self.disable_submodules,
             fetch=self.fetch,
             insecure_ignore_host_key=self.insecure_ignore_host_key,
+            insecure_skip_tls=self.insecure_skip_tls,
             password_secret=self.password_secret,
             repo=self.repo,
             revision=self.revision,
@@ -298,6 +299,7 @@ class GitArtifact(Artifact):
             "disable_submodules",
             "fetch",
             "insecure_ignore_host_key",
+            "insecure_skip_tls",
             "password_secret",
             "repo",
             "revision",
@@ -407,6 +409,7 @@ class OSSArtifact(Artifact):
             lifecycle_rule=self.lifecycle_rule,
             secret_key_secret=self.secret_key_secret,
             security_token=self.security_token,
+            use_sdk_creds=self.use_sdk_creds,
         )
         return artifact
 
@@ -422,6 +425,7 @@ class OSSArtifact(Artifact):
             "lifecycle_rule",
             "secret_key_secret",
             "security_token",
+            "use_sdk_creds",
         ]
 
 
@@ -499,6 +503,7 @@ class S3Artifact(Artifact):
         artifact.s3 = _ModelS3Artifact(
             access_key_secret=self.access_key_secret,
             bucket=self.bucket,
+            ca_secret=self.ca_secret,
             create_bucket_if_not_present=self.create_bucket_if_not_present,
             encryption_options=self.encryption_options,
             endpoint=self.endpoint,
@@ -507,6 +512,7 @@ class S3Artifact(Artifact):
             region=self.region,
             role_arn=self.role_arn,
             secret_key_secret=self.secret_key_secret,
+            session_token_secret=self.session_token_secret,
             use_sdk_creds=self.use_sdk_creds,
         )
         return artifact
@@ -517,6 +523,7 @@ class S3Artifact(Artifact):
         return super()._get_input_attributes() + [
             "access_key_secret",
             "bucket",
+            "ca_secret",
             "create_bucket_if_not_present",
             "encryption_options",
             "endpoint",
@@ -525,6 +532,7 @@ class S3Artifact(Artifact):
             "region",
             "role_arn",
             "secret_key_secret",
+            "session_token_secret",
             "use_sdk_creds",
         ]
 
