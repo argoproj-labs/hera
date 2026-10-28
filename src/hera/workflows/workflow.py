@@ -42,6 +42,7 @@ from hera.workflows.models import (
     PodDisruptionBudgetSpec,
     PodDNSConfig,
     PodGC,
+    PodResourceClaim,
     PodSecurityContext,
     ResourceRequirements,
     RetryStrategy as ModelRetryStrategy,
@@ -231,6 +232,7 @@ class Workflow(
     ] = None
     pod_spec_patch: Annotated[Optional[str], _WorkflowModelMapper("spec.pod_spec_patch")] = None
     priority: Annotated[Optional[int], _WorkflowModelMapper("spec.priority")] = None
+    resource_claims: Annotated[Optional[List[PodResourceClaim]], _WorkflowModelMapper("spec.resource_claims")] = None
     retry_strategy: Annotated[
         Optional[Union[RetryStrategy, ModelRetryStrategy]],
         _WorkflowModelMapper("spec.retry_strategy", _build_retry_strategy),

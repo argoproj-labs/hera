@@ -9,6 +9,7 @@ from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.models import (
     ImagePullPolicy,
     Parameter as ModelParameter,
+    PodResourceClaim,
     Quantity,
     ResourceRequirements,
     WorkflowCreateRequest,
@@ -17,6 +18,7 @@ from hera.workflows.parameter import Parameter
 from hera.workflows.resources import Resources
 from hera.workflows.script import script
 from hera.workflows.service import WorkflowsService
+from hera.workflows.steps import Steps
 from hera.workflows.workflow import NAME_LIMIT, Workflow
 from hera.workflows.workflow_status import WorkflowStatus
 
@@ -241,6 +243,28 @@ def test_workflow_pod_resources():
         requests={"cpu": Quantity(root="100m")}, limits={"memory": Quantity(root="512Mi")}
     )
     assert built.spec.templates[0].pod_resources == ResourceRequirements(limits={"cpu": Quantity(root="2")})
+
+    # Round trip keeps both levels
+    assert Workflow.from_dict(w.to_dict()).to_dict() == w.to_dict()
+
+
+def test_workflow_resource_claims_and_pending_timeout():
+    # GIVEN
+    workflow_claim = PodResourceClaim(name="gpu", resource_claim_template_name="small-gpu")
+    template_claim = PodResourceClaim(name="gpu", resource_claim_name="shared-gpu")
+    with Workflow(name="w", entrypoint="s", resource_claims=[workflow_claim]) as w:
+        c = Container(name="c", image="busybox", pending_timeout="5m", resource_claims=[template_claim])
+        with Steps(name="s"):
+            c()
+
+    # WHEN
+    built = w.build()
+
+    # THEN
+    assert built.spec.resource_claims == [workflow_claim]
+    container = next(t for t in built.spec.templates if t.name == "c")
+    assert container.pending_timeout == "5m"
+    assert container.resource_claims == [template_claim]
 
     # Round trip keeps both levels
     assert Workflow.from_dict(w.to_dict()).to_dict() == w.to_dict()

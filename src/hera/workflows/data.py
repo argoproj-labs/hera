@@ -58,6 +58,7 @@ class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
             metadata=self._build_metadata(),
             name=self.name,
             node_selector=self.node_selector,
+            pending_timeout=self.pending_timeout,
             plugin=self.plugin,
             priority_class_name=self.priority_class_name,
             retry_strategy=self._build_retry_strategy(),

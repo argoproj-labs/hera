@@ -39,8 +39,6 @@ Explore the examples through the side bar!
 | [parameter-aggregation](https://github.com/argoproj/argo-workflows/blob/main/examples/parameter-aggregation.yaml) |
 | [parameter-aggregation-script](https://github.com/argoproj/argo-workflows/blob/main/examples/parameter-aggregation-script.yaml) |
 | [pod-spec-from-previous-step](https://github.com/argoproj/argo-workflows/blob/main/examples/pod-spec-from-previous-step.yaml) |
-| [resource-claims](https://github.com/argoproj/argo-workflows/blob/main/examples/resource-claims.yaml) |
-| [resource-claims-template-override](https://github.com/argoproj/argo-workflows/blob/main/examples/resource-claims-template-override.yaml) |
 | [scripts-bash](https://github.com/argoproj/argo-workflows/blob/main/examples/scripts-bash.yaml) |
 | [scripts-javascript](https://github.com/argoproj/argo-workflows/blob/main/examples/scripts-javascript.yaml) |
 | [skipped-output-defaults/consumer-input-default](https://github.com/argoproj/argo-workflows/blob/main/examples/skipped-output-defaults/consumer-input-default.yaml) |
