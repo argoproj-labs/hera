@@ -253,14 +253,14 @@ class AsyncWorkflowsService:
         raise exception_from_server_response(resp)
 
     async def delete_archived_workflow(
-        self, uid: str, namespace: Optional[str] = None
+        self, uid: str, namespace: Optional[str] = None, name: Optional[str] = None
     ) -> ArchivedWorkflowDeletedResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = await self._request(
             method="delete",
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
-            params={k: v for k, v in {"namespace": namespace}.items() if v is not None},
+            params={k: v for k, v in {"namespace": namespace, "name": name}.items() if v is not None},
             headers={"Authorization": self.token or ""},
             data=None,
         )
