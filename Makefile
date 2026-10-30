@@ -201,9 +201,10 @@ set-up-argo: ## Start the argo service
 
 .PHONY: set-up-artifacts
 set-up-artifacts: ## Adds minio for running examples with artifact storage
-	kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj-labs/training-material/main/config/minio/minio.yaml
+	kubectl apply -n argo -f tests/submissions/minio.yaml
 	kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj-labs/training-material/main/config/argo-workflows/workflows-controller-configmap.yaml
 	kubectl apply -n argo -f tests/submissions/roles.yaml
+	kubectl rollout status -n argo deployment/minio --timeout=120s --watch=true
 
 .PHONY: stop-cluster
 stop-cluster:  ## Stop the cluster
