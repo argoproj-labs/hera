@@ -55,6 +55,58 @@ def test_dump_quotes_yaml_1_1_bool_aliases(value):
     assert f"name: '{value}'" in result.splitlines()
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        "1e3",
+        "1E3",
+        "1e+3",
+        "1e-3",
+        "1e-5",
+        "1.5e3",
+        "1.e3",
+        "+1e3",
+        "-1e3",
+        "1e03",
+        "+.5",
+        "-.5",
+        "0X1F",
+        "0o17",
+        "0O17",
+        "08",
+        "1_0e3",
+    ],
+)
+def test_dump_quotes_strings_that_go_yaml_resolves_as_numbers(value):
+    result = _yaml.dump({"name": value})
+
+    assert f"name: {value}" not in result.splitlines(), f"Argo/kubectl parses unquoted {value!r} as a number"
+    assert f"name: '{value}'" in result.splitlines()
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "1e",
+        "e3",
+        ".e3",
+        "1e3.5",
+        "0x",
+        "0o",
+        "v1.2.3",
+        "1.2.3",
+        "3.12-alpine",
+        "10.0.0.1",
+        "abc",
+        "1.2.3-rc1",
+    ],
+)
+def test_dump_leaves_non_numeric_strings_unquoted(value):
+    result = _yaml.dump({"name": value})
+
+    assert f"name: {value}" in result.splitlines()
+
+
 def test_dump_squashes_multiple_wrapped_expressions_on_one_line():
     result = _yaml._squash_wrapped_expressions(
         dedent(
