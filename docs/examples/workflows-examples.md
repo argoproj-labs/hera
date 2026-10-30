@@ -41,10 +41,16 @@ Explore the examples through the side bar!
 | [pod-spec-from-previous-step](https://github.com/argoproj/argo-workflows/blob/main/examples/pod-spec-from-previous-step.yaml) |
 | [scripts-bash](https://github.com/argoproj/argo-workflows/blob/main/examples/scripts-bash.yaml) |
 | [scripts-javascript](https://github.com/argoproj/argo-workflows/blob/main/examples/scripts-javascript.yaml) |
+| [skipped-output-defaults/consumer-input-default](https://github.com/argoproj/argo-workflows/blob/main/examples/skipped-output-defaults/consumer-input-default.yaml) |
+| [skipped-output-defaults/expression-fallback](https://github.com/argoproj/argo-workflows/blob/main/examples/skipped-output-defaults/expression-fallback.yaml) |
+| [skipped-output-defaults/producer-output-default](https://github.com/argoproj/argo-workflows/blob/main/examples/skipped-output-defaults/producer-output-default.yaml) |
 | [testvolume](https://github.com/argoproj/argo-workflows/blob/main/examples/testvolume.yaml) |
+| [variables-showcase](https://github.com/argoproj/argo-workflows/blob/main/examples/variables-showcase.yaml) |
 | [work-avoidance](https://github.com/argoproj/argo-workflows/blob/main/examples/work-avoidance.yaml) |
 | [workflow-count-resourcequota](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-count-resourcequota.yaml) |
 | [workflow-event-binding/event-consumer-workfloweventbinding](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-event-binding/event-consumer-workfloweventbinding.yaml) |
 | [workflow-event-binding/github-path-filter-workfloweventbinding](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-event-binding/github-path-filter-workfloweventbinding.yaml) |
 | [workflow-event-binding/github-path-filter-workflowtemplate](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-event-binding/github-path-filter-workflowtemplate.yaml) |
+| [workflow-level-executor-plugin](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-level-executor-plugin.yaml) |
+| [workflow-template/input-artifacts](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-template/input-artifacts.yaml) |
 | [workflow-template/templates](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-template/templates.yaml) |

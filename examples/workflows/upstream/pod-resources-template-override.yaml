@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pod-resources-template-override-
+spec:
+  entrypoint: main
+  templates:
+  - name: small
+    container:
+      image: busybox
+      args:
+      - small step
+      command:
+      - echo
+  - name: large
+    sidecars:
+    - name: helper
+      image: busybox
+      args:
+      - sleep 10
+      command:
+      - sh
+      - -c
+    container:
+      image: busybox
+      args:
+      - sleep 5; echo large step
+      command:
+      - sh
+      - -c
+    podResources:
+      limits:
+        cpu: '2'
+        memory: 1Gi
+  - name: main
+    steps:
+    - - name: small
+        template: small
+    - - name: large
+        template: large
+  podResources:
+    limits:
+      cpu: '1'
+      memory: 512Mi

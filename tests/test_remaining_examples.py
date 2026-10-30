@@ -33,6 +33,9 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = {
     "synchronization-mutex-wf-level-legacy.upstream.yaml",
     "synchronization-tmpl-level-legacy.upstream.yaml",
     "synchronization-wf-level-legacy.upstream.yaml",
+    # v4.1 added `executorPlugins` to the workflow spec; Hera does not expose
+    # it yet.
+    "workflow-level-executor-plugin.upstream.yaml",
 }
 
 

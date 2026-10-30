@@ -27,6 +27,7 @@ from hera.workflows.models import (
     PersistentVolumeClaimSpec,
     PersistentVolumeClaimVolumeSource,
     Quantity,
+    ResourceRequirements,
     RetryStrategy as ModelRetryStrategy,
     Template as ModelTemplate,
     Volume as ModelVolume,
@@ -34,6 +35,7 @@ from hera.workflows.models import (
     VolumeResourceRequirements,
     Workflow as ModelWorkflow,
 )
+from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.task import Task
 from hera.workflows.volume import ExistingVolume, Volume
@@ -62,6 +64,20 @@ class TestTemplateMixin:
         # Hera class
         assert TemplateMixin(retry_strategy=RetryStrategy(limit=2))._build_retry_strategy() == ModelRetryStrategy(
             limit=IntOrString(root=2)
+        )
+
+    def test_build_pod_resources(self):
+        expected = ResourceRequirements(limits={"cpu": Quantity(root="2"), "memory": Quantity(root="1Gi")})
+
+        # None
+        assert TemplateMixin(pod_resources=None)._build_pod_resources() is None
+
+        # Model class
+        assert TemplateMixin(pod_resources=expected)._build_pod_resources() == expected
+
+        # Hera class
+        assert (
+            TemplateMixin(pod_resources=Resources(cpu_limit=2, memory_limit="1Gi"))._build_pod_resources() == expected
         )
 
 

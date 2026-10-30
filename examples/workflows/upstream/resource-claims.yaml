@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: resource-claims-
+  labels:
+    workflows.argoproj.io/no-test: environment
+spec:
+  entrypoint: show-devices
+  resourceClaims:
+  - name: accelerator
+    resourceClaimTemplateName: example-device-claim-template
+  templates:
+  - name: show-devices
+    container:
+      image: busybox
+      args:
+      - echo using the allocated device
+      command:
+      - sh
+      - -c
+      resources:
+        claims:
+        - name: accelerator
