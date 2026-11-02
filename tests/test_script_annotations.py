@@ -515,3 +515,19 @@ def test_script_literals(module_name, input_name):
     (literal_str,) = (t for t in workflow_dict["spec"]["templates"] if t["name"] == "literal-str")
 
     assert literal_str["inputs"]["parameters"] == [{"name": input_name, "enum": ["foo", "bar"]}]
+
+
+def test_script_resolves_future_annotations():
+    from tests.script_runner.future_annotations import annotated_parameter
+
+    with Workflow(name="future-annotations", entrypoint="main") as workflow:
+        with Steps(name="main"):
+            annotated_parameter(name="annotated-parameter", arguments={"renamed": 1})
+
+    workflow_dict = workflow.to_dict()
+    template = next(t for t in workflow_dict["spec"]["templates"] if t["name"] == "annotated-parameter")
+
+    assert template["inputs"]["parameters"] == [{"name": "renamed"}]
+    assert template["outputs"]["parameters"] == [
+        {"name": "result", "valueFrom": {"path": "/tmp/hera-outputs/parameters/result"}}
+    ]

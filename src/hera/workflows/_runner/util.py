@@ -114,7 +114,7 @@ def _parse(value: str, key: str, f: Callable) -> Any:
 
 
 def _get_function_param_annotation(key: str, f: Callable) -> Optional[type]:
-    func_param_annotation = inspect.signature(f).parameters[key].annotation
+    func_param_annotation = inspect.signature(f, eval_str=True).parameters[key].annotation
     if func_param_annotation is inspect.Parameter.empty:
         return None
     return func_param_annotation
@@ -178,7 +178,7 @@ def _map_function_annotations(function: Callable, template_inputs: Dict[str, str
     # Iterate over the _function parameters_ and map the template inputs to them
     # e.g. for `function=func(param: Annotated[int, Parameter(name="my-param")])`,
     # and template_inputs={"my-param": "5"}, the function_kwargs will be {"param": 5}
-    for func_param_name, func_param in inspect.signature(function).parameters.items():
+    for func_param_name, func_param in inspect.signature(function, eval_str=True).parameters.items():
         if param_or_artifact := get_workflow_annotation(func_param.annotation):
             if isinstance(param_or_artifact, Parameter):
                 if param_or_artifact.output:
