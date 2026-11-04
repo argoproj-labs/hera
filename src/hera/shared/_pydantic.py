@@ -23,6 +23,20 @@ def get_fields(cls: Type[V1BaseModel] | Type[V2BaseModel]) -> Dict[str, FieldInf
         return cls.__fields__  # type: ignore
 
 
+def field_has_default(field_info: FieldInfo) -> bool:
+    """Whether the given field has a static default value, with V1 fallback.
+
+    Pydantic V1 sets `ModelField.default` to `None` for required fields, so `default` alone cannot
+    distinguish a required field from one that genuinely defaults to `None`. Fields using a
+    `default_factory` are reported as having no static default in both V1 and V2.
+    """
+    if hasattr(field_info, "is_required"):  # Pydantic V2 `FieldInfo`
+        required = field_info.is_required()
+    else:  # Pydantic V1 `ModelField`
+        required = bool(field_info.required)  # type: ignore[attr-defined]
+    return not required and field_info.default_factory is None
+
+
 def model_dump(obj: V1BaseModel | V2BaseModel) -> Dict[str, Any]:
     """Call model_dump, with V1 fallback."""
     if isinstance(obj, V1BaseModel):
@@ -48,6 +62,7 @@ class APIBaseModel(V2BaseModel):
 __all__ = [
     "APIBaseModel",
     "FieldInfo",
+    "field_has_default",
     "get_field_annotations",
     "get_fields",
     "model_dump",

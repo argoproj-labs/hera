@@ -370,7 +370,7 @@ def _get_outputs_from_return_annotation(
                 annotation.value_from = ValueFrom(path=outputs_directory + f"/parameters/{annotation.name}")
             parameters.append(annotation)
 
-    return_annotation = inspect.signature(source).return_annotation
+    return_annotation = inspect.signature(source, eval_str=True).return_annotation
     if param_or_artifact := get_workflow_annotation(return_annotation):
         append_annotation(param_or_artifact)
     elif get_origin(return_annotation) is tuple:
@@ -396,7 +396,7 @@ def _get_outputs_from_parameter_annotations(
     parameters: List[Parameter] = []
     artifacts: List[Artifact] = []
 
-    for name, p in inspect.signature(source).parameters.items():
+    for name, p in inspect.signature(source, eval_str=True).parameters.items():
         annotation = construct_io_from_annotation(name, p.annotation)
         if not annotation.output:
             continue
@@ -425,8 +425,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     """
     parameters = []
     artifacts = []
+    signature = inspect.signature(source, eval_str=True)
 
-    for func_param in inspect.signature(source).parameters.values():
+    for func_param in signature.parameters.values():
         # If the annotation is not subscripted, then we can directly check if it is an Input type annotation.
         # Otherwise, we check if it is of the form `Annotated[...]`, and subsequently check whether the unwrapped
         # annotation is a class which we can then check if it is a subclass. Otherwise, an annotation of the form
@@ -438,7 +439,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             and inspect.isclass(unwrap_annotation(func_param.annotation))
             and issubclass(unwrap_annotation(func_param.annotation), (InputV1, InputV2))
         ):
-            if len(inspect.signature(source).parameters) != 1:
+            if len(signature.parameters) != 1:
                 raise SyntaxError("Only one function parameter can be specified when using an Input.")
 
             input_class = func_param.annotation
@@ -482,7 +483,7 @@ def _extract_return_annotation_output(source: Callable) -> List:
     """Extract the output annotations from the return annotation of the function signature."""
     output: List[Union[Tuple[type, Union[Parameter, Artifact]], Type[Union[OutputV1, OutputV2]]]] = []
 
-    return_annotation = inspect.signature(source).return_annotation
+    return_annotation = inspect.signature(source, eval_str=True).return_annotation
     origin_type = get_origin(return_annotation)
     annotation_args = get_args(return_annotation)
     if get_workflow_annotation(return_annotation):
@@ -518,7 +519,7 @@ def _extract_all_output_annotations(source: Callable) -> List:
     """
     output = []
 
-    for _, func_param in inspect.signature(source).parameters.items():
+    for _, func_param in inspect.signature(source, eval_str=True).parameters.items():
         io = construct_io_from_annotation(func_param.name, func_param.annotation)
         if io.output:
             output.append(io)
