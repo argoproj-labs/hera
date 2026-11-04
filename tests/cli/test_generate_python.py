@@ -184,6 +184,126 @@ spec:
 
 
 @pytest.mark.cli
+def test_name_value_arguments_are_generated_as_a_dict(capsys, tmp_path: Path):
+    yaml_path = tmp_path / "workflow.yaml"
+    yaml_path.write_text(
+        """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ci-example-
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: revision
+        value: cfe12d6
+  templates:
+    - name: main
+      steps:
+        - - name: build
+            template: echo
+            arguments:
+              parameters:
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+    - name: fan-out
+      dag:
+        tasks:
+          - name: test
+            template: echo
+            arguments:
+              parameters:
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: verbose
+                  value: "true"
+    - name: echo
+      container:
+        image: alpine:latest
+"""
+    )
+
+    runner.invoke(str(yaml_path))
+
+    output = get_stdout(capsys)
+    assert 'arguments={"revision": "cfe12d6"}' in output
+    assert 'arguments={"revision": "{{workflow.parameters.revision}}"}' in output
+    assert (
+        "            arguments={\n"
+        '                "revision": "{{workflow.parameters.revision}}",\n'
+        '                "verbose": "true",\n'
+        "            },\n"
+    ) in output
+    # The `Arguments` model class is no longer needed, so it should not be imported.
+    assert "Arguments" not in output
+
+
+@pytest.mark.cli
+@pytest.mark.parametrize(
+    "arguments_yaml",
+    [
+        pytest.param(
+            """\
+    parameters:
+      - name: revision
+        valueFrom:
+          configMapKeyRef:
+            name: revision-config
+            key: revision
+""",
+            id="value-from",
+        ),
+        pytest.param(
+            """\
+    parameters:
+      - name: revision
+        value: cfe12d6
+        default: HEAD
+""",
+            id="default",
+        ),
+        pytest.param(
+            """\
+    parameters:
+      - name: revision
+        value: cfe12d6
+    artifacts:
+      - name: source
+        path: /src
+""",
+            id="artifacts",
+        ),
+    ],
+)
+def test_arguments_that_would_not_round_trip_keep_the_arguments_class(capsys, tmp_path: Path, arguments_yaml: str):
+    yaml_path = tmp_path / "workflow.yaml"
+    yaml_path.write_text(
+        """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ci-example-
+spec:
+  entrypoint: main
+  arguments:
+"""
+        + arguments_yaml
+        + """\
+  templates:
+    - name: main
+      container:
+        image: alpine:latest
+"""
+    )
+
+    runner.invoke(str(yaml_path))
+
+    output = get_stdout(capsys)
+    assert "arguments=Arguments(" in output
+
+
+@pytest.mark.cli
 def test_workflow_template(capsys):
     runner.invoke("tests/cli/examples/workflow_template.yaml")
 
