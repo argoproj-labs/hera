@@ -247,13 +247,15 @@ class WorkflowsService:
 
         raise exception_from_server_response(resp)
 
-    def delete_archived_workflow(self, uid: str, namespace: Optional[str] = None) -> ArchivedWorkflowDeletedResponse:
+    def delete_archived_workflow(
+        self, uid: str, namespace: Optional[str] = None, name: Optional[str] = None
+    ) -> ArchivedWorkflowDeletedResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = self._request(
             method="delete",
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
-            params={"namespace": namespace},
+            params={"namespace": namespace, "name": name},
             headers={"Authorization": self.token},
             data=None,
             verify=self.verify_ssl,

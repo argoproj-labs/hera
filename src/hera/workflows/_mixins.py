@@ -47,6 +47,7 @@ from hera.workflows.models import (
     Parameter as ModelParameter,
     PersistentVolumeClaim,
     Plugin,
+    PodResourceClaim,
     PodSecurityContext,
     Probe,
     Prometheus as ModelPrometheus,
@@ -422,9 +423,12 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
+    pending_timeout: Optional[str] = None
     plugin: Optional[Plugin] = None
+    pod_resources: Optional[Union[ResourceRequirements, Resources]] = None
     pod_spec_patch: Optional[str] = None
     priority_class_name: Optional[str] = None
+    resource_claims: Optional[List[PodResourceClaim]] = None
     retry_strategy: Optional[Union[RetryStrategy, ModelRetryStrategy]] = None
     scheduler_name: Optional[str] = None
     pod_security_context: Optional[PodSecurityContext] = None
@@ -443,6 +447,12 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
             return None
 
         return [i.build() if isinstance(i, UserContainer) else i for i in self.init_containers]
+
+    def _build_pod_resources(self) -> Optional[ResourceRequirements]:
+        """Parses the pod-level resources and returns a generated `ResourceRequirements` object."""
+        if self.pod_resources is None or isinstance(self.pod_resources, ResourceRequirements):
+            return self.pod_resources
+        return self.pod_resources.build()
 
     def _build_sidecars(self) -> Optional[List[ModelUserContainer]]:
         """Builds the `sidecars` field and optionally returns a list of `UserContainer`."""

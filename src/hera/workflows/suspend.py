@@ -98,6 +98,7 @@ class Suspend(
             name=self.name,
             node_selector=self.node_selector,
             outputs=self._build_outputs(),
+            pending_timeout=self.pending_timeout,
             plugin=self.plugin,
             priority_class_name=self.priority_class_name,
             retry_strategy=self._build_retry_strategy(),
